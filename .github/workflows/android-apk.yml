@@ -1,0 +1,65 @@
+name: Android APK (teste)
+
+# Gera um APK instalável para testes no celular (debug, anúncios de TESTE).
+# Baixe em: Actions → "Android APK (teste)" → execução mais recente → Artifacts.
+on:
+  push:
+    branches: ['**']
+    paths-ignore: ['**.md', 'store-listing/**', 'privacy-policy/**']
+  workflow_dispatch:
+
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Testes
+        run: npm test
+
+      - name: Build web + Capacitor sync
+        env:
+          APP_VERSION: 0.1.${{ github.run_number }}-test
+        run: |
+          npm run build
+          npx cap sync android
+
+      - name: Gradle assembleDebug
+        working-directory: android
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: 0.1.${{ github.run_number }}-test
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Renomear APK
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/debug/app-debug.apk "out/KingIdleSaviorBoy-0.1.${{ github.run_number }}-test.apk"
+          ls -la out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KingIdleSaviorBoy-APK-${{ github.run_number }}
+          path: out/*.apk
+          retention-days: 30
