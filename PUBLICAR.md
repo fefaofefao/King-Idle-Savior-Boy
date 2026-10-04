@@ -21,26 +21,66 @@ Resumo para levar o **King Idle Savior Boy** à Google Play. O passo a passo det
 | `app-ads.txt` modelo | `app-ads.txt` |
 | Licenças e créditos (KayKit CC0, Fredoka OFL) | `CREDITS.md`, `licenses/` |
 
-## ⏳ Falta do seu lado (em ordem)
+## ⏳ To-do do dono (em ordem)
 
-1. **Decidir o Package ID agora.** Hoje é `br.com.fernando.idleknight`. Depois da 1ª publicação **nunca mais muda**. Se quiser outro (ex.: `br.com.fernando.kingidlesaviorboy`), peça a troca antes de gerar o primeiro AAB.
-2. **Testar o APK no celular** (`TESTE_APK.md`): desempenho, anúncios de teste, botão voltar, notificação.
-3. **Conta de desenvolvedor Google Play** (taxa única de US$ 25 e verificação de identidade).
-4. **Keystore de upload:** ✅ gerada (alias `idleknight`, PKCS12, RSA 2048) e entregue ao dono fora do repositório. Falta: guardar em 2 lugares e cadastrar os 4 secrets dela.
-5. **AdMob:** ✅ app e blocos **Premiado** e **Intersticial** criados. Falta: publicar a mensagem de consentimento (GDPR/UMP) e definir a classificação **T** (SETUP §2).
-6. **GitHub Secrets** (7): `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `ADMOB_APP_ID`, `ADMOB_REWARDED_ID`, `ADMOB_INTERSTITIAL_ID` (SETUP §3).
-7. ✅ **E-mail de contato** `fefaofefao@gmail.com` no site (use o mesmo na ficha da Play).
-8. **Merge na `main` e ativar o GitHub Pages** (Settings → Pages → `main` / `/docs`). Conferir se abre `https://fefaofefao.github.io/King-Idle-Savior-Boy/privacy-policy/` (SETUP §7).
-9. **app-ads.txt:** ✅ já preenchido com o Publisher ID `pub-7483085200976329`. Falta: copiar para o repositório `fefaofefao.github.io`; usar `https://fefaofefao.github.io` como Site na ficha (SETUP §7).
-10. ✅ Build de produção testado no Actions (`KingIdleSaviorBoy-AAB-1.0.0-1`, 11,6 MB, sem assinatura porque faltavam os secrets da keystore). **Gerar o AAB final:** `git tag v1.0.0 && git push origin v1.0.0` → Actions → baixar `KingIdleSaviorBoy-AAB-1.0.0-N`.
-11. **Play Console:**
-    - criar o app (Jogo, Gratuito);
-    - preencher a ficha com os textos e imagens de `store-listing/`;
-    - política de privacidade (URL do item 8);
-    - classificação de conteúdo, público-alvo **13+**, anúncios **Sim**, ID de publicidade, Segurança dos dados (SETUP §4–6);
-    - aceitar o **Play App Signing** no primeiro envio.
-12. **Teste fechado obrigatório** (contas pessoais novas): pelo menos **12 testadores por 14 dias** seguidos e depois "Solicitar acesso à produção" (SETUP §9). Confira os números atuais no Play Console.
-13. **Produção:** nova versão com as notas de `release-notes.md`, lançamento gradual, enviar para revisão. Depois de publicado, **vincular o app no AdMob** (SETUP §10).
+### A. Conta Google Play (burocracia)
+- [ ] Verificação de identidade da conta de desenvolvedor (documento + selfie) — *aguardando o Google*
+- [ ] Verificar o **telefone** e o **e-mail de contato** da conta (Play Console pede um código)
+- [ ] Verificar o **acesso a um aparelho Android**: instalar o app **Google Play Console** no celular e entrar com a mesma conta
+- [ ] Nome do desenvolvedor público: **FSamp Labs**; e-mail público: `fefaofefao@gmail.com`
+- [ ] (Só se um dia vender algo no app) Perfil de pagamentos/comerciante — **não** é necessário para um app gratuito com anúncios
+
+### B. Site da política de privacidade (obrigatório)
+- [ ] GitHub → **Settings → Pages → Deploy from a branch** → branch `claude/youthful-hamilton-rx1ww2` (ou `main`, depois do merge), pasta **`/docs`** → Save
+- [ ] Abrir e conferir (1–2 min depois): `https://fefaofefao.github.io/King-Idle-Savior-Boy/privacy-policy/`
+- [ ] **app-ads.txt:** criar o repositório **`fefaofefao.github.io`** (público), enviar o arquivo `app-ads.txt` deste projeto para a raiz e ativar o Pages nele (branch `main`, `/root`). Conferir `https://fefaofefao.github.io/app-ads.txt`
+
+### C. AdMob (burocracia e anúncios)
+- [x] App e blocos Premiado e Intersticial criados; IDs nos GitHub Secrets
+- [ ] **Privacidade e mensagens → GDPR:** criar e **publicar** a mensagem de consentimento (sem ela, quem está na Europa não vê anúncios)
+- [ ] **Privacidade e mensagens → Regulamentações estaduais dos EUA:** criar e publicar (recomendado)
+- [ ] **Configurações do app:** classificação máxima de conteúdo do anúncio = **T**
+- [ ] **Pagamentos:** preencher endereço, **informações fiscais dos EUA** (formulário W-8BEN, como pessoa física não residente; usar CPF como TIN estrangeiro) e conta bancária. Os pagamentos saem quando o saldo passa do limite mínimo (cerca de US$ 100)
+- [ ] **PIN de endereço:** quando o saldo chegar a ~US$ 10, o Google envia uma carta com um PIN pelo correio; digitar no AdMob
+- [ ] Depois do app publicado: **Apps → Configurações → Vincular a uma app store** e conferir o **app-ads.txt** (até 24 h)
+- [ ] Imposto no Brasil: a receita do AdMob é rendimento do exterior (carnê-leão / declaração anual). Confirme com um contador
+
+### D. AAB (arquivo do app)
+- [x] Keystore de upload gerada e secrets cadastrados
+- [x] AAB 1.0.0 assinado gerado no GitHub Actions (Android Release (AAB) → Artifacts)
+- [ ] Guardar a keystore + senha em **2 lugares seguros** (ex.: Drive privado + pendrive)
+
+### E. Play Console — criar o app e preencher "Conteúdo do app"
+- [ ] **Criar app:** nome *King Idle Savior Boy*, idioma padrão Português (Brasil), **Jogo**, **Gratuito**, aceitar as declarações
+- [ ] **Política de privacidade:** URL do item B
+- [ ] **Acesso ao app:** todas as funções disponíveis sem restrições (sem login)
+- [ ] **Anúncios:** Sim, o app contém anúncios
+- [ ] **Classificação do conteúdo (IARC):** e-mail `fefaofefao@gmail.com`, categoria Jogo; violência de fantasia/cartoon sem sangue; sem conteúdo sexual, palavrões, drogas, apostas, chat ou compras (SETUP §5)
+- [ ] **Público-alvo:** marcar só **13–15, 16–17 e 18+**; "não é destinado a crianças"
+- [ ] **Segurança dos dados:** respostas do SETUP §6 (coleta pelo SDK de anúncios: ID de publicidade, local aproximado, interações, diagnóstico; criptografado em trânsito)
+- [ ] **ID de publicidade:** Sim, usado para publicidade
+- [ ] **Apps governamentais / recursos financeiros / saúde / notícias:** Não
+- [ ] **Categoria e tags:** Jogos → RPG (ou Casual); tags Idle, RPG, Clicker, Fantasia, Offline
+- [ ] **Detalhes de contato:** e-mail `fefaofefao@gmail.com`, site `https://fefaofefao.github.io/King-Idle-Savior-Boy/`
+
+### F. Ficha da loja (tudo pronto em `store-listing/`)
+- [ ] Textos pt-BR (`pt-BR.md`); em "Traduções" adicionar **en-US** (`en.md`), **es-ES** e **es-419** (`es.md`)
+- [ ] Ícone `graphics/icon-512.png`, gráfico `graphics/feature-graphic-1024x500.png`
+- [ ] Capturas de telefone: `screenshots/pt-BR`, `screenshots/en`, `screenshots/es` (8 cada)
+
+### G. Teste fechado (obrigatório para contas pessoais novas)
+- [ ] **Testar → Teste fechado → Criar faixa** → enviar o AAB → notas de `release-notes.md`
+- [ ] Na 1ª versão, aceitar o **Play App Signing** (o Google guarda a chave final)
+- [ ] Países: todos (ou Brasil + os que quiser)
+- [ ] Lista de **12+ testadores** (e-mails Gmail) → compartilhar o link de inscrição
+- [ ] Cada testador aceita o convite, instala e abre o jogo algumas vezes; ficam inscritos **14 dias seguidos**
+- [ ] Responder o feedback/relatório de pré-lançamento se o Google apontar algo
+
+### H. Produção
+- [ ] Após os 14 dias: **Painel → Solicitar acesso à produção** e responder o questionário sobre o teste (como recrutou testadores, o que mudou com o feedback)
+- [ ] Aprovado: **Produção → Criar versão** → promover o mesmo AAB (ou um novo, se mudou algo), lançamento **gradual** (ex.: 20%) → Enviar para revisão
+- [ ] Revisão do Google: de algumas horas a alguns dias
+- [ ] Publicado: vincular no AdMob (item C) e acompanhar Android vitals (falhas/ANR)
 
 ## Depois do lançamento (opcional)
 - Vídeo de 30 s no YouTube para a ficha da loja.
