@@ -6,6 +6,7 @@ import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.j
 import {
   CLIP_ALIASES,
   MODEL_PATHS,
+  OPTIONAL_ANIMATIONS,
   WEAPON_PATHS,
   type ClipRole,
   type ModelKey,
@@ -33,13 +34,14 @@ export class Assets {
     this.loader.setMeshoptDecoder(MeshoptDecoder);
   }
 
-  private loadGltf(url: string): Promise<GLTF | null> {
+  private loadGltf(url: string, optional = false): Promise<GLTF | null> {
     return new Promise((resolve) => {
       this.loader.load(
         url,
         (g) => resolve(g),
         undefined,
         (err) => {
+          if (optional) return resolve(null);
           console.warn(`[assets] falha ao carregar ${url} — usando forma primitiva`, err);
           this.warnings.push(url);
           resolve(null);
@@ -54,6 +56,7 @@ export class Assets {
     const weaponKeys = Object.keys(WEAPON_PATHS) as WeaponKey[];
     const total = modelKeys.length + weaponKeys.length + MODEL_PATHS.animations.length;
     let done = 0;
+    const weaponCache = new Map<string, Promise<GLTF | null>>();
     const tick = () => onProgress(++done / total);
 
     // Carrega o Cavaleiro primeiro: se ele falhar (ex.: zip ainda não extraído), não tenta o resto,
@@ -75,7 +78,10 @@ export class Assets {
         tick();
       }),
       ...weaponKeys.map(async (k) => {
-        const g = probe ? await this.loadGltf(WEAPON_PATHS[k]) : null;
+        // Várias chaves apontam para o mesmo arquivo: carrega cada URL uma vez só.
+        const url = WEAPON_PATHS[k];
+        if (!weaponCache.has(url)) weaponCache.set(url, probe ? this.loadGltf(url) : Promise.resolve(null));
+        const g = await weaponCache.get(url)!;
         this.weapons.set(k, g ? g.scene : null);
         tick();
       }),
@@ -83,6 +89,14 @@ export class Assets {
         const g = probe ? await this.loadGltf(url) : null;
         if (g) this.clips.push(...g.animations);
         tick();
+      }),
+      // Clipes de combate opcionais: se existirem, o ataque do Cavaleiro passa a usar o clipe real.
+      ...OPTIONAL_ANIMATIONS.map(async (url) => {
+        const g = probe ? await this.loadGltf(url, true) : null;
+        if (g) {
+          console.info('[assets] clipes de combate encontrados em', url);
+          this.clips.push(...g.animations);
+        }
       }),
     ]);
     if (!probe) {

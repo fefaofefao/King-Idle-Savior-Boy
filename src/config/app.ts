@@ -2,7 +2,9 @@
  * Identidade do app. O APP_ID NÃO pode mudar depois da publicação na Play Store.
  */
 export const APP_ID = 'br.com.fernando.idleknight';
-export const APP_NAME_EN = 'Idle Tap Knight';
+/** Nome do jogo (igual nos 3 idiomas). */
+export const GAME_TITLE = 'King Idle Savior Boy';
+export const APP_NAME_EN = GAME_TITLE;
 
 /** Flags de recursos. */
 export const FEATURES = {

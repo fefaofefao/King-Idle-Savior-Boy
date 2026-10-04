@@ -1,7 +1,7 @@
 import type { Locale } from './pt-BR';
 
 export const en: Locale = {
-  'app.name': 'Idle Tap Knight',
+  'app.name': 'King Idle Savior Boy',
   'lang.title': 'Choose your language',
   'lang.subtitle': 'You can change it later in the Menu.',
   'lang.continue': 'Play',
@@ -184,5 +184,5 @@ export const en: Locale = {
 
   'credits.text': '3D characters, weapons and animations: Kay Lousberg — KayKit (www.kaylousberg.com), CC0.',
   'credits.font': 'Font: Fredoka (SIL Open Font License).',
-  'credits.code': 'Code, sounds and procedural scenery: Idle Tap Knight team.',
+  'credits.code': 'Code, sounds and procedural scenery: King Idle Savior Boy team.',
 };

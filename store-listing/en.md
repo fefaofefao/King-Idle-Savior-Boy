@@ -1,12 +1,12 @@
 # Store listing — English (en)
 
-**Title (max 30):** Idle Tap Knight: Idle RPG
+**Title (max 30):** King Idle Savior Boy: RPG
 
 **Short description (max 80):** Tap, defeat skeletons and build your guild. Your knight grows even offline!
 
 **Full description:**
 
-Grab your sword and save the kingdom! In **Idle Tap Knight**, every tap makes your knight strike hordes of skeletons in a colorful 3D cartoon fantasy world.
+Grab your sword and save the kingdom! In **King Idle Savior Boy**, every tap makes your knight strike hordes of skeletons in a colorful 3D cartoon fantasy world.
 
 ⚔️ **TAP AND FIGHT**
 Defeat enemies, collect gold and face a **boss every 10 stages**: you have 30 seconds to win!

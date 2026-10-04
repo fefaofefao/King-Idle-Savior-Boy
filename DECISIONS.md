@@ -1,4 +1,4 @@
-# DECISIONS — Cavaleiro Ocioso / Idle Tap Knight
+# DECISIONS — King Idle Savior Boy
 
 Registro das decisões técnicas e de design, com uma linha de justificativa cada.
 
@@ -10,12 +10,16 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 - **Save em `@capacitor/preferences`** (localStorage no navegador) com backup do save anterior — simples e funciona offline.
 - **Capacitor 8** (última estável no momento): o template já vem com `minSdk 24` e `targetSdk 36`. A Play exige API 35 para apps novos desde 31/08/2025 e deve passar a exigir 36 em 2026; 36 atende os dois. Confirme no Play Console antes de publicar.
 
+## Nome e tela inicial
+- **Nome do jogo: "King Idle Savior Boy"** (pedido do dono), igual nos 3 idiomas e definido numa única constante (`GAME_TITLE`). O Package ID `br.com.fernando.idleknight` foi mantido, conforme a especificação.
+- **Tela inicial** (`src/ui/Intro.ts`): aparece a cada abertura. Tem um cenário em SVG ao entardecer (castelo, montanhas, raios girando, faíscas), o logo com coroa e o botão Jogar. O carregamento dos modelos aparece no próprio botão ("Carregando… 45%"), e a escolha dos 3 idiomas fica na mesma tela, em destaque na primeira abertura.
+
 ## Idiomas
 - **3 idiomas: pt-BR, en e es** (pedido do dono, ampliando os 2 da especificação). Arquivos em `src/i18n/locales/`; o TypeScript obriga os três a terem as mesmas chaves e um teste confere placeholders.
 - **Tela de escolha de idioma na primeira abertura**, com o idioma do aparelho pré-selecionado; depois é alterável no Menu. A escolha fica em `settings.lang` / `settings.langChosen`.
 - **Migração v1 → v2** do save marca `langChosen = true` para quem já jogava (não mostra a tela de novo).
 - **Bandeiras em SVG** em vez de emoji — emoji de bandeira não aparece em todos os aparelhos.
-- O nome do app também é traduzido no Android (`values-pt-rBR`, `values-es`): "Cavaleiro Ocioso" / "Idle Tap Knight" / "Caballero Ocioso".
+- O nome do app no Android é "King Idle Savior Boy" em todos os idiomas.
 
 ## Balanceamento (rodar `npm run sim`)
 - **Ouro por HP: 0,09 → 0,017.** Com 0,09 a fase 40 chegava em ~10 min (meta: 35–60). O formato da fórmula (`ouro = HP × k`) foi mantido; só a constante mudou.
@@ -74,8 +78,13 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 - **Ouro do inimigo arredondado para cima** — senão a fase 1 daria 0 de ouro.
 
 ## 3D
-- **Modelos KayKit não estavam na sessão** (o `assets_kaykit.zip` não foi enviado ao repositório). O jogo foi feito para funcionar sem eles: `Assets.ts` testa `models/characters/knight.glb` e, se não achar, usa **bonecos primitivos low-poly** (`src/scene/Fallback.ts`) com ossos falsos (`handslot.r/l`, `upperarm.r`) e animações procedurais.
-- **Caminhos, ossos e nomes de clipes ficam todos em `src/config/visual.ts`.** Depois de extrair o zip, ajuste-os conforme o `ASSETS.md` (ele prevalece). Os clipes são achados por lista de aliases (`Idle_A`, `Hit_A`, `Death_A`, `Spawn_Ground`, `Throw`...) e por busca parcial.
+- **Modelos KayKit** em `public/models/` conforme o `ASSETS.md`. Os bonecos primitivos (`src/scene/Fallback.ts`) continuam como fallback se algum GLB falhar.
+- **Caminhos, ossos e clipes em `src/config/visual.ts`.** Os clipes são achados por lista de aliases (`Idle_A`/`Idle_B`, `Hit_A`/`Hit_B`, `Death_A`/`Death_B`, `Spawn_Ground`/`Spawn_Air`, `Throw`, `Interact`).
+- **Animações (ASSETS.md):** a Maga usa `Idle_B` e lança o projétil a partir de `handslot.r` aos 40% do `Throw`. Os inimigos entram com `Spawn_Ground` (o chefe com `Spawn_Air`), alternam `Hit_A`/`Hit_B` com crossfade de 0,1 s (no máximo um a cada 0,28 s) e morrem com `Death_A` ou `Death_B` sorteado. O Cavaleiro toca `Interact` ao derrotar um chefe e ao atingir um marco de nível.
+- **Ataque do Cavaleiro (`KnightAttack.ts`):** como não há clipe de ataque, ele avança 0,15 s e volta 0,15 s, com rotação aditiva no `upperarm.r` (ergue no eixo Y e desce apontando para o inimigo no eixo X, eixos conferidos por render) e um leve giro no `lowerarm.r`. Toques rápidos reiniciam o golpe. Clipes de `rig_medium_combat*.glb` são detectados automaticamente.
+- **Armas dos esqueletos:** o pack não traz armas próprias para eles, então reutilizam as dos heróis. Minion e Rogue usam `sword_1handed`, o Mage usa `staff` e o Warrior (chefe) usa `sword_1handed` + `shield_badge_color`. Cada arquivo é carregado uma vez só.
+- **Companheira = "Maga":** o `mage.glb` tem aparência feminina (cabelo longo, chapéu de bruxa).
+- `rig_medium_movement.glb` veio no zip, mas não é usado (ASSETS.md marca como opcional).
 - **Materiais clonados por instância** — necessário para o tint por zona e o flash de impacto sem afetar outros inimigos.
 - **Sem shadow maps**: sombra circular falsa (textura radial) sob cada personagem.
 - **DRACO + meshopt** registrados no GLTFLoader; o decoder DRACO é empacotado pelo próprio three/Vite (sem CDN).

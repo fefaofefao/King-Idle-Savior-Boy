@@ -29,7 +29,7 @@ O resto o projeto já faz sozinho. Faça na ordem.
 ## 2. AdMob
 
 1. Entre em <https://admob.google.com> com a mesma conta Google que vai usar na Play.
-2. **Apps → Adicionar app** → Android → "O app ainda não está publicado" (você vincula à Play depois) → nome "Idle Tap Knight".
+2. **Apps → Adicionar app** → Android → "O app ainda não está publicado" (você vincula à Play depois) → nome "King Idle Savior Boy".
 3. Copie o **App ID** (formato `ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY`).
 4. **Blocos de anúncios → Adicionar bloco:**
    - **Premiado (Rewarded)**: nome "rewarded_main". Recompensa: 1 item "bonus". Copie o ID (`ca-app-pub-…/…`).
@@ -61,7 +61,7 @@ No GitHub: **Settings → Secrets and variables → Actions → New repository s
 ## 4. Play Console
 
 1. Crie a conta de desenvolvedor em <https://play.google.com/console> (taxa única). Contas pessoais exigem verificação de identidade.
-2. **Criar app:** nome "Cavaleiro Ocioso" (ou "Idle Tap Knight"), idioma padrão pt-BR, **Jogo**, **Gratuito**.
+2. **Criar app:** nome "King Idle Savior Boy", idioma padrão pt-BR, **Jogo**, **Gratuito**.
 3. **Configurar o app** (painel "Configure seu app"): preencha cada item conforme as seções 5 e 6.
 4. **Play App Signing:** na 1ª versão enviada, aceite "Deixar o Google gerenciar e proteger a chave de assinatura do app". O AAB enviado é assinado com a sua **chave de upload** (a keystore do passo 1).
 5. **Ficha da loja:** use os textos de `store-listing/` (pt-BR, en e es), o ícone `assets/icon-only.png` (512×512, exporte a partir dele) e os screenshots listados em `store-listing/screenshots.md`. Gráfico de destaque: 1024×500.

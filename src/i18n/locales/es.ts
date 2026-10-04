@@ -1,7 +1,7 @@
 import type { Locale } from './pt-BR';
 
 export const es: Locale = {
-  'app.name': 'Caballero Ocioso',
+  'app.name': 'King Idle Savior Boy',
   'lang.title': 'Elige tu idioma',
   'lang.subtitle': 'Puedes cambiarlo después en el Menú.',
   'lang.continue': 'Jugar',
@@ -184,5 +184,5 @@ export const es: Locale = {
 
   'credits.text': 'Personajes 3D, armas y animaciones: Kay Lousberg — KayKit (www.kaylousberg.com), CC0.',
   'credits.font': 'Fuente: Fredoka (SIL Open Font License).',
-  'credits.code': 'Código, sonidos y escenarios procedurales: equipo de Caballero Ocioso.',
+  'credits.code': 'Código, sonidos y escenarios procedurales: equipo de King Idle Savior Boy.',
 };

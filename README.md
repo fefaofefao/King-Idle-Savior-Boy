@@ -1,4 +1,4 @@
-# Cavaleiro Ocioso · Idle Tap Knight · Caballero Ocioso
+# King Idle Savior Boy
 
 Clicker + RPG idle em 3D low-poly para Android (Capacitor + Three.js), em **português, inglês e espanhol**. O idioma é escolhido na primeira vez que o jogo abre e pode ser trocado no Menu.
 

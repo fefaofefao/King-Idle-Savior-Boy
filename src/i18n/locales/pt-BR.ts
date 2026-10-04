@@ -1,5 +1,5 @@
 export const ptBR = {
-  'app.name': 'Cavaleiro Ocioso',
+  'app.name': 'King Idle Savior Boy',
   'lang.title': 'Escolha o idioma',
   'lang.subtitle': 'Você pode mudar depois no Menu.',
   'lang.continue': 'Jogar',
@@ -182,7 +182,7 @@ export const ptBR = {
 
   'credits.text': 'Personagens 3D, armas e animações: Kay Lousberg — KayKit (www.kaylousberg.com), CC0.',
   'credits.font': 'Fonte: Fredoka (SIL Open Font License).',
-  'credits.code': 'Código, sons e cenários procedurais: equipe do Cavaleiro Ocioso.',
+  'credits.code': 'Código, sons e cenários procedurais: equipe do King Idle Savior Boy.',
 };
 
 export type LocaleKey = keyof typeof ptBR;

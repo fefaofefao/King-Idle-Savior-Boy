@@ -1,12 +1,12 @@
 # Ficha de la tienda — Español (es)
 
-**Título (máx. 30):** Caballero Ocioso: RPG Idle
+**Título (máx. 30):** King Idle Savior Boy: RPG
 
 **Descripción breve (máx. 80):** Toca, derrota esqueletos y forma tu gremio. ¡Tu caballero mejora sin conexión!
 
 **Descripción completa:**
 
-¡Toma tu espada y salva el reino! En **Caballero Ocioso**, cada toque hace que tu caballero ataque a hordas de esqueletos en un colorido mundo de fantasía 3D.
+¡Toma tu espada y salva el reino! En **King Idle Savior Boy**, cada toque hace que tu caballero ataque a hordas de esqueletos en un colorido mundo de fantasía 3D.
 
 ⚔️ **TOCA Y LUCHA**
 Derrota enemigos, recoge oro y enfréntate a un **jefe cada 10 fases**: ¡tienes 30 segundos para vencerlo!

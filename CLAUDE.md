@@ -1,7 +1,7 @@
-# CLAUDE.md — Cavaleiro Ocioso / Idle Tap Knight
+# CLAUDE.md — King Idle Savior Boy
 
 Clicker + RPG idle em retrato (portrait) para Android (Capacitor) que também roda no navegador.
-Especificação original: GAME_SPEC v2 (no histórico da conversa/issue). Decisões: `DECISIONS.md`.
+Especificação: `GAME_SPEC.md` + `ASSETS.md`. Nome do jogo: **King Idle Savior Boy** (`GAME_TITLE` em `src/config/app.ts`). Decisões: `DECISIONS.md`.
 
 ## Como rodar
 
@@ -23,11 +23,9 @@ Depuração no navegador: `window.__app` (ex.: `__app.state.gold = __app.state.g
 
 ## Modelos 3D (KayKit)
 
-`assets_kaykit.zip` **ainda não foi adicionado** ao repositório. Para usar os modelos reais:
-1. Extraia o zip na raiz (cria `public/models/...`, `licenses/` e `ASSETS.md`). Não versione o zip (`*.zip` está no .gitignore).
-2. Leia o `ASSETS.md` e ajuste **apenas** `src/config/visual.ts` (`MODEL_PATHS`, `WEAPON_PATHS`, `HAND_BONES`, `ARM_BONES`, `CLIP_ALIASES`, alturas e posições).
-3. Sem os modelos, o jogo usa bonecos primitivos (`src/scene/Fallback.ts`) e nunca trava.
-O caminho com modelos reais foi validado com GLBs de teste (esqueleto com `handslot.r/l`, clipes `Idle_A`, `Hit_A`, `Death_A`, `Spawn_Ground`, `Throw`).
+Os modelos de `assets_kaykit.zip` estão em `public/models/` (heroes/, enemies/, weapons/, animations/), as licenças em `licenses/` e as regras em `ASSETS.md`, que prevalece sobre o GAME_SPEC nesses assuntos.
+Caminhos, ossos e clipes ficam só em `src/config/visual.ts`. Se um GLB falhar, o jogo usa bonecos primitivos (`src/scene/Fallback.ts`) e nunca trava.
+Se for adicionado `public/models/animations/rig_medium_combat*.glb` (pack KayKit Character Animations), o ataque do Cavaleiro passa a usar o clipe real automaticamente (`OPTIONAL_ANIMATIONS`).
 
 ## Estrutura
 
@@ -62,7 +60,7 @@ privacy-policy/ store-listing/ app-ads.txt SETUP_CONTAS.md CREDITS.md licenses/
 
 | Fase | Estado |
 |---|---|
-| 1. Núcleo jogável no navegador | ✅ concluída (com bonecos primitivos no lugar dos GLB ausentes) |
+| 1. Núcleo jogável no navegador | ✅ concluída, com os modelos KayKit |
 | 2. Progressão completa + i18n + simulador | ✅ concluída: **3 idiomas (pt-BR/en/es) com escolha ao iniciar**; simulação no DECISIONS.md |
 | 3. Visual e game feel | ✅ concluída: zonas, ataque procedural, projétil, partículas, números, áudio |
 | 4. Android + AdMob | ✅ código pronto: Capacitor, AdService, UMP, frequência, voltar, safe areas, haptics, notificações, ícone/splash |
@@ -71,10 +69,9 @@ privacy-policy/ store-listing/ app-ads.txt SETUP_CONTAS.md CREDITS.md licenses/
 
 ## Pendências (dependem do dono do projeto)
 
-1. **Adicionar `assets_kaykit.zip`** e ajustar `src/config/visual.ts` conforme o `ASSETS.md` (ver acima). Conferir também se a companheira é "Maga" ou "Mago" (textos `guild.mage*`).
-2. **Contas:** AdMob (app + rewarded + interstitial + UMP), keystore, GitHub Secrets, Play Console — passo a passo em `SETUP_CONTAS.md`.
-3. **Primeiro AAB:** rodar o workflow "Android Release (AAB)". O Gradle não pôde rodar nesta sessão (download do Android SDK bloqueado), então o 1º build Android real acontece no GitHub Actions. Confira lá o tamanho do AAB (o workflow falha se passar de 40 MB; o build web tem ~2,5 MB).
-4. **Teste em aparelho real:** desempenho (FPS/bateria), anúncios de teste, consentimento UMP, botão voltar, notificação do baú offline.
-5. **Publicar a política de privacidade** (GitHub Pages), trocar o e-mail de contato e conferir `PRIVACY_URL` em `src/ui/Panel.ts`; publicar o `app-ads.txt` com o seu Publisher ID.
-6. **Screenshots** da loja (lista em `store-listing/screenshots.md`).
-7. **Futuro:** "Remover anúncios" com Play Billing (`ENABLE_IAP`, plugin sugerido no DECISIONS.md).
+1. **Contas:** AdMob (app + rewarded + interstitial + UMP), keystore, GitHub Secrets, Play Console — passo a passo em `SETUP_CONTAS.md`.
+2. **Primeiro AAB:** rodar o workflow "Android Release (AAB)". O Gradle não pôde rodar nesta sessão (download do Android SDK bloqueado), então o 1º build Android real acontece no GitHub Actions. Confira lá o tamanho do AAB (o workflow falha se passar de 40 MB; o build web tem ~2,5 MB).
+3. **Teste em aparelho real:** desempenho (FPS/bateria), anúncios de teste, consentimento UMP, botão voltar, notificação do baú offline.
+4. **Publicar a política de privacidade** (GitHub Pages), trocar o e-mail de contato e conferir `PRIVACY_URL` em `src/ui/Panel.ts`; publicar o `app-ads.txt` com o seu Publisher ID.
+5. **Screenshots** da loja (lista em `store-listing/screenshots.md`).
+6. **Futuro:** "Remover anúncios" com Play Billing (`ENABLE_IAP`, plugin sugerido no DECISIONS.md).

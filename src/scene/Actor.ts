@@ -162,22 +162,45 @@ export class Actor {
     return true;
   }
 
+  private roleOf(a: THREE.AnimationAction): ClipRole | undefined {
+    for (const [role, act] of this.actions) if (act === a) return role;
+    return undefined;
+  }
+
   private onClipFinished(a: THREE.AnimationAction): void {
-    if (a === this.actions.get('death')) {
+    const role = this.roleOf(a);
+    if (role === 'death' || role === 'deathAlt') {
       this.startShrink();
-    } else if (a !== this.actions.get('idle') && !this.dying) {
-      this.play('idle', { fade: 0.2 });
+    } else if (role !== this.idleRole && !this.dying) {
+      this.play(this.idleRole, { fade: 0.2 });
     }
   }
 
-  spawn(): void {
-    if (!this.play('spawn', { once: true, timeScale: 1.4 })) {
+  /** Clipe de parado deste personagem (o Mago usa Idle_B). */
+  idleRole: ClipRole = 'idle';
+  private lastHitAt = -1;
+  private hitToggle = false;
+
+  /** Duração (s) de um clipe, já considerando a velocidade de reprodução. */
+  clipDuration(role: ClipRole, timeScale = 1): number {
+    const a = this.action(role);
+    return a ? a.getClip().duration / timeScale : 0;
+  }
+
+  spawn(air = false): void {
+    if (!this.play(air ? 'spawnAir' : 'spawn', { once: true, timeScale: 1.4 })) {
       this.procedural = { role: 'spawn', t: 0 };
     }
   }
 
-  idle(): void {
-    this.play('idle');
+  idle(role: ClipRole = this.idleRole): void {
+    this.idleRole = role;
+    this.play(role);
+  }
+
+  /** Comemoração (Interact/Use_Item), volta ao idle sozinho. */
+  cheer(): void {
+    if (!this.dying) this.play('cheer', { once: true, fade: 0.15, timeScale: 1.3 });
   }
 
   hit(): void {
@@ -185,15 +208,20 @@ export class Actor {
     this.flashT = 0.12;
     this.squashT = 0.18;
     // Não interrompe o Spawn no meio.
-    if (this.current && this.current === this.actions.get('spawn') && this.current.isRunning()) return;
-    this.play('hit', { once: true, fade: 0.05, timeScale: 1.6 });
+    const r = this.current ? this.roleOf(this.current) : undefined;
+    if ((r === 'spawn' || r === 'spawnAir') && this.current!.isRunning()) return;
+    // Limite de frequência: não reinicia o clipe a cada toque rápido.
+    if (this.time - this.lastHitAt < 0.28) return;
+    this.lastHitAt = this.time;
+    this.hitToggle = !this.hitToggle;
+    this.play(this.hitToggle ? 'hit' : 'hitAlt', { once: true, fade: 0.1, timeScale: 1.5 });
   }
 
   die(): void {
     if (this.dying) return;
     this.dying = true;
     this.flashT = 0.15;
-    if (!this.play('death', { once: true, fade: 0.05, timeScale: 1.8 })) {
+    if (!this.play(Math.random() < 0.5 ? 'death' : 'deathAlt', { once: true, fade: 0.05, timeScale: 1.8 })) {
       this.procedural = { role: 'death', t: 0 };
       // Modelo real sem clipe de morte: vai direto para o encolher.
       if (this.real) this.startShrink();

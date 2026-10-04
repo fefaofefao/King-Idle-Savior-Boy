@@ -39,7 +39,7 @@ import { $, h } from './ui/dom';
 import { Floaters } from './ui/Floaters';
 import { Hud } from './ui/Hud';
 import { ICONS } from './ui/icons';
-import { showLanguageSelect, showLoading } from './ui/Intro';
+import { showTitleScreen } from './ui/Intro';
 import { Modals } from './ui/Modals';
 import { Panel } from './ui/Panel';
 
@@ -78,20 +78,14 @@ export class App {
     setLang(s.settings.lang);
     await hideSplash();
 
-    // Carrega os modelos em paralelo com a escolha de idioma.
-    const loader = showLoading(root);
-    const loading = this.assets.loadAll((p) => loader.set(p));
-
-    if (!s.settings.langChosen) {
-      loader.hide();
-      const lang = await showLanguageSelect(root, s.settings.lang);
-      s.settings.lang = lang;
-      s.settings.langChosen = true;
-      setLang(lang);
-      loader.show();
-    }
-    await loading;
-    loader.done();
+    // Tela inicial: escolha de idioma + carregamento dos modelos em paralelo.
+    const title = showTitleScreen(document.body, !s.settings.langChosen, () => sfx.unlock());
+    await this.assets.loadAll((p) => title.setProgress(p));
+    title.ready();
+    const lang = await title.waitForPlay();
+    s.settings.lang = lang;
+    s.settings.langChosen = true;
+    setLang(lang);
 
     this.game = new Game(s, { offerBossExtension: true });
     this.buildUi(root);
@@ -205,6 +199,7 @@ export class App {
         sfx.play('death');
         this.floaters.coins(pos.x, pos.y + 40, this.hud.goldAnchor, e.boss ? 10 : 3, () => sfx.play('coin'));
         if (e.boss) {
+          this.scene.knightCheer();
           this.floaters.banner(t('boss.defeated'), 'good');
           sfx.play('levelUp');
           vibrate(true);
@@ -241,6 +236,7 @@ export class App {
         break;
       case 'levelMilestone':
         sfx.play('levelUp');
+        this.scene.knightCheer();
         break;
       case 'ability':
         sfx.play(e.id === 'goldRain' ? 'chest' : 'levelUp');

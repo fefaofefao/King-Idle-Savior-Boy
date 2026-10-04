@@ -1,12 +1,12 @@
 # Ficha da loja — Português (pt-BR)
 
-**Título (máx. 30):** Cavaleiro Ocioso: RPG Idle
+**Título (máx. 30):** King Idle Savior Boy: RPG
 
 **Descrição curta (máx. 80):** Toque, derrote esqueletos e monte sua guilda. Seu cavaleiro evolui até offline!
 
 **Descrição longa:**
 
-Pegue a espada e salve o reino! Em **Cavaleiro Ocioso**, cada toque na tela faz seu cavaleiro atacar hordas de esqueletos num mundo de fantasia cartoon em 3D.
+Pegue a espada e salve o reino! Em **King Idle Savior Boy**, cada toque na tela faz seu cavaleiro atacar hordas de esqueletos num mundo de fantasia cartoon em 3D.
 
 ⚔️ **TOQUE E LUTE**
 Derrote inimigos, colete ouro e enfrente um **chefe a cada 10 fases**: você tem 30 segundos para vencê-lo!

@@ -3,6 +3,7 @@ import {
   CAMERA,
   CHARACTER,
   ENEMY_WEIGHTS,
+  HAND_BONES,
   RENDER,
   ZONES,
   type ModelKey,
@@ -16,7 +17,7 @@ import { ZoneEnvironment } from './Zones';
 
 const ENEMY_WEAPONS: Record<string, [WeaponKey, 'right' | 'left'][]> = {
   skeletonMinion: [['skeletonBlade', 'right']],
-  skeletonRogue: [['skeletonDagger', 'right'], ['skeletonDagger', 'left']],
+  skeletonRogue: [['skeletonBlade', 'left']],
   skeletonMage: [['skeletonStaff', 'right']],
   skeletonWarrior: [['skeletonAxe', 'right'], ['skeletonShield', 'left']],
 };
@@ -38,6 +39,8 @@ export class GameScene {
   private enemyIsBoss = false;
   private zoneIndex = 0;
   private mageThrowT = -1;
+  private mageReleaseAt = 0.12;
+  private mageHand: THREE.Object3D | null = null;
   private shakeT = 0;
   private shakeMag = 0;
   private camBase = new THREE.Vector3(...CAMERA.pos);
@@ -85,7 +88,7 @@ export class GameScene {
     this.knightAttack = new KnightAttack(this.knight, this.enemyPos);
 
     this.mage = this.makeActor('mage', CHARACTER.mage, [['mageStaff', 'right']]);
-    this.mage.idle();
+    this.mage.idle('idleAlt');
     this.mage.root.visible = false;
 
     this.resize();
@@ -161,7 +164,7 @@ export class GameScene {
       this.aura.scale.setScalar(CHARACTER.bossScale);
       this.scene.add(this.aura);
     }
-    e.spawn();
+    e.spawn(boss);
     this.enemy = e;
     this.enemyIsBoss = boss;
   }
@@ -213,6 +216,13 @@ export class GameScene {
     if (!this.mage.root.visible) return;
     this.mage.play('throw', { once: true, timeScale: 1.6, fade: 0.1 });
     this.mageThrowT = 0;
+    // O projétil sai quando o braço está à frente (~40% do clipe Throw).
+    this.mageReleaseAt = this.mage.clipDuration('throw', 1.6) * 0.4 || 0.12;
+  }
+
+  /** Comemoração do Cavaleiro (chefe derrotado / level up). */
+  knightCheer(): void {
+    this.knight.cheer();
   }
 
   shake(mag: number): void {
@@ -284,9 +294,12 @@ export class GameScene {
     if (this.mage.root.visible) this.mage.update(dt);
     if (this.mageThrowT >= 0) {
       this.mageThrowT += dt;
-      if (this.mageThrowT > 0.12) {
+      if (this.mageThrowT > this.mageReleaseAt) {
         this.mageThrowT = -1;
-        const from = this.mage.root.position.clone().add(new THREE.Vector3(0.25, 1.3, 0.1));
+        this.mageHand ??= this.mage.getBone(HAND_BONES.right);
+        const from = this.mageHand
+          ? this.mageHand.getWorldPosition(new THREE.Vector3())
+          : this.mage.root.position.clone().add(new THREE.Vector3(0.25, 1.3, 0.1));
         const to = this.enemyPos.clone().setY(this.enemyIsBoss ? 1.5 : 1);
         this.projectiles.fire(from, to, 0.3);
       }

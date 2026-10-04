@@ -7,25 +7,36 @@
  */
 
 export const MODEL_PATHS = {
-  knight: 'models/characters/knight.glb',
-  mage: 'models/characters/mage.glb',
-  skeletonMinion: 'models/characters/skeleton_minion.glb',
-  skeletonRogue: 'models/characters/skeleton_rogue.glb',
-  skeletonMage: 'models/characters/skeleton_mage.glb',
-  skeletonWarrior: 'models/characters/skeleton_warrior.glb',
-  /** Clipes compartilhados do rig médio (Idle, Hit, Death, Spawn, Throw...). */
+  knight: 'models/heroes/knight.glb',
+  mage: 'models/heroes/mage.glb',
+  skeletonMinion: 'models/enemies/skeleton_minion.glb',
+  skeletonRogue: 'models/enemies/skeleton_rogue.glb',
+  skeletonMage: 'models/enemies/skeleton_mage.glb',
+  skeletonWarrior: 'models/enemies/skeleton_warrior.glb',
+  /** Clipes compartilhados do Rig_Medium (Idle_A/B, Hit_A/B, Death_A/B, Spawn_Ground/Air, Throw, Interact...). */
   animations: ['models/animations/rig_medium_general.glb'],
 } as const;
 
+/**
+ * Arquivos OPCIONAIS de clipes de combate (pack KayKit Character Animations). Se algum existir,
+ * os clipes de ataque dele são usados automaticamente no lugar do ataque procedural.
+ */
+export const OPTIONAL_ANIMATIONS = [
+  'models/animations/rig_medium_combat.glb',
+  'models/animations/rig_medium_combat_melee.glb',
+  'models/animations/rig_medium_combatmelee.glb',
+] as const;
+
+/** O pack não traz armas de esqueleto: os inimigos reutilizam as armas dos heróis. */
 export const WEAPON_PATHS = {
-  knightSword: 'models/weapons/sword_1handed.gltf',
-  knightShield: 'models/weapons/shield_round.gltf',
-  mageStaff: 'models/weapons/staff.gltf',
-  skeletonBlade: 'models/weapons/skeleton_blade.gltf',
-  skeletonDagger: 'models/weapons/dagger.gltf',
-  skeletonStaff: 'models/weapons/skeleton_staff.gltf',
-  skeletonAxe: 'models/weapons/axe_2handed.gltf',
-  skeletonShield: 'models/weapons/skeleton_shield.gltf',
+  knightSword: 'models/weapons/sword_1handed.glb',
+  knightShield: 'models/weapons/shield_badge_color.glb',
+  mageStaff: 'models/weapons/staff.glb',
+  skeletonBlade: 'models/weapons/sword_1handed.glb',
+  skeletonDagger: 'models/weapons/wand.glb',
+  skeletonStaff: 'models/weapons/staff.glb',
+  skeletonAxe: 'models/weapons/sword_1handed.glb',
+  skeletonShield: 'models/weapons/shield_badge_color.glb',
 } as const;
 
 export type ModelKey = keyof typeof MODEL_PATHS;
@@ -39,13 +50,19 @@ export const HAND_BONES = {
 
 /** Ossos usados no ataque procedural do Cavaleiro (fallback enquanto não há clipe). */
 export const ARM_BONES = ['upperarm.r', 'upperarmr', 'upperarm_r', 'arm.r', 'armr'];
+export const FOREARM_BONES = ['lowerarm.r', 'lowerarmr', 'lowerarm_r'];
 
 /** Aliases de clipes: o primeiro nome encontrado no arquivo de animações é usado. */
 export const CLIP_ALIASES = {
   idle: ['Idle_A', 'Idle', 'Idle_B', '1H_Melee_Idle', 'Unarmed_Idle'],
-  hit: ['Hit_A', 'Hit_B', 'Hit'],
-  death: ['Death_A', 'Death_B', 'Death'],
-  spawn: ['Spawn_Ground', 'Spawn_Air', 'Spawn'],
+  idleAlt: ['Idle_B', 'Idle_A'],
+  hit: ['Hit_A', 'Hit', 'Hit_B'],
+  hitAlt: ['Hit_B', 'Hit_A'],
+  death: ['Death_A', 'Death', 'Death_B'],
+  deathAlt: ['Death_B', 'Death_A'],
+  spawn: ['Spawn_Ground', 'Spawn', 'Spawn_Air'],
+  spawnAir: ['Spawn_Air', 'Spawn_Ground'],
+  cheer: ['Interact', 'Use_Item', 'PickUp'],
   throw: ['Throw', 'Spellcast_Shoot', 'Spellcasting'],
   attack: ['1H_Melee_Attack_Chop', 'Melee_1H_Attack_Chop', '1H_Melee_Attack_Slice_Horizontal', 'Attack'],
 } as const;
