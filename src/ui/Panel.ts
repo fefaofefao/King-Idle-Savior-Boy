@@ -41,6 +41,15 @@ export const TERMS_URL = `${SITE_URL}terms/`;
 /** Âncora da página no idioma do jogo (#pt, #en, #es). */
 const langAnchor = (lang: string) => `#${lang.slice(0, 2)}`;
 
+const COLLAPSE_KEY = 'kisb.panelCollapsed';
+function loadCollapsed(): boolean {
+  try {
+    return localStorage.getItem(COLLAPSE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 type TabId = 'hero' | 'guild' | 'prestige' | 'quests' | 'menu';
 const TABS: TabId[] = ['hero', 'guild', 'prestige', 'quests', 'menu'];
 
@@ -143,15 +152,51 @@ export class Panel {
     for (const id of TABS) {
       const b = h(
         'button',
-        { class: 'tab', onClick: () => this.select(id) },
+        { class: 'tab', onClick: () => this.onTab(id) },
         [h('span', { class: 'ico', html: ICONS[id] }), h('span', { class: 'tab-label', text: t(`tab.${id}`) }), h('i', { class: 'badge' })],
       );
       this.tabButtons[id] = b;
       nav.appendChild(b);
     }
-    this.root.append(this.content, nav);
+    // Alça no topo do painel: recolhe/expande (o jogo ocupa a tela toda quando recolhido).
+    this.handle = h('button', { class: 'panel-handle', 'aria-label': t('panel.toggle'), onClick: () => this.setCollapsed(!this.collapsed) }, [
+      h('i', { class: 'chev' }),
+    ]);
+    this.root.append(this.handle, this.content, nav);
     this.enableSwipe();
+    this.setCollapsed(this.collapsed, false);
     this.renderTab();
+  }
+
+  // ---------------- Recolher ----------------
+
+  collapsed = loadCollapsed();
+  private handle!: HTMLButtonElement;
+
+  setCollapsed(on: boolean, sound = true): void {
+    this.collapsed = on;
+    toggleClass(this.root, 'collapsed', on);
+    for (const id of TABS) toggleClass(this.tabButtons[id]!, 'active', !on && id === this.active);
+    if (sound) sfx.play('tap');
+    try {
+      localStorage.setItem(COLLAPSE_KEY, on ? '1' : '0');
+    } catch {
+      /* armazenamento indisponível: só não lembra a escolha */
+    }
+  }
+
+  /** Toque numa aba: recolhido → abre nela; aba atual → recolhe; outra → troca. */
+  private onTab(id: TabId): void {
+    if (this.collapsed) {
+      this.setCollapsed(false);
+      if (this.active !== id) {
+        this.active = id;
+        this.renderTab();
+      }
+      return;
+    }
+    if (this.active === id) return this.setCollapsed(true);
+    this.select(id);
   }
 
   /** Deslizar o dedo para os lados troca de aba. */
@@ -175,6 +220,7 @@ export class Panel {
   }
 
   select(id: TabId): void {
+    if (this.collapsed) this.setCollapsed(false, false);
     if (this.active === id) return;
     this.active = id;
     sfx.play('tap');
@@ -182,7 +228,7 @@ export class Panel {
   }
 
   private renderTab(): void {
-    for (const id of TABS) toggleClass(this.tabButtons[id]!, 'active', id === this.active);
+    for (const id of TABS) toggleClass(this.tabButtons[id]!, 'active', !this.collapsed && id === this.active);
     this.content.innerHTML = '';
     this.content.scrollTop = 0;
     this.updaters = [];
@@ -205,7 +251,7 @@ export class Panel {
     const now = performance.now();
     if (!force && now - this.lastFull < 200) return;
     this.lastFull = now;
-    for (const u of this.updaters) u();
+    if (!this.collapsed) for (const u of this.updaters) u();
     this.updateBadges();
   }
 
@@ -590,7 +636,7 @@ export class Panel {
       const def = missionDef(m.id)!;
       const fill = h('i');
       const label = h('span');
-      const btn = h('button', { class: 'btn small', onClick: () => (app.claimMission(i), this.update(true)) });
+      const btn = h('button', { class: 'btn primary small claim', onClick: () => (app.claimMission(i), this.update(true)) });
       const el = h('div', { class: 'quest' }, [
         h('div', { class: 'quest-main' }, [
           h('div', { class: 'row-title', text: tk(`mission.${def.kind}`, { n: def.target }) }),
@@ -640,7 +686,7 @@ export class Panel {
     const achRows = ACHIEVEMENTS.map((a) => {
       const fill = h('i');
       const label = h('span');
-      const btn = h('button', { class: 'btn small', onClick: () => (app.claimAchievement(a.id), this.update(true)) });
+      const btn = h('button', { class: 'btn primary small claim', onClick: () => (app.claimAchievement(a.id), this.update(true)) });
       const el = h('div', { class: 'quest ach' }, [
         h('div', { class: 'quest-main' }, [
           h('div', { class: 'row-title', text: tk(`ach.${a.kind}`, { n: formatNumber(a.target) }) }),

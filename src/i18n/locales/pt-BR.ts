@@ -355,6 +355,7 @@ export const ptBR = {
   "ability.lockedInfo": "{name}: {desc} · libera na fase {n}",
   "debug.relic": "+1 relíquia",
   "menu.terms": "Termos de uso",
+  "panel.toggle": "Recolher ou abrir o painel",
 };
 
 export type LocaleKey = keyof typeof ptBR;

@@ -19,7 +19,7 @@
   --safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
   --safe-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
   --safe-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
-  --panel-h: min(44vh, 440px);
+  --panel-h: min(41vh, 410px);
 }
 
 * {
@@ -1632,7 +1632,7 @@ table.stats td:last-child {
 /* ---------- Telas baixas (ex.: 360×640) ---------- */
 @media (max-height: 720px) {
   :root {
-    --panel-h: 40vh;
+    --panel-h: 38vh;
   }
   .res {
     min-height: 34px;
@@ -2159,4 +2159,60 @@ button.card:active:not(:disabled) {
 .ability.cooling .ico,
 .ability.locked {
   cursor: help;
+}
+
+/* ---------- Painel retrátil ---------- */
+#panel {
+  transition: height 0.28s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+.panel-handle {
+  flex: none;
+  height: 22px;
+  width: 100%;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.panel-handle .chev {
+  display: block;
+  width: 44px;
+  height: 14px;
+  border-radius: 7px;
+  background: var(--panel-3);
+  position: relative;
+}
+.panel-handle .chev::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  width: 7px;
+  height: 7px;
+  border-right: 2.5px solid var(--text);
+  border-bottom: 2.5px solid var(--text);
+  transform: translateX(-50%) rotate(45deg);
+  transition: transform 0.25s, top 0.25s;
+}
+.panel-handle:active .chev {
+  background: var(--line);
+}
+#panel.collapsed {
+  height: calc(22px + 56px + var(--safe-bottom));
+}
+#panel.collapsed .tab-content {
+  display: none;
+}
+#panel.collapsed .panel-handle .chev::after {
+  top: 5px;
+  transform: translateX(-50%) rotate(-135deg);
+}
+.btn.claim {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+.btn.claim svg {
+  width: 18px;
+  height: 18px;
 }

@@ -357,4 +357,5 @@ export const es: Locale = {
   "ability.lockedInfo": "{name}: {desc} · se desbloquea en la fase {n}",
   "debug.relic": "+1 reliquia",
   "menu.terms": "Términos de uso",
+  "panel.toggle": "Plegar o abrir el panel",
 };

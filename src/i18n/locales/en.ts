@@ -357,4 +357,5 @@ export const en: Locale = {
   "ability.lockedInfo": "{name}: {desc} · unlocks at stage {n}",
   "debug.relic": "+1 relic",
   "menu.terms": "Terms of use",
+  "panel.toggle": "Collapse or open the panel",
 };
