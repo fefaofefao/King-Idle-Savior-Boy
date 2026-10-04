@@ -23,9 +23,16 @@ describe('monstros', () => {
     // fase 1: só Lacaio
     const g = new Game(at(1), { rng: seq(0.99, 0.99) });
     expect(g.monster.type).toBe('minion');
-    // fase 40: o último sorteável é a Bruxa
+    // fase 41: o último sorteável é o último tipo da lista com fase mínima ≤ 41
+    const pool = BALANCE.monsters.types.filter((t) => t.minStage <= 41);
     const g2 = new Game(at(41), { rng: seq(0.999, 0.99) });
-    expect(g2.monster.type).toBe('witch');
+    expect(g2.monster.type).toBe(pool[pool.length - 1].id);
+    // nunca sorteia um tipo antes da fase mínima
+    for (let i = 0; i < 200; i++) {
+      const g3 = new Game(at(5));
+      const t = BALANCE.monsters.types.find((x) => x.id === g3.monster.type)!;
+      expect(t.minStage).toBeLessThanOrEqual(5);
+    }
   });
 
   it('chefes: General nas fases 10–40 e Rei Esqueleto a cada 50', () => {

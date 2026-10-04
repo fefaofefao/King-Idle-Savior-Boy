@@ -291,7 +291,7 @@ export class Panel {
       crystals.innerHTML = `${ICONS.crystal}<span>${t('prestige.crystals', { n: formatNumber(s.crystals, n) })}</span>`;
       const can = g.canPrestige();
       setText(locked, can ? '' : t('prestige.locked', { n: BALANCE.prestige.minStage }));
-      setText(btn, t('prestige.button', { n: formatNumber(crystalsForPrestige(s.maxStage), n) }));
+      setText(btn, t('prestige.button', { n: formatNumber(crystalsForPrestige(s.maxStage, s), n) }));
       setDisabled(btn, !can);
       for (const { r, id } of rows) {
         const lvl = s.crystalUpgrades[id] ?? 0;

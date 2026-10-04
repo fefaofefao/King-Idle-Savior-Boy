@@ -50,7 +50,7 @@ describe('Jornada do Rei', () => {
     s.story.index = STORY.length + 2;
     const q = currentStoryQuest(s);
     expect(q.kind).toBe('stage');
-    expect(q.target).toBe(175);
+    expect(q.target).toBe(215);
     expect(q.crystals).toBeGreaterThan(0);
   });
 

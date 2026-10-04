@@ -1,4 +1,4 @@
-import { BALANCE, type CrystalUpgradeId } from '../config/balance';
+import { BALANCE, type CrystalUpgradeId, type RelicStat, type SkinId } from '../config/balance';
 import { D, Decimal, bulkCost } from './bignum';
 import { isBossStage, type GameState } from './state';
 
@@ -71,18 +71,61 @@ export function crystalUpgradeMaxed(id: CrystalUpgradeId, level: number): boolea
 const perLevel = (id: CrystalUpgradeId): number =>
   BALANCE.crystalShop.find((x) => x.id === id)!.perLevel;
 
-export function crystalsForPrestige(maxStage: number): Decimal {
+export function crystalsForPrestige(maxStage: number, s?: GameState): Decimal {
   const P = BALANCE.prestige;
   if (maxStage < P.minStage) return D(0);
-  return D(Math.floor(Math.pow((maxStage - P.offset) / P.divisor, P.exponent)));
+  const crown = s ? 1 + relicBonus(s, 'crystals') : 1;
+  const late = Math.pow(P.lateGrowth, Math.max(0, maxStage - P.lateStart));
+  return D(Math.floor(Math.pow((maxStage - P.offset) / P.divisor, P.exponent) * late * crown));
 }
 
 // ---------- Multiplicadores ----------
 export function globalDamageMult(s: GameState, crystals: Decimal = s.crystals): Decimal {
   const fromCrystals = crystals.times(BALANCE.prestige.damagePerCrystal).plus(1);
   const fromShop = 1 + crystalLevel(s, 'damage') * perLevel('damage');
-  return fromCrystals.times(fromShop);
+  const fromSkins = 1 + skinsUnlocked(s) * BALANCE.skins.damagePerSkin;
+  return fromCrystals.times(fromShop).times(fromSkins);
 }
+
+// ---------- Relíquias e visuais ----------
+/** Soma do bônus das relíquias de um tipo de efeito. */
+export function relicBonus(s: GameState, stat: RelicStat): number {
+  let b = 0;
+  for (const r of BALANCE.relics.list) if (r.stat === stat) b += (s.relics[r.id] ?? 0) * r.perLevel;
+  return b;
+}
+
+export const relicCount = (s: GameState): number => Object.values(s.relics).filter((l) => (l ?? 0) > 0).length;
+export const relicLevels = (s: GameState): number => Object.values(s.relics).reduce((a, l) => a + (l ?? 0), 0);
+
+/** Valor atual de cada condição de desbloqueio de visual. */
+export function skinProgress(s: GameState, kind: string): number {
+  switch (kind) {
+    case 'stage':
+      return s.stats.highestStage;
+    case 'boss':
+      return s.stats.bossKills;
+    case 'prestige':
+      return s.stats.prestiges;
+    case 'bestiary':
+      return totalBestiaryStars(s);
+    case 'golden':
+      return s.stats.goldenKills;
+    case 'relics':
+      return relicCount(s);
+    default:
+      return 0;
+  }
+}
+
+export function skinUnlocked(s: GameState, id: SkinId): boolean {
+  const sk = BALANCE.skins.list.find((x) => x.id === id);
+  if (!sk) return false;
+  return !sk.unlock || skinProgress(s, sk.unlock.kind) >= sk.unlock.n;
+}
+
+export const skinsUnlocked = (s: GameState): number =>
+  BALANCE.skins.list.filter((x) => x.unlock && skinUnlocked(s, x.id)).length;
 
 // ---------- Bestiário ----------
 /** Estrelas (0..4) de um tipo de monstro pelo número de abates. */
@@ -99,29 +142,29 @@ export const bestiaryGoldMult = (s: GameState): number =>
   1 + totalBestiaryStars(s) * BALANCE.monsters.bestiary.goldPerStar;
 
 export function goldMult(s: GameState, now: number): number {
-  let m = (1 + crystalLevel(s, 'gold') * perLevel('gold')) * bestiaryGoldMult(s);
+  let m = (1 + crystalLevel(s, 'gold') * perLevel('gold')) * bestiaryGoldMult(s) * (1 + relicBonus(s, 'gold'));
   if (s.adGoldBuffUntil > now || s.noAds) m *= BALANCE.ads.goldBuffMult;
   if (s.abilityActiveUntil.goldRain > now) m *= BALANCE.abilities.goldRain.goldMult;
   return m;
 }
 
 export const critChance = (s: GameState): number =>
-  Math.min(1, BALANCE.crit.chance + crystalLevel(s, 'crit') * perLevel('crit'));
+  Math.min(1, BALANCE.crit.chance + crystalLevel(s, 'crit') * perLevel('crit') + relicBonus(s, 'crit'));
 
 export const bossTimeSec = (s: GameState): number =>
-  BALANCE.stage.bossTimeSec + crystalLevel(s, 'bossTime') * perLevel('bossTime');
+  BALANCE.stage.bossTimeSec + crystalLevel(s, 'bossTime') * perLevel('bossTime') + relicBonus(s, 'bossTime');
 
 export const offlineCapSec = (s: GameState): number =>
-  (BALANCE.offline.baseCapHours + crystalLevel(s, 'offline') * perLevel('offline')) * 3600;
+  (BALANCE.offline.baseCapHours + crystalLevel(s, 'offline') * perLevel('offline') + relicBonus(s, 'offline')) * 3600;
 
 export const cooldownMult = (s: GameState): number =>
-  Math.max(0.2, 1 - crystalLevel(s, 'cooldown') * perLevel('cooldown'));
+  Math.max(0.2, 1 - crystalLevel(s, 'cooldown') * perLevel('cooldown') - relicBonus(s, 'cooldown'));
 
 // ---------- Dano total ----------
 export function guildDps(s: GameState): Decimal {
   let sum = D(0);
   s.guild.forEach((lvl, i) => (sum = sum.plus(memberDps(i, lvl))));
-  return sum.times(globalDamageMult(s));
+  return sum.times(globalDamageMult(s)).times(1 + relicBonus(s, 'dps'));
 }
 
 export const mageUnlocked = (s: GameState): boolean => s.maxStage >= BALANCE.mage.unlockStage;
@@ -134,10 +177,10 @@ export function totalDps(s: GameState): Decimal {
 
 /** Dano do projétil do Mago (um pacote a cada intervalo). */
 export const mageHitDamage = (s: GameState): Decimal =>
-  guildDps(s).times(BALANCE.mage.dpsShare * BALANCE.mage.intervalSec);
+  guildDps(s).times(BALANCE.mage.dpsShare * BALANCE.mage.intervalSec).times(1 + relicBonus(s, 'mage'));
 
 export function tapDamage(s: GameState, now: number): Decimal {
-  let dmg = bladeDamage(s.bladeLevel).times(globalDamageMult(s));
+  let dmg = bladeDamage(s.bladeLevel).times(globalDamageMult(s)).times(1 + relicBonus(s, 'tap'));
   if (s.arcaneLevel > 0) {
     dmg = dmg.plus(totalDps(s).times(s.arcaneLevel * BALANCE.arcane.dpsSharePerLevel));
   }
@@ -154,6 +197,6 @@ export function incomePerSec(s: GameState, now: number): Decimal {
 
 /** Multiplicador de dano que o jogador terá depois de renascer. */
 export function prestigeDamageGain(s: GameState): Decimal {
-  const after = s.crystals.plus(crystalsForPrestige(s.maxStage));
+  const after = s.crystals.plus(crystalsForPrestige(s.maxStage, s));
   return globalDamageMult(s, after).div(globalDamageMult(s));
 }

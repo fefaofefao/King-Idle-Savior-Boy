@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { LANGUAGES, LOCALES, detectLang } from '../src/i18n';
 import { ACHIEVEMENTS, MISSION_POOL } from '../src/core/retention';
 import { BALANCE, MONSTER_IDS } from '../src/config/balance';
+import { CHAPTERS, STORY } from '../src/core/story';
 
 describe('i18n', () => {
   it('3 idiomas com as mesmas chaves e sem textos vazios', () => {
@@ -28,6 +29,13 @@ describe('i18n', () => {
     for (let z = 0; z < 5; z++) expect(keys.has(`zone.${z}`) && keys.has(`zoneOf.${z}`)).toBe(true);
     for (const id of MONSTER_IDS) expect(keys.has(`monster.${id}`)).toBe(true);
     for (const id of Object.keys(BALANCE.monsters.affixes)) expect(keys.has(`affix.${id}`)).toBe(true);
+    for (let c = 1; c <= CHAPTERS + 1; c++) expect(keys.has(`chapter.${c}`) && keys.has(`chapterIntro.${c}`), `chapter ${c}`).toBe(true);
+    for (const q of STORY) expect(keys.has(`story.${q.kind}`), q.kind).toBe(true);
+    for (const r of BALANCE.relics.list) expect(keys.has(`relic.${r.id}`) && keys.has(`relicStat.${r.stat}`), r.id).toBe(true);
+    for (const sk of BALANCE.skins.list) {
+      expect(keys.has(`skin.${sk.id}`), sk.id).toBe(true);
+      if (sk.unlock) expect(keys.has(`skinLock.${sk.unlock.kind}`), sk.unlock.kind).toBe(true);
+    }
   });
   it('detecta o idioma do aparelho', () => {
     expect(detectLang(['pt-PT'])).toBe('pt-BR');

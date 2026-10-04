@@ -1,8 +1,11 @@
 import { BALANCE } from '../config/balance';
+import { relicCount, relicLevels, skinsUnlocked, totalBestiaryStars } from './formulas';
 import type { GameState } from './state';
 
 /**
- * "Jornada do Rei": cadeia de missões principais, em 5 capítulos (um por zona), que guia o jogador.
+ * "Jornada do Rei": cadeia de missões principais, em 10 capítulos, que guia o jogador por dias de jogo.
+ * Os alvos de fase dos capítulos 6–10 seguem o alcance simulado (`npm run sim -- --minutes=2400`):
+ * ~120 em 4 h, ~150 em 8 h, ~180 em 1 dia, ~195 em 1,5 dia de jogo ativo.
  * O progresso é lido do estado (não acumulado), então é robusto a saves antigos e ao Renascer.
  * Ao fim da cadeia, missões infinitas de "alcance a fase X" continuam dando cristais.
  */
@@ -19,7 +22,14 @@ export type StoryKind =
   | 'arcane'
   | 'prestige'
   | 'crystalShop'
-  | 'crits';
+  | 'crits'
+  | 'relics'
+  | 'relicLevels'
+  | 'bestiary'
+  | 'golden'
+  | 'weakHits'
+  | 'skins'
+  | 'combo';
 
 export interface StoryQuest {
   kind: StoryKind;
@@ -31,7 +41,7 @@ export interface StoryQuest {
   crystals?: number;
   /** Ouro fixo mínimo (garante a próxima compra no tutorial). */
   gold?: number;
-  /** Capítulo (1..5) — muda o título exibido. */
+  /** Capítulo (1..10; 11 = infinitas) — muda o título exibido. */
   chapter: number;
 }
 
@@ -85,18 +95,60 @@ export const STORY: StoryQuest[] = [
   q(5, 'boss', 25, { incomeSec: 300, crystals: 3 }),
   q(5, 'stage', 100, { incomeSec: 360, crystals: 5 }),
   q(5, 'prestige', 5, { incomeSec: 300, crystals: 5 }),
+  // Capítulo 6 — As Ruínas Esquecidas (relíquias e bestiário)
+  q(6, 'relics', 3, { incomeSec: 300 }),
+  q(6, 'golden', 10, { incomeSec: 300 }),
+  q(6, 'stage', 110, { incomeSec: 360 }),
+  q(6, 'bestiary', 12, { incomeSec: 360 }),
+  q(6, 'weakHits', 150, { incomeSec: 360 }),
+  q(6, 'hire', 1, { member: 6, incomeSec: 360 }),
+  q(6, 'stage', 120, { incomeSec: 420, crystals: 5 }),
+  // Capítulo 7 — O Pântano Sombrio
+  q(7, 'combo', 100, { incomeSec: 360 }),
+  q(7, 'prestige', 10, { incomeSec: 360, crystals: 5 }),
+  q(7, 'relics', 6, { incomeSec: 420 }),
+  q(7, 'stage', 130, { incomeSec: 420 }),
+  q(7, 'skins', 2, { incomeSec: 420 }),
+  q(7, 'boss', 100, { incomeSec: 420 }),
+  q(7, 'stage', 140, { incomeSec: 480, crystals: 8 }),
+  // Capítulo 8 — A Cidadela de Cristal
+  q(8, 'crystalShop', 40, { incomeSec: 420 }),
+  q(8, 'relicLevels', 30, { incomeSec: 480 }),
+  q(8, 'hire', 1, { member: 7, incomeSec: 480 }),
+  q(8, 'stage', 150, { incomeSec: 480 }),
+  q(8, 'golden', 50, { incomeSec: 480 }),
+  q(8, 'combo', 200, { incomeSec: 480 }),
+  q(8, 'stage', 160, { incomeSec: 540, crystals: 10 }),
+  // Capítulo 9 — O Abismo
+  q(9, 'bestiary', 24, { incomeSec: 480 }),
+  q(9, 'prestige', 20, { incomeSec: 480, crystals: 8 }),
+  q(9, 'relics', 12, { incomeSec: 540 }),
+  q(9, 'stage', 170, { incomeSec: 540 }),
+  q(9, 'weakHits', 1000, { incomeSec: 540 }),
+  q(9, 'skins', 4, { incomeSec: 540 }),
+  q(9, 'stage', 180, { incomeSec: 600, crystals: 12 }),
+  // Capítulo 10 — O Trono Eterno
+  q(10, 'relicLevels', 100, { incomeSec: 540 }),
+  q(10, 'combo', 400, { incomeSec: 540 }),
+  q(10, 'boss', 300, { incomeSec: 600 }),
+  q(10, 'stage', 190, { incomeSec: 600 }),
+  q(10, 'skins', 6, { incomeSec: 600 }),
+  q(10, 'prestige', 30, { incomeSec: 600, crystals: 12 }),
+  q(10, 'stage', 200, { incomeSec: 900, crystals: 20 }),
 ];
 
-export const CHAPTERS = 5;
+export const CHAPTERS = 10;
+/** Última fase pedida pela cadeia; as infinitas continuam a partir dela. */
+const CHAIN_LAST_STAGE = 200;
 
 /** Missão atual (cadeia ou, depois dela, infinita). */
 export function currentStoryQuest(s: GameState): StoryQuest {
   const i = s.story.index;
   if (i < STORY.length) return STORY[i];
-  // Infinitas: a cada 25 fases além da maior fase já alcançada na época.
+  // Infinitas: a cada 5 fases depois do fim da cadeia (o fim de jogo avança devagar).
   const step = i - STORY.length + 1;
-  const target = 100 + step * 25;
-  return { chapter: CHAPTERS + 1, kind: 'stage', target, incomeSec: 300, crystals: 3 + Math.floor(step / 2) };
+  const target = CHAIN_LAST_STAGE + step * 5;
+  return { chapter: CHAPTERS + 1, kind: 'stage', target, incomeSec: 600, crystals: 10 + step * 2 };
 }
 
 export function storyProgress(s: GameState, quest: StoryQuest = currentStoryQuest(s)): number {
@@ -127,6 +179,20 @@ export function storyProgress(s: GameState, quest: StoryQuest = currentStoryQues
       return Object.values(s.crystalUpgrades).reduce((a, b) => a + b, 0);
     case 'crits':
       return s.stats.crits;
+    case 'relics':
+      return relicCount(s);
+    case 'relicLevels':
+      return relicLevels(s);
+    case 'bestiary':
+      return totalBestiaryStars(s);
+    case 'golden':
+      return s.stats.goldenKills;
+    case 'weakHits':
+      return s.stats.weakHits;
+    case 'skins':
+      return skinsUnlocked(s);
+    case 'combo':
+      return s.stats.maxCombo;
   }
 }
 

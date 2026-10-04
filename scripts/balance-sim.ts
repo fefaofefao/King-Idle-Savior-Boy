@@ -15,6 +15,7 @@ import {
   bladeDamage,
   critChance,
   crystalUpgradeCost,
+  enemyHp,
   crystalsForPrestige,
   globalDamageMult,
   mageUnlocked,
@@ -364,6 +365,14 @@ function resetRun(tps: number, minutes: number) {
     }
   }
   runs.push({ start: runStart, end: p.now, max: p.g.state.maxStage, crystals: 0 });
+  if (process.argv.includes('--debug')) {
+    const s = p.g.state;
+    console.log(
+      `  [debug] cristais ${formatNumber(s.crystals)}, loja dano ${s.crystalUpgrades.damage}, mult global ${formatNumber(globalDamageMult(s))}, ` +
+        `DPS ${formatNumber(totalDps(s))}, toque ${formatNumber(tapDamage(s, p.now))}, HP fase ${s.maxStage}: ${formatNumber(enemyHp(s.maxStage))}, ` +
+        `ouro ${formatNumber(s.gold)}, lâmina ${s.bladeLevel}, guilda [${s.guild.join(',')}], relíquias ${JSON.stringify(s.relics)}`,
+    );
+  }
   runs.forEach((r, i) =>
     console.log(
       `  run ${i + 1}: ${formatTime(r.start / 1000)} → ${formatTime(r.end / 1000)} (${formatTime((r.end - r.start) / 1000)}), fase máx. ${r.max}${r.crystals ? `, +${r.crystals} cristais` : ''}`,

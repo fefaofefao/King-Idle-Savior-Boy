@@ -1,5 +1,5 @@
 import { BALANCE } from '../config/balance';
-import { totalBestiaryStars } from './formulas';
+import { relicCount, skinsUnlocked, totalBestiaryStars } from './formulas';
 import type { GameState, MissionState } from './state';
 
 /** Chave do dia no fuso local (AAAA-MM-DD). */
@@ -37,7 +37,9 @@ export type TrackKind =
   | 'stages'
   | 'crits'
   | 'weakHits'
-  | 'golden';
+  | 'golden'
+  | 'relics'
+  | 'combo';
 
 export interface MissionDef {
   id: string;
@@ -65,6 +67,8 @@ export const MISSION_POOL: MissionDef[] = [
   { id: 'weak15', kind: 'weakHits', target: 15, rewardIncomeSec: 450 },
   { id: 'weak40', kind: 'weakHits', target: 40, rewardIncomeSec: 600, rewardCrystals: 1 },
   { id: 'golden1', kind: 'golden', target: 1, rewardIncomeSec: 450 },
+  { id: 'combo2', kind: 'combo', target: 2, rewardIncomeSec: 450 },
+  { id: 'combo5', kind: 'combo', target: 5, rewardIncomeSec: 600, rewardCrystals: 1 },
 ];
 
 export const missionDef = (id: string): MissionDef | undefined =>
@@ -123,7 +127,7 @@ export interface AchievementDef {
   /** Cristais de recompensa; 0 = recompensa em ouro (as conquistas do começo não dão cristais). */
   crystals: number;
   /** Chave i18n do tipo da conquista (recebe {n}). */
-  kind: 'stage' | 'taps' | 'kills' | 'boss' | 'prestige' | 'crits' | 'chests' | 'blade' | 'guild' | 'abilities' | 'weak' | 'golden' | 'bestiary';
+  kind: 'stage' | 'taps' | 'kills' | 'boss' | 'prestige' | 'crits' | 'chests' | 'blade' | 'guild' | 'abilities' | 'weak' | 'golden' | 'bestiary' | 'combo' | 'relics' | 'skins';
 }
 
 const ach = (
@@ -146,7 +150,10 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   ...ach('abilities', (s) => s.stats.abilitiesUsed, [[25, 1]]),
   ...ach('weak', (s) => s.stats.weakHits, [[10, 0], [100, 1], [1000, 2]]),
   ...ach('golden', (s) => s.stats.goldenKills, [[1, 0], [10, 1], [50, 2]]),
-  ...ach('bestiary', (s) => totalBestiaryStars(s), [[5, 1], [15, 2]]),
+  ...ach('bestiary', (s) => totalBestiaryStars(s), [[5, 1], [15, 2], [30, 4]]),
+  ...ach('combo', (s) => s.stats.maxCombo, [[50, 0], [200, 1], [800, 3]]),
+  ...ach('relics', (s) => relicCount(s), [[1, 0], [6, 2], [12, 4]]),
+  ...ach('skins', (s) => skinsUnlocked(s), [[1, 1], [4, 2], [7, 5]]),
 ];
 
 /** Marca conquistas recém-atingidas como 'done'. Retorna os ids novos. */

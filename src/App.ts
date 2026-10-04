@@ -539,7 +539,7 @@ export class App {
   async prestige(): Promise<void> {
     const s = this.state;
     if (!this.game.canPrestige()) return;
-    const gain = crystalsForPrestige(s.maxStage);
+    const gain = crystalsForPrestige(s.maxStage, s);
     const mult = prestigeDamageGain(s);
     const ok = await this.modals.confirm(
       t('prestige.confirmTitle'),

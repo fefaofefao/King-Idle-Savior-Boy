@@ -1,4 +1,4 @@
-import { BALANCE, type AbilityId, type CrystalUpgradeId, type MonsterId } from '../config/balance';
+import { BALANCE, type AbilityId, type CrystalUpgradeId, type MonsterId, type RelicId, type SkinId } from '../config/balance';
 import { Decimal, ZERO } from './bignum';
 
 export type Lang = 'pt-BR' | 'en' | 'es';
@@ -34,6 +34,10 @@ export interface Stats {
   weakHits: number;
   /** Esqueletos Dourados derrotados. */
   goldenKills: number;
+  /** Maior combo de toques. */
+  maxCombo: number;
+  /** Relíquias obtidas (contando repetidas). */
+  relicDrops: number;
 }
 
 export interface MissionState {
@@ -72,6 +76,10 @@ export interface GameState {
   tutorial: { tapHintDone: boolean; weakHintDone?: boolean };
   /** Bestiário: abates por tipo de monstro (permanente, sobrevive ao Renascer). */
   bestiary: Partial<Record<MonsterId, number>>;
+  /** Relíquias: nível de cada uma (permanente). */
+  relics: Partial<Record<RelicId, number>>;
+  /** Visual do Cavaleiro em uso. */
+  skin: SkinId;
   missions: { day: string; list: MissionState[] };
   achievements: Record<string, 'done' | 'claimed'>;
   settings: Settings;
@@ -81,7 +89,7 @@ export interface GameState {
   noAds: boolean;
 }
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export function createInitialState(now = Date.now(), lang: Lang = 'en'): GameState {
   return {
@@ -117,12 +125,16 @@ export function createInitialState(now = Date.now(), lang: Lang = 'en'): GameSta
       highestStage: 1,
       weakHits: 0,
       goldenKills: 0,
+      maxCombo: 0,
+      relicDrops: 0,
     },
     runStartedAt: now,
     daily: { lastClaimDay: '', index: 0 },
     story: { index: 0 },
     tutorial: { tapHintDone: false },
     bestiary: {},
+    relics: {},
+    skin: 'classic',
     missions: { day: '', list: [] },
     achievements: {},
     settings: {

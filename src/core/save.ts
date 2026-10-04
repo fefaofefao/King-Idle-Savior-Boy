@@ -49,6 +49,8 @@ export const MIGRATIONS: Record<number, (raw: Raw) => Raw> = {
   }),
   // v3 → v4: Bestiário e estatísticas de Pontos Fracos / Dourados (campos novos com valor padrão).
   3: (raw) => ({ ...raw, bestiary: {}, schemaVersion: 4 }),
+  // v4 → v5: Relíquias e visuais do Cavaleiro.
+  4: (raw) => ({ ...raw, relics: {}, skin: 'classic', schemaVersion: 5 }),
 };
 
 export function migrate(raw: Raw): Raw {
@@ -82,6 +84,8 @@ export function deserialize(json: string): GameState {
     story: { ...base.story, ...raw.story },
     tutorial: { ...base.tutorial, ...raw.tutorial },
     bestiary: { ...raw.bestiary },
+    relics: { ...raw.relics },
+    skin: raw.skin ?? 'classic',
     missions: raw.missions ?? base.missions,
     achievements: raw.achievements ?? {},
     guild: base.guild.map((_, i) => Number(raw.guild?.[i] ?? 0)),

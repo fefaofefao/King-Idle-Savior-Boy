@@ -1,4 +1,4 @@
-import { BALANCE, type AbilityId, type AffixId, type CrystalUpgradeId, type MonsterId } from '../config/balance';
+import { BALANCE, type AbilityId, type AffixId, type CrystalUpgradeId, type MonsterId, type RelicId } from '../config/balance';
 import { D, Decimal, maxAffordable } from './bignum';
 import {
   arcaneCost,
@@ -12,6 +12,7 @@ import {
   enemyGold,
   goldMult,
   incomePerSec,
+  relicBonus,
   mageHitDamage,
   mageUnlocked,
   memberCost,
@@ -37,6 +38,8 @@ export type GameEvent =
   | { type: 'kill'; gold: Decimal; boss: boolean; monster: Monster }
   | { type: 'spawn'; boss: boolean; stage: number; monster: Monster }
   | { type: 'escaped' }
+  | { type: 'relic'; id: RelicId; level: number; crystals: number }
+  | { type: 'combo'; count: number; gold: Decimal }
   | { type: 'armorBroken' }
   | { type: 'stageChanged'; stage: number }
   | { type: 'bossTimeout'; canExtend: boolean }
@@ -138,7 +141,8 @@ export class Game {
     for (const id of Object.keys(M.affixes) as AffixId[]) {
       const a = M.affixes[id];
       if (s.stage < a.minStage) continue;
-      acc += a.chance;
+      // Trevo da Sorte (relíquia) aumenta a chance do Dourado.
+      acc += id === 'golden' ? a.chance * (1 + relicBonus(s, 'golden')) : a.chance;
       if (roll < acc) {
         affix = id;
         break;
@@ -259,6 +263,7 @@ export class Game {
     if (!this.enemyAlive || this.bossPaused) return null;
     s.stats.taps++;
     this.track('taps', 1);
+    this.registerCombo(now);
     let dmg = tapDamage(s, now);
     const crit = this.rng() < critChance(s);
     if (crit) {
@@ -269,6 +274,30 @@ export class Game {
     this.emit({ type: 'hit', amount: dmg, crit, source: 'tap', armor: this.armor.gt(0) });
     this.damage(dmg, true);
     return { damage: dmg, crit };
+  }
+
+  /** Combo atual de toques seguidos. */
+  combo = 0;
+  private lastTapAt = -1e9;
+
+  /** Conta o combo; nos marcos (50, 100, 200...) dá um pouco de ouro. */
+  private registerCombo(now: number): void {
+    const C = BALANCE.combo;
+    this.combo = now - this.lastTapAt <= C.windowSec * 1000 ? this.combo + 1 : 1;
+    this.lastTapAt = now;
+    const s = this.state;
+    if (this.combo > s.stats.maxCombo) s.stats.maxCombo = this.combo;
+    if ((C.milestones as readonly number[]).includes(this.combo)) {
+      const gold = enemyGold(s.stage).times(goldMult(s, now)).times(C.rewardKills * (this.combo / 50));
+      this.addGold(gold);
+      this.track('combo', 1);
+      this.emit({ type: 'combo', count: this.combo, gold });
+    }
+  }
+
+  /** Combo zera se o jogador para de tocar. */
+  comboAlive(now: number): boolean {
+    return now - this.lastTapAt <= BALANCE.combo.windowSec * 1000;
   }
 
   /** Toque num Ponto Fraco: sempre crítico e multiplicado. Ignora a armadura (é um ponto fraco!). */
@@ -282,7 +311,10 @@ export class Game {
     this.track('taps', 1);
     this.track('crits', 1);
     this.track('weakHits', 1);
-    const dmg = tapDamage(s, now).times(BALANCE.crit.mult).times(BALANCE.monsters.weakSpot.tapMult);
+    const dmg = tapDamage(s, now)
+      .times(BALANCE.crit.mult)
+      .times(BALANCE.monsters.weakSpot.tapMult)
+      .times(1 + relicBonus(s, 'weak'));
     this.emit({ type: 'hit', amount: dmg, crit: true, source: 'weak' });
     // Ponto fraco atravessa a armadura.
     this.armor = D(0);
@@ -338,6 +370,7 @@ export class Game {
     if (boss) {
       s.stats.bossKills++;
       this.track('bossKills', 1);
+      this.rollRelic();
       this.advanceStage();
     } else if (s.farming) {
       s.killsInStage = BALANCE.stage.enemiesPerStage;
@@ -346,6 +379,35 @@ export class Game {
       if (s.killsInStage >= BALANCE.stage.enemiesPerStage) this.advanceStage();
     }
     this.checkAchievements();
+  }
+
+  /** Chefe derrotado: chance de relíquia (General 25%, Rei 100%). */
+  private rollRelic(): void {
+    const s = this.state;
+    const R = BALANCE.relics;
+    const chance = this.monster.type === 'king' ? R.dropChance.king : R.dropChance.general;
+    if (this.rng() >= chance) return;
+    const open = R.list.filter((r) => (s.relics[r.id] ?? 0) < R.maxLevel);
+    s.stats.relicDrops++;
+    this.track('relics', 1);
+    if (!open.length) {
+      s.crystals = s.crystals.plus(R.maxedCrystals);
+      this.emit({ type: 'relic', id: R.list[0].id, level: R.maxLevel, crystals: R.maxedCrystals });
+      return;
+    }
+    // Relíquias que você ainda não tem têm o dobro de chance (a coleção anda mais rápido).
+    const weights = open.map((r) => ((s.relics[r.id] ?? 0) === 0 ? 2 : 1));
+    let roll = this.rng() * weights.reduce((a, b) => a + b, 0);
+    let pick = open[0];
+    for (let i = 0; i < open.length; i++) {
+      if ((roll -= weights[i]) < 0) {
+        pick = open[i];
+        break;
+      }
+    }
+    const level = (s.relics[pick.id] ?? 0) + 1;
+    s.relics[pick.id] = level;
+    this.emit({ type: 'relic', id: pick.id, level, crystals: 0 });
   }
 
   private advanceStage(): void {
@@ -505,7 +567,7 @@ export class Game {
   prestige(now: number): Decimal {
     const s = this.state;
     if (!this.canPrestige()) return D(0);
-    const gain = crystalsForPrestige(s.maxStage);
+    const gain = crystalsForPrestige(s.maxStage, s);
     s.crystals = s.crystals.plus(gain);
     s.gold = D(0);
     s.stage = 1;

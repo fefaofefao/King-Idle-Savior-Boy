@@ -86,6 +86,12 @@ export const BALANCE = {
     exponent: 1.4,
     /** Bônus de dano global por cristal NÃO gasto. */
     damagePerCrystal: 0.1,
+    /**
+     * Fim de jogo: a partir de lateStart os cristais crescem ×lateGrowth por fase.
+     * Sem isso o jogo "empacava" (a vida dos monstros cresce exponencialmente e os cristais não).
+     */
+    lateStart: 60,
+    lateGrowth: 1.06,
   },
 
   /** Loja de Cristais: passos pequenos e custo crescente (antes +25% por 1 cristal quebrava o jogo). */
@@ -149,6 +155,12 @@ export const BALANCE = {
       { id: 'skmage', minStage: 6, weight: 2.5, hp: 0.9, gold: 1.05 },
       { id: 'fallen', minStage: 21, weight: 2, hp: 1.3, gold: 1.35 },
       { id: 'witch', minStage: 31, weight: 1.6, hp: 1.15, gold: 1.25 },
+      // Criaturas procedurais (low-poly feitas por código), com animações próprias.
+      { id: 'slime', minStage: 2, weight: 3, hp: 0.75, gold: 0.8 },
+      { id: 'mushroom', minStage: 8, weight: 2.5, hp: 0.95, gold: 1 },
+      { id: 'bat', minStage: 16, weight: 2.5, hp: 0.7, gold: 0.85 },
+      { id: 'golem', minStage: 36, weight: 1.5, hp: 1.6, gold: 1.6 },
+      { id: 'imp', minStage: 46, weight: 1.8, hp: 1, gold: 1.15 },
     ],
     /** Variações raras (nunca no chefe). */
     affixes: {
@@ -165,6 +177,49 @@ export const BALANCE = {
     bestiary: { tiers: [10, 100, 1000, 10000], goldPerStar: 0.02 },
   },
 
+  /**
+   * Relíquias: caem dos chefes (General 25%, Rei 100%), sobem de nível com repetidas e
+   * dão bônus permanentes (sobrevivem ao Renascer). Coleção de longo prazo.
+   */
+  relics: {
+    dropChance: { general: 0.15, king: 1 },
+    maxLevel: 25,
+    /** Relíquia repetida com nível máximo vira cristais. */
+    maxedCrystals: 2,
+    list: [
+      { id: 'sword', stat: 'tap', perLevel: 0.1 },
+      { id: 'banner', stat: 'dps', perLevel: 0.1 },
+      { id: 'purse', stat: 'gold', perLevel: 0.08 },
+      { id: 'eye', stat: 'crit', perLevel: 0.005 },
+      { id: 'lens', stat: 'weak', perLevel: 0.1 },
+      { id: 'hourglass', stat: 'bossTime', perLevel: 1 },
+      { id: 'clover', stat: 'golden', perLevel: 0.1 },
+      { id: 'lantern', stat: 'offline', perLevel: 0.5 },
+      { id: 'horn', stat: 'cooldown', perLevel: 0.03 },
+      { id: 'crown', stat: 'crystals', perLevel: 0.05 },
+      { id: 'chalice', stat: 'chest', perLevel: 0.15 },
+      { id: 'grimoire', stat: 'mage', perLevel: 0.1 },
+    ],
+  },
+
+  /** Visuais do Cavaleiro: desbloqueados por marcos; cada um dá +1% de dano (coleção). */
+  skins: {
+    damagePerSkin: 0.01,
+    list: [
+      { id: 'classic', tint: '#ffffff', emissive: '#000000', unlock: null },
+      { id: 'royal', tint: '#ffe0a0', emissive: '#2a1a00', unlock: { kind: 'stage', n: 50 } },
+      { id: 'crimson', tint: '#ff9f90', emissive: '#2a0000', unlock: { kind: 'boss', n: 30 } },
+      { id: 'shadow', tint: '#8a7ab0', emissive: '#12062a', unlock: { kind: 'prestige', n: 3 } },
+      { id: 'frost', tint: '#c4e8ff', emissive: '#062236', unlock: { kind: 'bestiary', n: 10 } },
+      { id: 'golden', tint: '#ffe680', emissive: '#4a3000', unlock: { kind: 'golden', n: 25 } },
+      { id: 'arcane', tint: '#d0b0ff', emissive: '#2a0a5a', unlock: { kind: 'relics', n: 8 } },
+      { id: 'savior', tint: '#ffffff', emissive: '#3a3a10', unlock: { kind: 'stage', n: 150 } },
+    ],
+  },
+
+  /** Combo: toques seguidos (até 0,6 s entre eles) somam; marcos dão um pouco de ouro. */
+  combo: { windowSec: 0.6, milestones: [50, 100, 200, 400, 800], rewardKills: 3 },
+
   saveIntervalSec: 10,
 } as const;
 
@@ -174,5 +229,10 @@ export type AbilityId = keyof typeof BALANCE.abilities;
 /** 'general' = chefe comum (fases 10, 20, 30, 40); 'king' = Rei Esqueleto (a cada 50 fases). */
 export type MonsterId = (typeof BALANCE.monsters.types)[number]['id'] | 'general' | 'king';
 export type AffixId = keyof typeof BALANCE.monsters.affixes;
-export const MONSTER_IDS: MonsterId[] = ['minion', 'rogue', 'skmage', 'fallen', 'witch', 'general', 'king'];
+export const MONSTER_IDS: MonsterId[] = [
+  'minion', 'slime', 'rogue', 'skmage', 'mushroom', 'bat', 'fallen', 'witch', 'golem', 'imp', 'general', 'king',
+];
+export type RelicId = (typeof BALANCE.relics.list)[number]['id'];
+export type RelicStat = (typeof BALANCE.relics.list)[number]['stat'];
+export type SkinId = (typeof BALANCE.skins.list)[number]['id'];
 export const ABILITY_IDS: AbilityId[] = ['strike', 'fury', 'goldRain'];
