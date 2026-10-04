@@ -61,7 +61,10 @@ export class Floaters {
     }
   }
 
-  toast(text: string, icon = '', ms = 2600): void {
+  toast(text: string, icon = '', ms = 2200): void {
+    // No máximo 2 avisos ao mesmo tempo: o mais antigo sai.
+    const live = [...this.toastBox.querySelectorAll('.toast:not(.out)')];
+    while (live.length >= 2) live.shift()!.remove();
     const el = h('div', { class: 'toast', html: `${icon}<span></span>` });
     el.querySelector('span')!.textContent = text;
     this.toastBox.appendChild(el);

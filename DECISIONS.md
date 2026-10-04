@@ -39,7 +39,7 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 
 ## Balanceamento (rodar `npm run sim`)
 - **O simulador segue a Jornada do Rei** como um jogador real: compra o que a missão pede, guarda ouro para contratar o membro pedido, coleta as missões e abre o Baú do Mensageiro a cada ~4 min. Com isso o ritmo ficou mais rápido que na versão sem missões, e as constantes foram reajustadas.
-- **Ouro por HP: 0,09 → 0,0095.** O formato `ouro = HP × k` foi mantido; só a constante mudou.
+- **Ouro por HP: 0,09 → 0,009.** O formato `ouro = HP × k` foi mantido; só a constante mudou.
 - **Cristais: `floor(((faseMax − 30) / 3,5)^1,55)`.** A fase 40 dá 5 cristais e a fase 50 dá 14 (meta de 5 a 15 no 1º Renascer). Renascimentos mais tardios rendem mais (fase 70 = 43, fase 100 = 103), o que leva o jogador casual à fase ~100 no 3º dia.
 - **Loja de Cristais:** dano/ouro custam `1 × 1,3^nível`; crítico, tempo do chefe, offline e recarga têm nível máximo (20/15/16/10) e custo mais íngreme.
 - **Toque Arcano:** desbloqueia na fase 20 e custa `25 000 × 12^nível`.
@@ -107,6 +107,12 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 - **Sem shadow maps**: sombra circular falsa (textura radial) sob cada personagem.
 - **DRACO + meshopt** registrados no GLTFLoader; o decoder DRACO é empacotado pelo próprio three/Vite (sem CDN).
 
+## Layout responsivo
+- **Câmera se ajusta à faixa livre** entre o HUD de cima (fase + rastreador + nome/HP do inimigo) e os botões de habilidade. A distância é calculada para caber o Cavaleiro, a Maga e o chefe ×1,6 (`CAMERA.fitHeight`/`fitWidth`), e `setViewOffset` centraliza a luta nessa faixa. O Hud informa a faixa a cada atualização (`GameScene.setInsets`). Testado em 360×640, 360×780 e 412×915.
+- **Telas baixas (≤ 720 px):** painel em 40vh e HUD compacto.
+- **Avisos (toasts):** no topo, no máximo 2 ao mesmo tempo, para nunca cobrir a luta.
+- **Recompensa da Jornada:** piso de 20 kills da fase atual, para nunca parecer "nada".
+
 ## Desempenho
 - `pixelRatio` até 2; cai para 1,5 se o FPS médio ficar abaixo de 42 com o jogo em uso.
 - 60 fps durante a interação e 30 fps após 20 s sem toque (o `rAF` continua, só o render é pulado).
@@ -114,6 +120,9 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 - Números de dano limitados a 40 simultâneos.
 
 ## Anúncios
+- **Rewarded por eventos, não pela Promise.** No Android, `showRewardVideoAd()` do `@capacitor-community/admob` só resolve quando a recompensa é ganha. Se o jogador fecha antes, a Promise fica pendente para sempre, o que travava o jogo (modais sem fechar, botões de anúncio mortos) e não dava a recompensa. Agora `AdMobAdService.showRewarded` escuta `Rewarded`/`Dismissed`/`FailedToShow` e SEMPRE termina quando o anúncio fecha, com tempo-limite de segurança. Coberto por `tests/admob.test.ts`.
+- **`AdMob.initialize()` antes do UMP**, como na documentação do plugin.
+- **Confirmação visível:** "Ouro ×2 ativo: 5:00" ao ganhar o buff; a recompensa da Jornada aparece em destaque (+ouro/+cristais).
 - `AdService` com `MockAdService` (navegador; `?adfail=1` na URL simula falha) e `AdMobAdService` (Android).
 - **Sem IDs reais no código:** padrão = IDs de teste oficiais do Google; os reais entram como `VITE_ADMOB_*` (build web) e `ADMOB_APP_ID` (Gradle), vindos dos GitHub Secrets.
 - UMP antes de `initialize`; `tagForChildDirectedTreatment: false`, `maxAdContentRating: Teen`.

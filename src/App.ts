@@ -259,10 +259,11 @@ export class App {
         sfx.play('levelUp');
         vibrate(false);
         const parts = [];
-        if (e.gold.gt(0)) parts.push(`+${formatNumber(e.gold, s.settings.notation)}`);
+        if (e.gold.gt(0)) parts.push(`+${formatNumber(e.gold, s.settings.notation)} 🪙`);
         if (e.crystals) parts.push(`+${e.crystals} 💎`);
-        this.floaters.toast(`${t('story.title')}: ${parts.join('  ')}`, ICONS.quests);
-        this.floaters.coins(innerWidth / 2, 150, this.hud.goldAnchor, 6, () => sfx.play('coin'));
+        this.floaters.banner(parts.join('   '), 'good');
+        this.floaters.toast(t('story.claimedToast'), ICONS.quests);
+        this.floaters.coins(innerWidth / 2, 200, this.hud.goldAnchor, 10, () => sfx.play('coin'));
         if (e.chapterDone) {
           this.floaters.banner(t('story.chapterDone'), 'good');
           setTimeout(() => this.showChapterIntro(), 900);
@@ -282,7 +283,11 @@ export class App {
     sfx.suspend();
     let ok = false;
     try {
-      ok = await this.ads.showRewarded(placement);
+      // Tempo-limite extra: o jogo nunca fica preso esperando um anúncio.
+      ok = await Promise.race([
+        this.ads.showRewarded(placement),
+        new Promise<boolean>((r) => setTimeout(() => r(false), 4 * 60_000)),
+      ]);
     } catch {
       ok = false;
     }
@@ -303,8 +308,11 @@ export class App {
     const s = this.state;
     if (this.goldBuffFull(now)) return;
     if (!(await this.watchAd('goldBuff'))) return;
-    const base = Math.max(now, s.adGoldBuffUntil);
-    s.adGoldBuffUntil = Math.min(base + A.goldBuffMinutesPerAd * 60_000, now + A.goldBuffMaxMinutes * 60_000);
+    const after = Date.now();
+    const base = Math.max(after, s.adGoldBuffUntil);
+    s.adGoldBuffUntil = Math.min(base + A.goldBuffMinutesPerAd * 60_000, after + A.goldBuffMaxMinutes * 60_000);
+    this.floaters.banner(t('ads.buffOn', { time: formatTime((s.adGoldBuffUntil - after) / 1000) }), 'good');
+    sfx.play('levelUp');
     this.queueSave();
   }
 

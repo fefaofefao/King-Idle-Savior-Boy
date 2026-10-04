@@ -108,6 +108,21 @@ export class GameScene {
     return a;
   }
 
+  /** Área livre da tela (px) entre o HUD de cima e os botões de baixo, onde a luta deve caber. */
+  private insetTop = 0;
+  private insetBottom = 0;
+
+  setInsets(top: number, bottom: number): void {
+    if (Math.abs(top - this.insetTop) < 2 && Math.abs(bottom - this.insetBottom) < 2) return;
+    this.insetTop = top;
+    this.insetBottom = bottom;
+    this.resize();
+  }
+
+  /**
+   * Enquadramento responsivo: afasta a câmera o suficiente para o Cavaleiro, a Maga e o inimigo
+   * (inclusive o chefe ×1,6) caberem na faixa livre, e desloca a imagem para o centro dessa faixa.
+   */
   resize(): void {
     const w = this.container.clientWidth || 1;
     const h = this.container.clientHeight || 1;
@@ -115,11 +130,19 @@ export class GameScene {
     this.renderer.domElement.style.width = w + 'px';
     this.renderer.domElement.style.height = h + 'px';
     this.camera.aspect = w / h;
-    // Em telas muito estreitas, afasta a câmera para caber Cavaleiro + inimigo.
-    const fit = Math.max(1, 0.62 / this.camera.aspect);
-    this.camBase.set(CAMERA.pos[0], CAMERA.pos[1] * Math.min(fit, 1.3), CAMERA.pos[2] * fit);
+
+    const band = Math.max(h * 0.35, h - this.insetTop - this.insetBottom);
+    const tanHalf = Math.tan(THREE.MathUtils.degToRad(CAMERA.fov / 2));
+    const distForHeight = (CAMERA.fitHeight * h) / (band * 2 * tanHalf);
+    const distForWidth = CAMERA.fitWidth / (2 * tanHalf * this.camera.aspect);
+    const dist = Math.max(CAMERA.minDistance, distForHeight, distForWidth);
+    const dir = new THREE.Vector3(...CAMERA.pos).sub(this.lookAt).normalize();
+    this.camBase.copy(this.lookAt).addScaledVector(dir, dist);
     this.camera.position.copy(this.camBase);
     this.camera.lookAt(this.lookAt);
+    // Centraliza o ponto de mira no meio da faixa livre.
+    const shift = (this.insetTop - this.insetBottom) / 2;
+    this.camera.setViewOffset(w, h, 0, -shift, w, h);
     this.camera.updateProjectionMatrix();
   }
 

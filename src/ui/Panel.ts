@@ -335,7 +335,7 @@ export class Panel {
       qFill.style.width = `${(prog / quest.target) * 100}%`;
       setText(qLabel, `${formatNumber(prog)}/${formatNumber(quest.target)}`);
       const rewards = [];
-      if (quest.incomeSec || quest.gold) rewards.push(`🪙 ${formatNumber(app.game.incomeReward(quest.incomeSec ?? 0, Date.now(), 5).max(quest.gold ?? 0), st.settings.notation)}`);
+      rewards.push(`🪙 ${formatNumber(app.game.storyGoldReward(Date.now()), st.settings.notation)}`);
       if (quest.crystals) rewards.push(`💎 ${quest.crystals}`);
       setText(qReward, `${t('story.reward')} ${rewards.join('  ')}`);
       setText(qBtn, t('quests.claim'));

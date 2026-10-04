@@ -225,6 +225,8 @@ export const es: Locale = {
   "debug.reset": "Borrar progreso",
   "debug.resetConfirm": "¿Borrar TODO el progreso y empezar de cero?",
   "debug.unlocked": "Panel de pruebas desbloqueado",
+  "ads.buffOn": "Oro ×2 activo: {time}",
+  "story.claimedToast": "¡Recompensa del Viaje recibida!",
   'credits.text': 'Personajes 3D, armas y animaciones: Kay Lousberg — KayKit (www.kaylousberg.com), CC0.',
   'credits.font': 'Fuente: Fredoka (SIL Open Font License).',
   'credits.code': 'Código, sonidos y escenarios procedurales: equipo de King Idle Savior Boy.',

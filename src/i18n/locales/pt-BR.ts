@@ -223,6 +223,8 @@ export const ptBR = {
   "debug.reset": "Apagar progresso",
   "debug.resetConfirm": "Apagar TODO o progresso e recomeçar do zero?",
   "debug.unlocked": "Painel de testes liberado",
+  "ads.buffOn": "Ouro ×2 ativo: {time}",
+  "story.claimedToast": "Recompensa da Jornada recebida!",
   'credits.text': 'Personagens 3D, armas e animações: Kay Lousberg — KayKit (www.kaylousberg.com), CC0.',
   'credits.font': 'Fonte: Fredoka (SIL Open Font License).',
   'credits.code': 'Código, sons e cenários procedurais: equipe do King Idle Savior Boy.',

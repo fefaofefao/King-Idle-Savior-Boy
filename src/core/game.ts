@@ -410,12 +410,18 @@ export class Game {
 
   // ---------------- Jornada do Rei ----------------
 
+  /** Ouro da missão principal atual: segundos de renda, com piso de 20 kills da fase e ouro fixo. */
+  storyGoldReward(now: number): Decimal {
+    const quest = currentStoryQuest(this.state);
+    return this.incomeReward(quest.incomeSec ?? 0, now, 20).max(quest.gold ?? 0);
+  }
+
   /** Coleta a missão principal atual, se cumprida. Retorna false se ainda não está pronta. */
   claimStory(now: number): boolean {
     const s = this.state;
     const quest = currentStoryQuest(s);
     if (storyProgress(s, quest) < quest.target) return false;
-    const gold = (quest.incomeSec ? this.incomeReward(quest.incomeSec, now, 5) : D(0)).max(quest.gold ?? 0);
+    const gold = this.storyGoldReward(now);
     this.addGold(gold);
     const crystals = quest.crystals ?? 0;
     if (crystals) s.crystals = s.crystals.plus(crystals);

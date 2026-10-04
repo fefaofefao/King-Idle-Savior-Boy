@@ -875,12 +875,13 @@ table.stats td:last-child {
   height: 22px;
 }
 .toasts {
+  /* No topo, por cima da barra de recursos (por pouco tempo), sem cobrir a luta. */
   inset: auto 0 auto 0;
-  top: calc(var(--safe-top) + 205px);
+  top: calc(var(--safe-top) + 4px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 .toast {
   display: flex;
@@ -889,8 +890,8 @@ table.stats td:last-child {
   background: rgba(14, 22, 44, 0.9);
   border: 2px solid var(--line);
   border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 14px;
+  padding: 4px 12px;
+  font-size: 13px;
   animation: toast-in 0.25s ease-out;
   transition: opacity 0.4s, transform 0.4s;
   max-width: 90vw;
@@ -1462,5 +1463,65 @@ table.stats td:last-child {
 @keyframes tap-bounce {
   50% {
     transform: translateY(-14px) scale(0.92);
+  }
+}
+
+/* ---------- Telas baixas (ex.: 360×640) ---------- */
+@media (max-height: 720px) {
+  :root {
+    --panel-h: 40vh;
+  }
+  .res {
+    min-height: 34px;
+  }
+  .res .ico {
+    width: 24px;
+    height: 24px;
+  }
+  .res .num {
+    font-size: 16px;
+  }
+  .buff-btn {
+    min-height: 38px;
+  }
+  .stage-box {
+    margin-top: 4px;
+    padding: 3px 10px 5px;
+  }
+  .stage-title {
+    font-size: 16px;
+  }
+  .zone-name {
+    display: none;
+  }
+  .stage-progress {
+    height: 13px;
+    margin-top: 2px;
+  }
+  .stage-progress span {
+    line-height: 13px;
+    font-size: 10px;
+  }
+  .quest-tracker {
+    min-height: 36px;
+    margin-top: 4px;
+    padding: 3px 8px 3px 4px;
+  }
+  .quest-tracker .ico {
+    width: 22px;
+    height: 22px;
+  }
+  .ability {
+    width: 54px;
+    height: 54px;
+  }
+  .ability .ico {
+    inset: 10px;
+  }
+  .abilities {
+    bottom: 6px;
+  }
+  .tab {
+    min-height: 50px;
   }
 }

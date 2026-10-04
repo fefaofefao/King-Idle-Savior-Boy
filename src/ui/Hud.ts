@@ -16,6 +16,7 @@ export class Hud {
   private abilityEls: Record<AbilityId, { btn: HTMLButtonElement; cd: HTMLElement; label: HTMLElement; timer: HTMLElement }> =
     {} as never;
   private wrap: HTMLElement;
+  private abilityBar!: HTMLElement;
 
   constructor(
     private app: App,
@@ -70,6 +71,7 @@ export class Hud {
     E.enemyBox = enemyBox;
 
     const bar = h('div', { class: 'abilities' });
+    this.abilityBar = bar;
     for (const id of ABILITY_IDS) {
       const cd = h('div', { class: 'cd' });
       const label = h('span', { class: 'ab-name' });
@@ -170,6 +172,11 @@ export class Hud {
     }
     toggleClass(E.fightBoss, 'show', s.farming);
     this.updateQuestTracker();
+    // Faixa livre para a luta: abaixo do rastreador (+ nome/HP do inimigo) e acima das habilidades.
+    const stageH = this.wrap.clientHeight;
+    const top = E.quest.offsetTop + E.quest.offsetHeight + 46;
+    const bottom = stageH - this.abilityBar.offsetTop + 4;
+    app.scene.setInsets(top, Math.max(0, bottom));
 
     // Nome + HP acompanham a cabeça do inimigo.
     const pos = app.scene.enemyScreenPos();

@@ -78,8 +78,14 @@ export const CHARACTER = {
 
 export const CAMERA = {
   fov: 40,
+  /** Direção da câmera (a distância é calculada para caber na tela). */
   pos: [0.05, 3.1, 8.2] as const,
-  lookAt: [0, 1.45, 0] as const,
+  lookAt: [0, 1.15, 0] as const,
+  /** Altura (unidades de mundo) que precisa caber na faixa livre: chefe ×1,6 + folga. */
+  fitHeight: 2.8,
+  /** Largura que precisa caber: Maga/Cavaleiro à esquerda até o inimigo à direita. */
+  fitWidth: 3.9,
+  minDistance: 6.5,
 };
 
 export const RENDER = {
