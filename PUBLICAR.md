@@ -46,8 +46,9 @@ Resumo para levar o **King Idle Savior Boy** à Google Play. O passo a passo det
 - [ ] Imposto no Brasil: a receita do AdMob é rendimento do exterior (carnê-leão / declaração anual). Confirme com um contador
 
 ### D. AAB (arquivo do app)
-- [x] Keystore de upload gerada e secrets cadastrados
-- [x] AAB 1.0.0 assinado gerado no GitHub Actions (Android Release (AAB) → Artifacts)
+- [x] Keystore de upload gerada
+- [ ] Secrets da keystore como **Repository secrets** de Actions (conferir nomes)
+- [ ] AAB 1.0.0 **assinado** (Actions → Android Release (AAB) → Artifacts) — os builds 1–3 saíram SEM assinatura: secret da keystore não encontrado
 - [ ] Guardar a keystore + senha em **2 lugares seguros** (ex.: Drive privado + pendrive)
 
 ### E. Play Console — criar o app e preencher "Conteúdo do app"
