@@ -253,6 +253,7 @@ export const ptBR = {
   "hero.gain": "⚔+{n}",
   "guild.dpsGain": "+{n} DPS",
   "monster.general": "General Esqueleto",
+  "boss.enraged": "O Rei está FURIOSO!",
   'credits.text': 'Personagens 3D, armas e animações: Kay Lousberg — KayKit (www.kaylousberg.com), CC0.',
   'credits.font': 'Fonte: Fredoka (SIL Open Font License).',
   'credits.code': 'Código, sons e cenários procedurais: equipe do King Idle Savior Boy.',

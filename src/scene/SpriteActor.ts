@@ -33,34 +33,47 @@ function loadPixelTexture(url: string): THREE.Texture {
 }
 
 /**
- * Rei Esqueleto em pixel art (48×48) desenhado como billboard (sempre de frente para a câmera).
- * O sprite não tem frames de animação, então tudo é procedural:
- * respiração (escala), surgir do chão, recuo + flash vermelho ao levar dano, queda e encolher na morte.
+ * Rei Esqueleto em pixel art desenhado como billboard (sempre de frente para a câmera).
+ * - Parado: sprite + respiração procedural.
+ * - Soco (Cross_Punch, 6 frames) a cada ~2,6 s; no frame de impacto chama `onPunch` (o Cavaleiro recua).
+ * - Fase 2 (vida < 40%): vira a versão dourada e soca mais rápido.
+ * - Dano: recuo + flash vermelho; morte: tomba e encolhe.
  */
 export class SpriteActor implements EnemyActor {
   readonly root = new THREE.Group();
   private sprite: THREE.Sprite;
   private mat: THREE.SpriteMaterial;
+  private idleTex: THREE.Texture;
+  private goldenTex: THREE.Texture;
+  private punchTex: THREE.Texture;
   private time = 0;
   private spawnT = -1;
   private hitT = 0;
   private deathT = -1;
   private fleeT = -1;
+  private punchT = -1;
+  private punchTimer = 1.6;
+  private impactDone = false;
+  enraged = false;
   dying = false;
   baseScale = 1;
   onDeathFinished?: () => void;
+  /** Chamado no frame de impacto do soco. */
+  onPunch?: () => void;
   private done = false;
 
-  constructor(tint = '#ffffff') {
-    const tex = loadPixelTexture(`${SPRITE_BOSS.dir}${SPRITE_BOSS.facing}.png`);
-    this.mat = new THREE.SpriteMaterial({ map: tex, color: tint, transparent: true, alphaTest: 0.1 });
+  constructor() {
+    const S = SPRITE_BOSS;
+    this.idleTex = loadPixelTexture(S.dir + S.idle.file);
+    this.goldenTex = loadPixelTexture(S.dir + S.golden.file);
+    // Cópia própria do sheet para controlar o frame (offset) por instância.
+    this.punchTex = loadPixelTexture(S.dir + S.punch.sheet).clone();
+    this.punchTex.repeat.set(1 / S.punch.frames, 1);
+    this.punchTex.needsUpdate = true;
+    this.mat = new THREE.SpriteMaterial({ map: this.idleTex, transparent: true, alphaTest: 0.1 });
     this.sprite = new THREE.Sprite(this.mat);
-    // Centro embaixo: o pé fica no chão.
-    this.sprite.center.set(0.5, 0.04);
-    this.sprite.scale.set(SPRITE_BOSS.height, SPRITE_BOSS.height, 1);
     this.root.add(this.sprite);
-    const shadow = fakeShadow(0.95);
-    this.root.add(shadow);
+    this.root.add(fakeShadow(0.95));
   }
 
   spawn(): void {
@@ -72,10 +85,18 @@ export class SpriteActor implements EnemyActor {
     if (this.hitT < 0.06) this.hitT = 0.16;
   }
 
+  /** Fase 2: versão dourada. */
+  enrage(): void {
+    if (this.enraged || this.dying) return;
+    this.enraged = true;
+    this.punchTimer = Math.min(this.punchTimer, 0.4);
+  }
+
   die(): void {
     if (this.dying) return;
     this.dying = true;
     this.deathT = 0;
+    this.punchT = -1;
   }
 
   flee(onDone: () => void): void {
@@ -85,19 +106,60 @@ export class SpriteActor implements EnemyActor {
   }
 
   update(dt: number): void {
+    const S = SPRITE_BOSS;
     this.time += dt;
-    const H = SPRITE_BOSS.height * this.baseScale;
+
+    // Soco periódico (só vivo e depois de surgir).
+    if (!this.dying && this.spawnT < 0) {
+      if (this.punchT < 0) {
+        this.punchTimer -= dt;
+        if (this.punchTimer <= 0) {
+          this.punchT = 0;
+          this.impactDone = false;
+        }
+      } else {
+        this.punchT += dt;
+        const f = Math.floor(this.punchT * S.punch.fps);
+        if (!this.impactDone && f >= S.punch.impactFrame) {
+          this.impactDone = true;
+          this.onPunch?.();
+        }
+        if (f >= S.punch.frames) {
+          this.punchT = -1;
+          this.punchTimer = this.enraged ? S.punchEveryEnraged : S.punchEvery;
+        }
+      }
+    }
+
+    // Textura + enquadramento: a escala por pixel é a mesma em todas as poses.
+    const pxWorld = (S.height * this.baseScale) / S.idle.framePx;
+    let framePx: number = S.idle.framePx;
+    let footPx: number = S.idle.footPx;
+    if (this.punchT >= 0) {
+      const f = Math.min(S.punch.frames - 1, Math.floor(this.punchT * S.punch.fps));
+      this.punchTex.offset.x = f / S.punch.frames;
+      this.mat.map = this.punchTex;
+      framePx = S.punch.framePx;
+      footPx = S.punch.footPx;
+    } else {
+      this.mat.map = this.enraged ? this.goldenTex : this.idleTex;
+    }
+    this.sprite.center.set(0.5, footPx / framePx);
+    const size = framePx * pxWorld;
+
     let sx = 1;
-    let sy = 1 + Math.sin(this.time * 2.4) * 0.025; // respiração
+    let sy = this.punchT >= 0 ? 1 : 1 + Math.sin(this.time * 2.4) * 0.025; // respiração
     let y = 0;
     let rot = 0;
     const color = this.mat.color;
-    color.setRGB(1, 1, 1);
+    // Fase 2 parada já é dourada; no soco, um brilho dourado lembra que está furioso.
+    if (this.enraged && this.punchT >= 0) color.setRGB(1.0, 0.85, 0.45);
+    else color.setRGB(1, 1, 1);
 
     if (this.spawnT >= 0) {
       this.spawnT += dt;
       const k = Math.min(1, this.spawnT / 0.6);
-      y = -H * 0.6 * (1 - k) * (1 - k);
+      y = -size * 0.6 * (1 - k) * (1 - k);
       if (k >= 1) this.spawnT = -1;
     }
     if (this.hitT > 0) {
@@ -126,7 +188,7 @@ export class SpriteActor implements EnemyActor {
       sy *= 1 - k;
       if (k >= 1) this.finish();
     }
-    this.sprite.scale.set(H * sx, H * sy, 1);
+    this.sprite.scale.set(size * sx, size * sy, 1);
     this.sprite.position.y = y;
     this.mat.rotation = rot;
   }
@@ -140,5 +202,6 @@ export class SpriteActor implements EnemyActor {
   dispose(): void {
     this.root.removeFromParent();
     this.mat.dispose();
+    this.punchTex.dispose();
   }
 }

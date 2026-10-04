@@ -17,6 +17,15 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 - **Bestiário (retenção de longo prazo):** abates por tipo, com estrelas a 10/100/1000/10000; cada estrela dá +2% de ouro permanente (sobrevive ao Renascer). Novas missões diárias e conquistas: Pontos Fracos, Dourados e estrelas.
 - Save v4 (Bestiário). O ouro agora é fracionário: antes era arredondado para cima a cada abate, o que inflava ~11× o ouro das primeiras fases e era a causa do "começo rápido demais".
 
+## Rei Esqueleto (sprites do dono)
+- **Pose parada** `south.png` (48×48), **soco** Cross_Punch (6 frames 64×64, convertidos num sprite sheet) e **versão dourada** (`golden/`). Como a animação de soco só existe na direção "south", o Rei fica de frente. Os pés foram alinhados pelas medidas reais dos PNGs (2 px e 8 px da borda) e a escala por pixel é a mesma nas duas poses.
+- **Ataque visual:** o Rei soca a cada 2,6 s (1,5 s furioso); no frame de impacto o Cavaleiro recua. É só visual: o jogo não tem dano contra o jogador, então o balanceamento não muda.
+- **Fase 2:** abaixo de 40% de vida o Rei vira dourado ("O Rei está FURIOSO!") e soca mais rápido.
+- `scripts/gif-to-sheet.mjs` converte um GIF animado em sprite sheet, caso venham novas animações.
+
+## Segurar para atacar
+- Segurar o dedo no palco ataca sozinho a 5 toques/s (após 0,35 s), o mesmo ritmo do jogador de referência do balanceamento, para não cansar a mão. Tocar manualmente ainda pode ser mais rápido. Soltar em qualquer lugar (inclusive sobre um modal) para o ataque.
+
 ## Animações e feedback
 - **Golpes encadeados:** tocar durante um golpe enfileira o próximo (mais rápido, como combo) em vez de reiniciar o movimento no meio, que causava "pulos". O dano de cada toque continua instantâneo.
 - **Números de dano mesclados:** toques normais em até 220 ms somam no mesmo número (com um "pop"); críticos e Pontos Fracos têm número próprio.

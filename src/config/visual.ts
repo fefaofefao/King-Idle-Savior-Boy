@@ -159,13 +159,24 @@ export const MONSTER_LOOK: Record<
   king: { model: 'skeletonWarrior', weapons: [['skeletonAxe', 'right'], ['skeletonShield', 'left']], tint: '#ffd0d0' },
 };
 
-/** Rei Esqueleto em pixel art (8 direções, 48×48), desenhado como billboard na cena 3D. */
+/**
+ * Rei Esqueleto em pixel art (sprites enviados pelo dono), desenhado como billboard na cena 3D.
+ * Medidas em pixels conferidas nos PNGs: pose parada 48×48 (pé a 2 px da borda de baixo);
+ * soco Cross_Punch 6 frames 64×64 (pé a 8 px). A escala por pixel é a mesma nos dois.
+ */
 export const SPRITE_BOSS = {
   dir: 'models/sprites/skeleton_king/',
-  /** Direção usada: o Rei olha para o Cavaleiro (à esquerda da câmera). */
-  facing: 'south-west',
-  /** Altura em unidades de mundo (maior que o General). */
+  /** Mesma direção da animação de soco (de frente). */
+  idle: { file: 'south.png', framePx: 48, footPx: 2 },
+  /** Fase 2 (vida < 40%): versão dourada. */
+  golden: { file: 'golden/south.png', framePx: 48, footPx: 2 },
+  punch: { sheet: 'punch_sheet.png', frames: 6, fps: 12, framePx: 64, footPx: 8, impactFrame: 3 },
+  /** Altura da pose parada em unidades de mundo. */
   height: 2.7,
+  /** Intervalo entre socos (s): normal e furioso. */
+  punchEvery: 2.6,
+  punchEveryEnraged: 1.5,
+  enrageAt: 0.4,
 };
 
 /** Visual das variações raras. */

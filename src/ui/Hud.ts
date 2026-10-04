@@ -94,6 +94,15 @@ export class Hud {
     this.update();
   }
 
+  /** Animação rápida na caixa da fase ao avançar. */
+  stageCleared(): void {
+    const box = this.els.stageBox;
+    if (!box) return;
+    box.classList.remove('cleared');
+    void box.offsetWidth;
+    box.classList.add('cleared');
+  }
+
   /** Rastreador da missão principal (Jornada do Rei), logo abaixo da fase. */
   private buildQuestTracker(): HTMLElement {
     const E = this.els;

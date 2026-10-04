@@ -46,6 +46,9 @@ import { Modals } from './ui/Modals';
 import { Panel } from './ui/Panel';
 import { WeakSpot } from './ui/WeakSpot';
 
+/** Segurar para atacar: começa após 0,35 s e repete 5×/s (o mesmo ritmo do balanceamento). */
+const HOLD = { delaySec: 0.35, tapsPerSec: 5 };
+
 export class App {
   game!: Game;
   scene!: GameScene;
@@ -59,6 +62,8 @@ export class App {
   panel!: Panel;
   buyAmount: BuyAmount = 1;
   weakSpot!: WeakSpot;
+  private holdPointers = new Set<number>();
+  private holdTimer = 0;
 
   private lastRewardedAt = 0;
   private saveTimer = 0;
@@ -131,6 +136,10 @@ export class App {
     this.hud = new Hud(this, stage);
     this.panel = new Panel(this, panelEl);
     this.weakSpot = new WeakSpot(this, stage);
+    this.scene.onKingPunch = () => {
+      sfx.play('death');
+      vibrate(false);
+    };
 
     // Toque: a área inteira do palco (exceto botões).
     stage.addEventListener('pointerdown', (e) => {
@@ -138,7 +147,15 @@ export class App {
       if ((e.target as HTMLElement).closest('button, .chest-fly, .hud-click')) return;
       e.preventDefault();
       this.tap();
+      // Segurar o dedo ataca sozinho (5/s, depois de um instante), para não cansar a mão.
+      this.holdPointers.add(e.pointerId);
+      this.holdTimer = HOLD.delaySec;
     });
+    const release = (e: PointerEvent) => this.holdPointers.delete(e.pointerId);
+    // No documento todo: o dedo pode soltar em cima de um modal ou fora do palco.
+    document.addEventListener('pointerup', release);
+    document.addEventListener('pointercancel', release);
+    stage.addEventListener('pointerleave', release);
     // Desbloqueia o áudio no primeiro toque em qualquer lugar.
     document.addEventListener('pointerdown', () => sfx.unlock(), { once: true });
   }
@@ -158,6 +175,21 @@ export class App {
     const now = Date.now();
     this.game.update(dt, now);
     this.weakSpot.update(dt);
+    // Rei Esqueleto: fase 2 (dourado) abaixo de 40% de vida.
+    if (this.game.isBoss && this.game.monster.type === 'king' && this.game.enemyAlive) {
+      if (this.scene.updateBossPhase(this.game.enemyTotalHp.div(this.game.enemyMaxHp).toNumber())) {
+        this.floaters.banner(t('boss.enraged'), 'good');
+        sfx.play('boss');
+        vibrate(true);
+      }
+    }
+    if (this.holdPointers.size > 0 && !this.modals.isOpen) {
+      this.holdTimer -= dt;
+      if (this.holdTimer <= 0) {
+        this.holdTimer += 1 / HOLD.tapsPerSec;
+        this.tap();
+      }
+    }
     this.uiTimer += dt;
     if (this.uiTimer >= 0.1) {
       this.uiTimer = 0;
@@ -268,6 +300,7 @@ export class App {
         this.floaters.banner(t('affix.armorBroken'), 'good');
         break;
       case 'stageChanged': {
+        this.hud.stageCleared();
         const z = zoneIndex(e.stage);
         if (z !== this.scene.currentZone) {
           this.scene.setZone(z);
@@ -692,6 +725,7 @@ export class App {
   private pause(): void {
     if (this.paused || !this.game) return;
     this.paused = true;
+    this.holdPointers.clear();
     this.scene.stop();
     sfx.suspend();
     void this.save();

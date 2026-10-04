@@ -198,8 +198,30 @@ export class GameScene {
     this.enemyScale = scale;
   }
 
+  /** Chamado quando o Rei acerta um soco (App toca som/vibração). */
+  onKingPunch: () => void = () => {};
+  private knockT = 0;
+
+  /** Atualiza a fase do Rei pela vida (0..1). Retorna true no instante em que ele fica furioso. */
+  updateBossPhase(hpFrac: number): boolean {
+    const e = this.enemy;
+    if (!(e instanceof SpriteActor) || e.enraged || e.dying) return false;
+    if (hpFrac > SPRITE_BOSS.enrageAt) return false;
+    e.enrage();
+    this.particles.burst(this.enemyPos.clone().setY(1.4), '#ffd54a', 26, 3.5, 4, 1.2);
+    this.shake(0.12);
+    return true;
+  }
+
   private spawnSpriteKing(): void {
     const e = new SpriteActor();
+    e.onPunch = () => {
+      // Soco: o Cavaleiro recua um pouco (só visual, não muda o balanceamento).
+      this.knockT = 0.28;
+      this.particles.burst(this.enemyPos.clone().lerp(new THREE.Vector3(...CHARACTER.knight.pos), 0.6).setY(1.0), '#ffffff', 6, 2, 4, 0.7);
+      this.shake(0.07);
+      this.onKingPunch();
+    };
     e.root.position.copy(this.enemyPos);
     this.scene.add(e.root);
     this.aura = bossAura();
@@ -366,6 +388,13 @@ export class GameScene {
   private renderFrame(dt: number): void {
     this.knight.update(dt);
     this.knightAttack.update(dt);
+    if (this.knockT > 0) {
+      // Recuo do Cavaleiro ao levar o soco do Rei.
+      this.knockT -= dt;
+      const k = Math.sin((Math.max(0, this.knockT) / 0.28) * Math.PI);
+      this.knight.root.position.x = CHARACTER.knight.pos[0] - k * 0.22;
+      if (this.knockT <= 0) this.knight.root.position.x = CHARACTER.knight.pos[0];
+    }
     if (this.mage.root.visible) this.mage.update(dt);
     if (this.mageThrowT >= 0) {
       this.mageThrowT += dt;

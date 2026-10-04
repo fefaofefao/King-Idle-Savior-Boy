@@ -1800,3 +1800,13 @@ img.pixel,
     transform: translate(-70%, -50%) scale(0.95);
   }
 }
+
+.stage-box.cleared {
+  animation: stage-clear 0.6s ease-out;
+}
+@keyframes stage-clear {
+  30% {
+    transform: scale(1.06);
+    box-shadow: 0 0 18px rgba(141, 224, 106, 0.8);
+  }
+}

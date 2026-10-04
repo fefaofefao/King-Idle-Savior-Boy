@@ -255,6 +255,7 @@ export const es: Locale = {
   "hero.gain": "⚔+{n}",
   "guild.dpsGain": "+{n} DPS",
   "monster.general": "General Esqueleto",
+  "boss.enraged": "¡El Rey está FURIOSO!",
   'credits.text': 'Personajes 3D, armas y animaciones: Kay Lousberg — KayKit (www.kaylousberg.com), CC0.',
   'credits.font': 'Fuente: Fredoka (SIL Open Font License).',
   'credits.code': 'Código, sonidos y escenarios procedurales: equipo de King Idle Savior Boy.',
