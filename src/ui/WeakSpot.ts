@@ -3,7 +3,6 @@ import { BALANCE } from '../config/balance';
 import { sfx } from '../audio/Sfx';
 import { t } from '../i18n';
 import { h } from './dom';
-import { ICONS } from './icons';
 
 /**
  * Ponto Fraco: um alvo brilhante aparece num lugar aleatório do corpo do inimigo por ~1,7 s.
@@ -63,7 +62,7 @@ export class WeakSpot {
       // Primeira vez: fica mais tempo e explica o que é.
       const first = !this.app.state.tutorial.weakHintDone;
       this.life = first ? W.durationSec * 2.5 : W.durationSec;
-      if (first) this.app.floaters.toast(t('tutorial.weak'), ICONS.strike, 4000);
+      if (first) this.el.setAttribute('aria-label', t('tutorial.weak'));
       sfx.play('spot');
       this.dx = (Math.random() - 0.5) * 0.5;
       this.yFrac = 0.35 + Math.random() * 0.45;

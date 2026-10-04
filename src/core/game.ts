@@ -541,10 +541,15 @@ export class Game {
 
   // ---------------- Jornada do Rei ----------------
 
-  /** Ouro da missão principal atual: segundos de renda, com piso de 20 kills da fase e ouro fixo. */
+  /** Ouro de uma conquista sem cristais: 3 min de renda (piso de 15 abates da fase). */
+  achievementGold(now: number): Decimal {
+    return this.incomeReward(180, now, 15);
+  }
+
+  /** Ouro da missão principal atual: segundos de renda, com piso de 5 abates da fase e ouro fixo. */
   storyGoldReward(now: number): Decimal {
     const quest = currentStoryQuest(this.state);
-    return this.incomeReward(quest.incomeSec ?? 0, now, 20).max(quest.gold ?? 0);
+    return this.incomeReward(quest.incomeSec ?? 0, now, 5).max(quest.gold ?? 0);
   }
 
   /** Coleta a missão principal atual, se cumprida. Retorna false se ainda não está pronta. */

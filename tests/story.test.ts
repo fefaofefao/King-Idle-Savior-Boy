@@ -30,16 +30,19 @@ describe('Jornada do Rei', () => {
     expect(g.state.story.index).toBe(1);
   });
 
-  it('missões do tutorial pagam a próxima compra (Lâmina e Escudeiro)', () => {
+  it('tutorial dá pouco ouro (o começo é pago pelos monstros, sem avalanche)', () => {
     const g = new Game(undefined, { rng: () => 1 });
     g.state.stats.taps = 10;
     g.claimStory(0);
     g.state.stats.kills = 5;
     g.claimStory(0);
-    expect(g.state.gold.gte(10)).toBe(true); // Lâmina nível 1 custa 10
-    g.buyBlade(1);
+    g.state.bladeLevel = 1;
     g.claimStory(0);
-    expect(g.state.gold.gte(50)).toBe(true); // Escudeiro custa 50
+    g.state.guild[0] = 1;
+    g.claimStory(0);
+    // 4 primeiras missões juntas: menos que o custo do 1º Escudeiro (50).
+    expect(g.state.gold.toNumber()).toBeLessThan(50);
+    expect(g.state.gold.toNumber()).toBeGreaterThan(0);
   });
 
   it('depois da cadeia, missões infinitas de fase com cristais', () => {

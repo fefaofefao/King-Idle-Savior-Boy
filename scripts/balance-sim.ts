@@ -27,6 +27,7 @@ import {
 import { formatNumber, formatTime } from '../src/core/format';
 import { applyOffline } from '../src/core/offline';
 import { createInitialState } from '../src/core/state';
+import { deserialize, serialize } from '../src/core/save';
 import { ABILITY_IDS } from '../src/config/balance';
 import { STORY, currentStoryQuest } from '../src/core/story';
 
@@ -107,7 +108,10 @@ function greedyBuy(g: Game, tps: number, now: number): number {
 /** Missão atual pede uma compra de guilda ainda não feita? (o jogador guarda ouro para ela) */
 function savingForQuest(g: Game): boolean {
   const quest = currentStoryQuest(g.state);
-  return (quest.kind === 'hire' || quest.kind === 'member') && g.state.guild[quest.member ?? 0] < quest.target;
+  if (!((quest.kind === 'hire' || quest.kind === 'member') && g.state.guild[quest.member ?? 0] < quest.target)) return false;
+  // Só guarda se a compra estiver ao alcance (≤ 2 min de renda/abates); senão segue comprando normal.
+  const cost = g.memberBuyInfo(quest.member ?? 0, 1).cost;
+  return cost.lte(g.incomeReward(120, Date.now(), 60));
 }
 
 /** Compra o que a missão principal atual pede, se der. */
@@ -297,21 +301,100 @@ function printStory(p: PlayerSim, days = false): void {
   console.log(`  Jornada (${p.story.length}/${STORY.length} coletadas): ${parts.join('  ')}`);
 }
 
+/**
+ * Jogador ativo com Renascer real: joga, renasce quando trava (150 s sem fase nova) e mede cada run.
+ * Também mede a "parede": quanto a guilda sozinha (sem tocar) avança em 10 min no ponto do 1º Renascer.
+ */
+function resetRun(tps: number, minutes: number) {
+  console.log(`\n=== Jogador ATIVO com Renascer (${tps} toques/s, ${minutes} min) ===`);
+  const p = newPlayer();
+  const runs: { start: number; end: number; max: number; crystals: number }[] = [];
+  let runStart = 0;
+  let lastMax = 0;
+  let lastProgressAt = 0;
+  let firstResetAvailable = 0;
+  let guildTapRatio = 0;
+  let idleStages = 0;
+  let wallStages = 0;
+  const t10 = { v: 0 };
+  while (p.now < minutes * 60_000) {
+    step(p, tps, p.now < 2 * 3600_000);
+    const s = p.g.state;
+    if (!t10.v && runs.length === 0 && s.maxStage >= 10) t10.v = p.now / 1000;
+    if (s.maxStage > lastMax) {
+      lastMax = s.maxStage;
+      lastProgressAt = p.now;
+    }
+    if (!firstResetAvailable && p.g.canPrestige()) {
+      firstResetAvailable = p.now / 1000;
+      // Razão DPS da guilda / DPS de toque nesse momento.
+      guildTapRatio = totalDps(s).div(tapDamage(s, p.now).times(tps)).toNumber();
+      // Teste do dono: e se o jogador parar de tocar e só deixar a guilda por 10 min?
+      const clone = new Game(deserialize(serialize(s)), { rng: Math.random });
+      const before = clone.state.maxStage;
+      for (let t = 0; t < 600; t += DT) {
+        clone.update(DT, p.now + t * 1000);
+        if (clone.state.farming) clone.fightBoss();
+      }
+      idleStages = clone.state.maxStage - before;
+      // Jogando ativo sem renascer: quantas fases a mais em 10 min?
+      const clone2 = { ...p, g: new Game(deserialize(serialize(s)), { rng: Math.random }), story: [] as number[] };
+      const b2 = clone2.g.state.maxStage;
+      const end2 = p.now + 600_000;
+      while (clone2.now < end2) step(clone2, tps, false);
+      wallStages = clone2.g.state.maxStage - b2;
+    }
+    if (p.g.canPrestige() && p.now - lastProgressAt > 150_000) {
+      const max = s.maxStage;
+      const c = p.g.prestige(p.now).toNumber();
+      runs.push({ start: runStart, end: p.now, max, crystals: c });
+      // Loja: compra "Dano" só quando aumenta o dano total (cada cristal guardado vale +10%).
+      for (let i = 0; i < 200; i++) {
+        const lvl = s.crystalUpgrades.damage;
+        const cost = crystalUpgradeCost('damage', lvl);
+        if (s.crystals.lt(cost)) break;
+        const before = globalDamageMult(s);
+        const after = globalDamageMult({ ...s, crystalUpgrades: { ...s.crystalUpgrades, damage: lvl + 1 } }, s.crystals.minus(cost));
+        if (after.lte(before)) break;
+        p.g.buyCrystalUpgrade('damage');
+      }
+      runStart = p.now;
+      lastMax = 0;
+      lastProgressAt = p.now;
+    }
+  }
+  runs.push({ start: runStart, end: p.now, max: p.g.state.maxStage, crystals: 0 });
+  runs.forEach((r, i) =>
+    console.log(
+      `  run ${i + 1}: ${formatTime(r.start / 1000)} → ${formatTime(r.end / 1000)} (${formatTime((r.end - r.start) / 1000)}), fase máx. ${r.max}${r.crystals ? `, +${r.crystals} cristais` : ''}`,
+    ),
+  );
+  console.log(`  fase 10 em ${formatTime(t10.v)}; Renascer disponível em ${formatTime(firstResetAvailable)}`);
+  console.log(`  DPS guilda / DPS de toque no 1º Renascer: ${guildTapRatio.toFixed(2)}`);
+  console.log(`  parede: guilda sozinha 10 min → +${idleStages} fases; jogando ativo 10 min sem renascer → +${wallStages} fases`);
+  return { runs, t10: t10.v, firstResetAvailable, guildTapRatio, idleStages, wallStages };
+}
+
 const tps = arg('tps', 5);
-const a = activeRun(tps, arg('minutes', 120));
-const casualBest = casualRun(arg('days', 3));
+const r = resetRun(tps, arg('minutes', 60));
+const a = activeRun(tps, 10);
+// Jogador casual (sessões curtas + offline): npm run sim -- --casual
+if (process.argv.includes('--casual')) casualRun(arg('days', 3));
 
 console.log('\n=== Metas ===');
 const ok = (b: boolean) => (b ? 'OK ' : 'FORA');
-const t10 = a.hit[10] ?? Infinity;
-console.log(`  [${ok(a.earlyTtk >= 1.5 && a.earlyTtk <= 4)}] Inimigo das fases 1–10 dura 1,5–4 s: ${a.earlyTtk.toFixed(1)}s`);
-console.log(`  [${ok(t10 >= 240 && t10 <= 420)}] Fase 10 em 4–7 min: ${formatTime(t10)}`);
-console.log(
-  `  [${ok(a.firstPrestigeAt >= 35 * 60 && a.firstPrestigeAt <= 60 * 60)}] Renascer (fase 40) em 35–60 min: ${formatTime(a.firstPrestigeAt)}`,
-);
-const c40 = crystalsForPrestige(40).toNumber();
-const c50 = crystalsForPrestige(50).toNumber();
-console.log(`  [${ok(c40 >= 5 && c40 <= 15)}] Cristais no 1º Renascer (fase 40–50): ${c40}–${c50}`);
-console.log(`  [${ok(casualBest >= 80)}] Fase ~100 (80+) no 3º dia casual: ${casualBest}`);
-console.log(`  [${ok(a.maxGap <= 330)}] Nunca > ~5 min sem nada para comprar (2 h): ${formatTime(a.maxGap)}`);
+console.log(`  [${ok(a.earlyTtk >= 1 && a.earlyTtk <= 4)}] Inimigo das fases 1–10 dura 1–4 s (o 1º: 10 toques ≈ 2 s): ${a.earlyTtk.toFixed(1)}s`);
+console.log(`  [${ok(r.t10 >= 90 && r.t10 <= 240)}] Fase 10 em 1,5–4 min: ${formatTime(r.t10)}`);
+console.log(`  [${ok(r.firstResetAvailable >= 5 * 60 && r.firstResetAvailable <= 11 * 60)}] 1º Renascer liberado em 5–11 min: ${formatTime(r.firstResetAvailable)}`);
+const wall1 = (r.runs[0].end - 150_000) / 60_000;
+console.log(`  [${ok(wall1 >= 9 && wall1 <= 17)}] Parede (trava sem renascer) por volta de 10–15 min: ${wall1.toFixed(1)} min`);
+console.log(`  [${ok(r.guildTapRatio <= 2)}] Guilda não domina no 1º Renascer (DPS guilda ≤ 2× toques): ${r.guildTapRatio.toFixed(2)}`);
+console.log(`  [${ok(r.idleStages <= 2)}] Parede: só com a guilda, ≤ 2 fases em 10 min: +${r.idleStages}`);
+console.log(`  [${ok(r.wallStages <= 15)}] Parede: ativo sem renascer, a partir da liberação (fase 30), ≤ 15 fases em 10 min (trava no chefe 40): +${r.wallStages}`);
+const [r1, r2] = r.runs;
+const c1 = r1?.crystals ?? 0;
+console.log(`  [${ok(c1 >= 5 && c1 <= 20)}] Cristais no 1º Renascer: 5–20: ${c1}`);
+const gain = r2 ? r2.max - r1.max : 0;
+console.log(`  [${ok(gain >= 3)}] Renascer compensa: run 2 passa a run 1 em ≥ 3 fases: ${gain >= 0 ? '+' : ''}${gain}`);
+console.log(`  [${ok(a.maxGap <= 330)}] Nunca > ~5 min sem nada para comprar: ${formatTime(a.maxGap)}`);
 void D;

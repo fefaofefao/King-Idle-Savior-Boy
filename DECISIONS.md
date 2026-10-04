@@ -61,49 +61,55 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 - O nome do app no Android é "King Idle Savior Boy" em todos os idiomas.
 
 ## Balanceamento (rodar `npm run sim`)
-- **Rebalanceamento do começo (feedback do APK de teste: "começo rápido demais").** O jogador de referência agora toca a 5 toques/s e acerta ~70% dos Pontos Fracos. Há uma meta nova: um inimigo das fases 1–10 deve durar de 1,5 a 4 s (antes durava 0,6 s), e a fase 10 sai em 4–7 min. Ajustes: **HP base 10 → 55**, **ouro/HP 0,009 → 0,0045**, **DPS da guilda ×2,2** (o progresso do jogador casual depende mais da guilda, que também rende offline) e ouro fracionário.
-- **O simulador segue a Jornada do Rei** como um jogador real: compra o que a missão pede, guarda ouro para contratar o membro pedido, coleta as missões e abre o Baú do Mensageiro a cada ~4 min. Com isso o ritmo ficou mais rápido que na versão sem missões, e as constantes foram reajustadas.
-- **Ouro por HP: 0,09 → 0,0045** (com HP base 55; veja o rebalanceamento do começo acima). O formato `ouro = HP × k` foi mantido; só a constante mudou.
-- **Cristais: `floor(((faseMax − 30) / 3,5)^1,55)`.** A fase 40 dá 5 cristais e a fase 50 dá 14 (meta de 5 a 15 no 1º Renascer). Renascimentos mais tardios rendem mais (fase 70 = 43, fase 100 = 103), o que leva o jogador casual à fase ~100 no 3º dia.
-- **Loja de Cristais:** dano/ouro custam `1 × 1,3^nível`; crítico, tempo do chefe, offline e recarga têm nível máximo (20/15/16/10) e custo mais íngreme.
-- **Toque Arcano:** desbloqueia na fase 20 e custa `25 000 × 12^nível`.
-- **Jogador de referência:** 3 toques/s no modo ativo. No casual, 4 sessões de 10 min por dia a 2 toques/s, renascendo quando o ganho de cristais iguala tudo o que já obteve.
-- **Métrica "sem algo para comprar"** mede o tempo sem NENHUM upgrade acessível.
-- `goldStageDecay` (ouro crescendo mais devagar que o HP) existe, mas fica em 1 (desligado).
+**Versão atual (feedback do APK 8 do dono):** "cristais quebrando o jogo", "primeiro monstro com 10 de vida e 1 de ouro", "guilda forte demais", "10 min de jogo → 1º reset" e "pulando 10 min a guilda ainda matava, então não compensa resetar".
+
+- **Começo:** HP base **10**, ouro por HP **0,1** → o primeiro monstro tem 10 de vida e dá **1 de ouro** (10 toques ≈ 2 s).
+- **Parede para o Renascer:** HP cresce **×1,26 por fase** e o ouro cresce mais devagar (**goldStageDecay 0,95** → ×1,197 por fase). Como as compras rendem cada vez menos em relação à vida dos monstros, por volta da fase 40 (o chefe) o jogador trava. No simulador, **só com a guilda o progresso a partir da fase 30 é 0 fases em 10 min**, que era exatamente o problema relatado.
+- **Guilda:** voltou aos valores da especificação (Escudeiro 5 DPS etc.). No 1º Renascer o DPS da guilda é ~0,55× o dos toques (antes era 12×).
+- **Renascer:** liberado na **fase 30 (~8–9 min)**; a parede vem por volta de **14–15 min**. Cristais = `floor(((faseMax − 20) / 2,5)^1,4)` → fase 30 = 3, fase 40 = 18, fase 60 = 48.
+- **Cristais menos fortes:** cada cristal guardado vale **+10%** de dano. Na loja, Dano custa `2 × 1,5^nível` e dá **+15%/nível** (antes +25% por 1 cristal), Ouro +10%/nível. As **conquistas do começo e as missões do tutorial agora dão ouro**; cristais vêm do Renascer e de marcos maiores (fase 50+, 10 mil toques, 1º Renascer...). O 7º dia da recompensa diária passou de 5 para 2 cristais.
+- **Tutorial modesto:** as 4 primeiras missões juntas dão menos de 50 de ouro (antes ~120 em 13 s, que comprava Lâmina 4 + 2 Escudeiros na hora).
+- **O Renascer compensa:** a run 2 passa a run 1 em +12 a +20 fases (stage 40 → 60) em ~3 de cada 4 simulações; na outra, a run 3 passa. Depois, cada Renascer rende algumas fases a mais (progressão idle clássica, sem explosão).
+- **Jogador de referência:** 5 toques/s, ~70% dos Pontos Fracos, compra gananciosa, segue a Jornada, renasce quando fica 150 s sem fase nova e só compra Dano na loja quando isso aumenta o dano total (guardar cristal vale +10%).
+- O jogador casual de 3 dias continua disponível (`npm run sim -- --casual`), mas a meta de ritmo agora é a do dono (reset em ~10 min).
 
 ### Resultado da simulação (constantes atuais)
 ```
 
-=== Jogador ATIVO (5 toques/s, 120 min) ===
-  fase  10: 4:32
-  fase  20: 13:53
-  fase  30: 24:10
-  fase  40: 41:50
-  fase  50: 1h 16m
+=== Jogador ATIVO com Renascer (5 toques/s, 60 min) ===
+  run 1: 0s → 17:09 (17:09), fase máx. 40, +18 cristais
+  run 2: 17:09 → 48:46 (31:37), fase máx. 60, +48 cristais
+  run 3: 48:46 → 1h 00m (11:15), fase máx. 52
+  fase 10 em 2:52; Renascer disponível em 8:38
+  DPS guilda / DPS de toque no 1º Renascer: 0.55
+  parede: guilda sozinha 10 min → +0 fases; jogando ativo 10 min sem renascer → +14 fases
+
+=== Jogador ATIVO (5 toques/s, 10 min) ===
+  fase  10: 2:39
+  fase  20: 5:13
+  fase  30: 9:03
+  fase  40: —
+  fase  50: —
   fase  60: —
   fase  80: —
   fase 100: —
-  Renascer disponível em: 41:50
-  final: fase 50, DPS 49.5K, toque 851, lâmina 80, guilda [58,38,22,2,0,0,0,0], arcano 1
-  cristais se renascer agora: 14
-  maior intervalo sem nada para comprar (primeiras 2 h): 1:16
-  tempo médio por inimigo — fases 1-5: 2.3s | fases 6-10: 2.5s | fases 11-20: 5.2s | fases 21-40: 4.7s
-
-=== Jogador CASUAL (3 dias, 4×10 min/dia, 2 toques/s) ===
-  dia 1 sessão 4: Renascer na fase 46 (+10 cristais)
-  fim do dia 1: fase máx. da run 8, recorde 46, cristais 11, renascimentos 1
-  dia 2 sessão 4: Renascer na fase 58 (+25 cristais)
-  fim do dia 2: fase máx. da run 25, recorde 58, cristais 12, renascimentos 2
-  dia 3 sessão 3: Renascer na fase 86 (+73 cristais)
-  fim do dia 3: fase máx. da run 30, recorde 86, cristais 35, renascimentos 3
+  Renascer disponível em: 9:03
+  final: fase 33, DPS 4.20K, toque 312, lâmina 64, guilda [38,21,5,0,0,0,0,0], arcano 0
+  cristais se renascer agora: 10
+  maior intervalo sem nada para comprar (primeiras 2 h): 10s
+  tempo médio por inimigo — fases 1-5: 1.2s | fases 6-10: 1.1s | fases 11-20: 1.0s | fases 21-40: 1.8s
 
 === Metas ===
-  [OK ] Inimigo das fases 1–10 dura 1,5–4 s: 2.4s
-  [OK ] Fase 10 em 4–7 min: 4:32
-  [OK ] Renascer (fase 40) em 35–60 min: 41:50
-  [OK ] Cristais no 1º Renascer (fase 40–50): 5–14
-  [OK ] Fase ~100 (80+) no 3º dia casual: 86
-  [OK ] Nunca > ~5 min sem nada para comprar (2 h): 1:16
+  [OK ] Inimigo das fases 1–10 dura 1–4 s (o 1º: 10 toques ≈ 2 s): 1.2s
+  [OK ] Fase 10 em 1,5–4 min: 2:52
+  [OK ] 1º Renascer liberado em 5–11 min: 8:38
+  [OK ] Parede (trava sem renascer) por volta de 10–15 min: 14.6 min
+  [OK ] Guilda não domina no 1º Renascer (DPS guilda ≤ 2× toques): 0.55
+  [OK ] Parede: só com a guilda, ≤ 2 fases em 10 min: +0
+  [OK ] Parede: ativo sem renascer, a partir da liberação (fase 30), ≤ 15 fases em 10 min (trava no chefe 40): +14
+  [OK ] Cristais no 1º Renascer: 5–20: 18
+  [OK ] Renascer compensa: run 2 passa a run 1 em ≥ 3 fases: +20
+  [OK ] Nunca > ~5 min sem nada para comprar: 10s
 ```
 
 ## Regras de jogo interpretadas

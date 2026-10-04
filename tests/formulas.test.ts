@@ -104,17 +104,20 @@ describe('cristais', () => {
       Math.floor(Math.pow((m - P.offset) / P.divisor, P.exponent)),
     );
   });
-  it('primeiro Renascer na fase 40-50 dá entre 5 e 15 cristais', () => {
-    for (const m of [40, 45, 50]) {
-      const c = crystalsForPrestige(m).toNumber();
-      expect(c).toBeGreaterThanOrEqual(5);
-      expect(c).toBeLessThanOrEqual(15);
-    }
+  it('1º Renascer (fase mínima até a parede do chefe 40) dá de 3 a 20 cristais', () => {
+    const min = BALANCE.prestige.minStage;
+    expect(crystalsForPrestige(min).toNumber()).toBeGreaterThanOrEqual(3);
+    expect(crystalsForPrestige(40).toNumber()).toBeLessThanOrEqual(20);
   });
-  it('cada cristal não gasto dá +5% de dano', () => {
+  it('cada cristal não gasto dá o bônus configurado', () => {
     const s = createInitialState();
     s.crystals = D(10);
-    expect(globalDamageMult(s).toNumber()).toBeCloseTo(1.5);
+    expect(globalDamageMult(s).toNumber()).toBeCloseTo(1 + 10 * BALANCE.prestige.damagePerCrystal);
+  });
+  it('loja de cristais: passos pequenos e custo crescente', () => {
+    const dmg = BALANCE.crystalShop.find((u) => u.id === 'damage')!;
+    expect(dmg.perLevel).toBeLessThanOrEqual(0.15);
+    expect(dmg.baseCost).toBeGreaterThanOrEqual(2);
   });
 });
 

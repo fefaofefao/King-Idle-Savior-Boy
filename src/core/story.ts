@@ -45,13 +45,13 @@ const q = (chapter: number, kind: StoryKind, target: number, reward: Partial<Sto
 
 export const STORY: StoryQuest[] = [
   // Capítulo 1 — A Floresta Sombria (tutorial)
-  q(1, 'taps', 10, { incomeSec: 20, gold: 5 }),
-  q(1, 'kills', 5, { incomeSec: 30, gold: 5 }),
-  q(1, 'blade', 1, { incomeSec: 30, gold: 50 }),
-  q(1, 'hire', 1, { member: 0, incomeSec: 45, gold: 60 }),
+  q(1, 'taps', 10, { incomeSec: 10, gold: 2 }),
+  q(1, 'kills', 5, { incomeSec: 10, gold: 3 }),
+  q(1, 'blade', 1, { incomeSec: 15, gold: 5 }),
+  q(1, 'hire', 1, { member: 0, incomeSec: 20, gold: 10 }),
   q(1, 'stage', 5, { incomeSec: 60 }),
   q(1, 'member', 10, { member: 0, incomeSec: 60 }),
-  q(1, 'boss', 1, { incomeSec: 90, gold: 500 }),
+  q(1, 'boss', 1, { incomeSec: 60, gold: 50 }),
   q(1, 'hire', 1, { member: 1, incomeSec: 90 }),
   q(1, 'blade', 25, { incomeSec: 120, crystals: 1 }),
   // Capítulo 2 — As Cavernas de Cristal

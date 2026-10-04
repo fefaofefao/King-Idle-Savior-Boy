@@ -11,12 +11,15 @@ export const BALANCE = {
   },
 
   enemy: {
-    hpBase: 55,
-    hpGrowth: 1.19,
+    hpBase: 10,
+    hpGrowth: 1.26,
     bossHpMult: 10,
-    goldPerHp: 0.0045,
-    /** Ouro cresce um pouco mais devagar que o HP: ouro(n) = HP(n) × goldPerHp × goldStageDecay^(n−1). */
-    goldStageDecay: 1,
+    goldPerHp: 0.1,
+    /**
+     * Ouro cresce MAIS DEVAGAR que o HP: ouro(n) = HP(n) × goldPerHp × goldStageDecay^(n−1).
+     * É isso que cria a "parede" que torna o Renascer necessário (sem isso a guilda passava sozinha).
+     */
+    goldStageDecay: 0.95,
     bossGoldMult: 6,
   },
 
@@ -44,14 +47,14 @@ export const BALANCE = {
   guild: {
     costGrowth: 1.075,
     members: [
-      { id: 'squire', baseCost: 50, baseDps: 11 },
-      { id: 'archer', baseCost: 500, baseDps: 66 },
-      { id: 'cleric', baseCost: 5e3, baseDps: 400 },
-      { id: 'rogue', baseCost: 6e4, baseDps: 2.4e3 },
-      { id: 'barbarian', baseCost: 8e5, baseDps: 1.55e4 },
-      { id: 'druid', baseCost: 1.2e7, baseDps: 1e5 },
-      { id: 'paladin', baseCost: 2e8, baseDps: 6.6e5 },
-      { id: 'dragoon', baseCost: 4e9, baseDps: 4.85e6 },
+      { id: 'squire', baseCost: 50, baseDps: 5 },
+      { id: 'archer', baseCost: 500, baseDps: 30 },
+      { id: 'cleric', baseCost: 5e3, baseDps: 180 },
+      { id: 'rogue', baseCost: 6e4, baseDps: 1.1e3 },
+      { id: 'barbarian', baseCost: 8e5, baseDps: 7e3 },
+      { id: 'druid', baseCost: 1.2e7, baseDps: 4.5e4 },
+      { id: 'paladin', baseCost: 2e8, baseDps: 3e5 },
+      { id: 'dragoon', baseCost: 4e9, baseDps: 2.2e6 },
     ],
     milestones: [
       { level: 10, mult: 2 },
@@ -76,21 +79,23 @@ export const BALANCE = {
   },
 
   prestige: {
-    minStage: 40,
-    offset: 30,
-    divisor: 3.5,
-    exponent: 1.55,
+    /** Fase mínima para renascer (~7 min de jogo). A parede (chefe da fase 40) vem por volta de 12–15 min. */
+    minStage: 30,
+    offset: 20,
+    divisor: 2.5,
+    exponent: 1.4,
     /** Bônus de dano global por cristal NÃO gasto. */
-    damagePerCrystal: 0.05,
+    damagePerCrystal: 0.1,
   },
 
+  /** Loja de Cristais: passos pequenos e custo crescente (antes +25% por 1 cristal quebrava o jogo). */
   crystalShop: [
-    { id: 'damage', baseCost: 1, costGrowth: 1.3, maxLevel: 0, perLevel: 0.25 },
-    { id: 'gold', baseCost: 1, costGrowth: 1.3, maxLevel: 0, perLevel: 0.2 },
-    { id: 'crit', baseCost: 3, costGrowth: 1.5, maxLevel: 20, perLevel: 0.01 },
-    { id: 'bossTime', baseCost: 3, costGrowth: 1.6, maxLevel: 15, perLevel: 2 },
-    { id: 'offline', baseCost: 4, costGrowth: 1.6, maxLevel: 16, perLevel: 1 },
-    { id: 'cooldown', baseCost: 5, costGrowth: 1.7, maxLevel: 10, perLevel: 0.05 },
+    { id: 'damage', baseCost: 2, costGrowth: 1.5, maxLevel: 0, perLevel: 0.15 },
+    { id: 'gold', baseCost: 2, costGrowth: 1.5, maxLevel: 0, perLevel: 0.1 },
+    { id: 'crit', baseCost: 4, costGrowth: 1.6, maxLevel: 15, perLevel: 0.01 },
+    { id: 'bossTime', baseCost: 4, costGrowth: 1.7, maxLevel: 10, perLevel: 2 },
+    { id: 'offline', baseCost: 5, costGrowth: 1.7, maxLevel: 16, perLevel: 1 },
+    { id: 'cooldown', baseCost: 6, costGrowth: 1.8, maxLevel: 10, perLevel: 0.05 },
   ],
 
   offline: {
@@ -131,7 +136,7 @@ export const BALANCE = {
       { incomeSec: 420 },
       { incomeSec: 600 },
       { incomeSec: 900 },
-      { crystals: 5 },
+      { crystals: 2 },
     ],
   },
 

@@ -111,7 +111,7 @@ export class App {
     // Primeira vez: história do capítulo 1 e a dica de toque.
     if (s.story.index === 0 && s.stats.taps === 0) this.showChapterIntro(() => this.showTapHint());
     else this.showTapHint();
-    if (canClaimDaily(s, now)) this.floaters.toast(t('quests.daily'), ICONS.calendar);
+    // (A recompensa diária é indicada pela bolinha na aba Missões — sem aviso em caixa ao abrir.)
 
     this.scene.onFrame = (dt) => this.frame(dt);
     this.scene.start();
@@ -625,7 +625,8 @@ export class App {
   /** Mãozinha do tutorial apontando para o inimigo até os primeiros toques. */
   private showTapHint(): void {
     if (this.state.tutorial.tapHintDone) return;
-    const hint = h('div', { class: 'tap-hint' }, [h('div', { class: 'tap-hand', text: '👆' }), h('div', { class: 'tap-label', text: t('tutorial.tap') })]);
+    // Só a mãozinha (sem caixa de texto por cima da tela).
+    const hint = h('div', { class: 'tap-hint', 'aria-label': t('tutorial.tap') }, [h('div', { class: 'tap-hand', text: '👆' })]);
     $('#stage').appendChild(hint);
     const place = () => {
       if (!hint.isConnected) return;
@@ -649,8 +650,13 @@ export class App {
     const a = ACHIEVEMENTS.find((x) => x.id === id);
     if (!a || s.achievements[id] !== 'done') return;
     s.achievements[id] = 'claimed';
-    s.crystals = s.crystals.plus(a.crystals);
-    this.floaters.toast(`+${a.crystals}`, ICONS.crystal);
+    if (a.crystals > 0) {
+      s.crystals = s.crystals.plus(a.crystals);
+      this.floaters.banner(`+${a.crystals} 💎`, 'crystal');
+    } else {
+      // Conquistas do começo dão ouro (cristais vêm do Renascer).
+      this.collect(this.game.achievementGold(Date.now()));
+    }
     sfx.play('chest');
     this.queueSave();
   }

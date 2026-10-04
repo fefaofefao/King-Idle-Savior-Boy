@@ -92,12 +92,20 @@ describe('monstros', () => {
     expect(hp).toBeLessThan(1.15);
   });
 
-  it('ouro fracionário: inimigo da fase 1 vale menos de 1', () => {
+  it('primeiro monstro: 10 de vida e 1 de ouro', () => {
     const g = new Game(at(1), { rng: () => 0.99, respawnDelaySec: 0 });
+    expect(g.enemyMaxHp.toNumber()).toBe(10);
     g.state.bladeLevel = 1000;
     g.tap(0);
-    expect(g.state.gold.lt(1)).toBe(true);
-    expect(g.state.gold.gt(0)).toBe(true);
+    expect(g.state.gold.toNumber()).toBeCloseTo(1);
     void D;
+  });
+
+  it('parede: o ouro cresce mais devagar que a vida (o Renascer passa a valer a pena)', () => {
+    const hp = enemyHp(40).div(enemyHp(1)).toNumber();
+    const gold = new Game(at(40), { rng: () => 0.99 }); // só para garantir que a fase 40 é chefe
+    expect(gold.isBoss).toBe(true);
+    expect(BALANCE.enemy.goldStageDecay).toBeLessThan(1);
+    expect(hp).toBeGreaterThan(1000);
   });
 });

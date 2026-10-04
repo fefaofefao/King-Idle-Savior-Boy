@@ -120,6 +120,7 @@ export interface AchievementDef {
   /** Lê o valor atual do estado. */
   stat: (s: GameState) => number;
   target: number;
+  /** Cristais de recompensa; 0 = recompensa em ouro (as conquistas do começo não dão cristais). */
   crystals: number;
   /** Chave i18n do tipo da conquista (recebe {n}). */
   kind: 'stage' | 'taps' | 'kills' | 'boss' | 'prestige' | 'crits' | 'chests' | 'blade' | 'guild' | 'abilities' | 'weak' | 'golden' | 'bestiary';
@@ -133,19 +134,19 @@ const ach = (
   targets.map(([target, crystals]) => ({ id: `${kind}_${target}`, kind, stat, target, crystals }));
 
 export const ACHIEVEMENTS: AchievementDef[] = [
-  ...ach('stage', (s) => s.stats.highestStage, [[10, 1], [25, 1], [50, 2], [100, 3], [150, 4], [200, 5], [300, 8]]),
-  ...ach('taps', (s) => s.stats.taps, [[100, 1], [1000, 1], [10000, 2], [100000, 4]]),
-  ...ach('kills', (s) => s.stats.kills, [[100, 1], [1000, 2], [10000, 3], [100000, 5]]),
-  ...ach('boss', (s) => s.stats.bossKills, [[1, 1], [10, 2], [50, 3], [100, 5]]),
-  ...ach('prestige', (s) => s.stats.prestiges, [[1, 2], [5, 3], [10, 5], [25, 8]]),
-  ...ach('crits', (s) => s.stats.crits, [[100, 1], [1000, 2]]),
-  ...ach('chests', (s) => s.stats.chests, [[1, 1], [25, 2]]),
-  ...ach('blade', (s) => s.bladeLevel, [[100, 2]]),
-  ...ach('guild', (s) => s.guild.filter((l) => l > 0).length, [[8, 3]]),
-  ...ach('abilities', (s) => s.stats.abilitiesUsed, [[25, 2]]),
-  ...ach('weak', (s) => s.stats.weakHits, [[10, 1], [100, 2], [1000, 4]]),
-  ...ach('golden', (s) => s.stats.goldenKills, [[1, 1], [10, 2], [50, 4]]),
-  ...ach('bestiary', (s) => totalBestiaryStars(s), [[5, 2], [15, 4]]),
+  ...ach('stage', (s) => s.stats.highestStage, [[10, 0], [25, 0], [50, 1], [100, 2], [150, 3], [200, 4], [300, 6]]),
+  ...ach('taps', (s) => s.stats.taps, [[100, 0], [1000, 0], [10000, 1], [100000, 2]]),
+  ...ach('kills', (s) => s.stats.kills, [[100, 0], [1000, 0], [10000, 1], [100000, 2]]),
+  ...ach('boss', (s) => s.stats.bossKills, [[1, 0], [10, 0], [50, 1], [100, 2]]),
+  ...ach('prestige', (s) => s.stats.prestiges, [[1, 1], [5, 2], [10, 3], [25, 5]]),
+  ...ach('crits', (s) => s.stats.crits, [[100, 0], [1000, 1]]),
+  ...ach('chests', (s) => s.stats.chests, [[1, 0], [25, 1]]),
+  ...ach('blade', (s) => s.bladeLevel, [[100, 1]]),
+  ...ach('guild', (s) => s.guild.filter((l) => l > 0).length, [[8, 2]]),
+  ...ach('abilities', (s) => s.stats.abilitiesUsed, [[25, 1]]),
+  ...ach('weak', (s) => s.stats.weakHits, [[10, 0], [100, 1], [1000, 2]]),
+  ...ach('golden', (s) => s.stats.goldenKills, [[1, 0], [10, 1], [50, 2]]),
+  ...ach('bestiary', (s) => totalBestiaryStars(s), [[5, 1], [15, 2]]),
 ];
 
 /** Marca conquistas recém-atingidas como 'done'. Retorna os ids novos. */

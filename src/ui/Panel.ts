@@ -459,7 +459,12 @@ export class Panel {
         const v = Math.min(ar.a.stat(st), ar.a.target);
         ar.fill.style.width = `${(v / ar.a.target) * 100}%`;
         setText(ar.label, `${formatNumber(v)}/${formatNumber(ar.a.target)}`);
-        ar.btn.innerHTML = state === 'claimed' ? t('quests.claimed') : `${ICONS.crystal}+${ar.a.crystals}`;
+        ar.btn.innerHTML =
+          state === 'claimed'
+            ? t('quests.claimed')
+            : ar.a.crystals > 0
+              ? `${ICONS.crystal}+${ar.a.crystals}`
+              : `${ICONS.gold}${formatNumber(app.game.achievementGold(Date.now()), st.settings.notation)}`;
         setDisabled(ar.btn, state !== 'done');
         toggleClass(ar.el, 'done', state === 'claimed');
       }
