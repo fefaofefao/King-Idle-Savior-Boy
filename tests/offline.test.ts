@@ -13,7 +13,8 @@ describe('ganhos offline', () => {
     s.lastSeen = 0;
     const r = computeOffline(s, 1000 * 1000);
     expect(r.cappedSeconds).toBe(1000);
-    expect(r.gold.toNumber()).toBe(Math.floor(incomePerSec(s, 0).toNumber() * 1000 * 0.5));
+    // Tolerância de 1 por arredondamento (Decimal × number).
+    expect(Math.abs(r.gold.toNumber() - incomePerSec(s, 0).toNumber() * 1000 * 0.5)).toBeLessThanOrEqual(1);
   });
   it('limite padrão de 8h e +1h por nível da loja', () => {
     const s = createInitialState(0);
