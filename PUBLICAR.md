@@ -47,8 +47,8 @@ Resumo para levar o **King Idle Savior Boy** à Google Play. O passo a passo det
 
 ### D. AAB (arquivo do app)
 - [x] Keystore de upload gerada
-- [ ] Secrets da keystore como **Repository secrets** de Actions (conferir nomes)
-- [ ] AAB 1.0.0 **assinado** (Actions → Android Release (AAB) → Artifacts) — os builds 1–3 saíram SEM assinatura: secret da keystore não encontrado
+- [x] Secrets da keystore cadastrados
+- [x] AAB 1.0.0 **assinado**: `KingIdleSaviorBoy-AAB-1.0.0-4` (versionCode 4) em https://github.com/fefaofefao/King-Idle-Savior-Boy/actions/runs/37244728314 → Artifacts (o arquivo fica disponível por 90 dias; baixe e guarde)
 - [ ] Guardar a keystore + senha em **2 lugares seguros** (ex.: Drive privado + pendrive)
 
 ### E. Play Console — criar o app e preencher "Conteúdo do app"
