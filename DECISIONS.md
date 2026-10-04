@@ -167,3 +167,26 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 - `versionCode` = número do run do workflow; `versionName` = tag sem o "v".
 - A assinatura só é configurada se `ANDROID_KEYSTORE_PATH` existir; sem keystore o workflow avisa e gera um AAB não assinado.
 - Não foi possível rodar o Gradle nesta sessão (o download do Android SDK foi bloqueado pela rede). O AAB é gerado no GitHub Actions.
+
+## Versão final: conteúdo de longo prazo e UX
+- **Fim de jogo sem platô:** a partir da fase 60 os cristais do Renascer crescem ×1,06 por fase (`prestige.lateGrowth`). Antes, a vida dos monstros crescia exponencialmente e os cristais não, e o jogo empacava na fase ~140 depois de ~25 h. Agora (simulação ativa, `npm run sim -- --minutes=2700`): fase ~120 em 4 h, ~160 em 10 h, ~186 em 1 dia, ~199 em 44 h.
+- **Jornada em 10 capítulos (71 missões) + infinitas** (a cada 5 fases depois da 200). Conclusão simulada: cap. 3 em 35 min, cap. 5 em 2 h 40, cap. 6 em 3 h 50, cap. 7 em 5 h 40, cap. 8 em 10 h, cap. 9 em 22 h, cap. 10 em 45 h de jogo ativo (bem mais em dias reais, com sessões curtas).
+- **Novos tipos de missão:** relíquias, níveis de relíquia, estrelas do Bestiário, Dourados, Pontos Fracos, visuais e combo.
+- **Criaturas procedurais** (`src/scene/CreatureActor.ts`): Geleca, Cogumelo, Morcego, Golem e Diabrete, feitas de formas simples (sem GLB), cada uma com idle próprio, provocação periódica, dano, morte e fuga. A zona tinge de leve; variações (Dourado/Blindado/Gigante) tingem forte.
+- **Relíquias:** 12, até nível 25, permanentes. O Rei (a cada 50 fases) sempre deixa uma; o General, 15%, **só depois do 1º Renascer** (com relíquias cedo, metade das corridas passava da parede da fase 40). Relíquias que você ainda não tem saem com o dobro de chance; com tudo no máximo, viram cristais.
+- **Visuais do herói:** 8 (1 inicial + 7 por marcos), cada um dá +1% de dano (coleção). Trocar muda a cor do Cavaleiro na cena.
+- **Combo:** toques com até 0,6 s entre eles. Marcos 50/100/200/400/800 dão um pouco de ouro (não altera o balanceamento: testado com e sem).
+- **Parede da 1ª corrida:** continua no chefe da fase 40 por volta de 14 min. Em ~1 de cada 4 simulações a sorte (críticos/Pontos Fracos/Dourados) vence esse chefe e o jogador empaca na 48–50 por volta de 28 min — parede suave, aceitável.
+- **UX:**
+  - segurar para comprar (acelera);
+  - botão de compra que "enche" conforme o ouro;
+  - selo **MELHOR** no membro da guilda com mais DPS por ouro;
+  - prévia "Dano depois de renascer ×N" com recomendação (a bolinha da aba só aparece quando dobra o dano);
+  - **Coletar tudo**, com as conquistas prontas no topo;
+  - deslizar para trocar de aba e transição suave;
+  - habilidades em recarga ou bloqueadas explicam o que fazem ao tocar;
+  - pulso quando a habilidade recarrega;
+  - cartões de prêmio que não bloqueiam o jogo;
+  - convite da recompensa diária ao voltar (nunca na 1ª abertura);
+  - dica depois de perder para o chefe;
+  - "Atual: +X%" na loja de cristais.

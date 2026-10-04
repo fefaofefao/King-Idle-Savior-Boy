@@ -378,6 +378,13 @@ function resetRun(tps: number, minutes: number) {
       `  run ${i + 1}: ${formatTime(r.start / 1000)} → ${formatTime(r.end / 1000)} (${formatTime((r.end - r.start) / 1000)}), fase máx. ${r.max}${r.crystals ? `, +${r.crystals} cristais` : ''}`,
     ),
   );
+  // Quando cada capítulo da Jornada foi concluído.
+  const chapters: string[] = [];
+  for (let c = 1; c <= 10; c++) {
+    const last = STORY.reduce((acc, q, i) => (q.chapter === c ? i : acc), -1);
+    chapters.push(`cap.${c} ${p.story[last] !== undefined ? formatTime(p.story[last] / 1000) : '—'}`);
+  }
+  console.log(`  Jornada (${p.story.length}/${STORY.length}): ${chapters.join(' | ')}`);
   console.log(`  fase 10 em ${formatTime(t10.v)}; Renascer disponível em ${formatTime(firstResetAvailable)}`);
   console.log(`  DPS guilda / DPS de toque no 1º Renascer: ${guildTapRatio.toFixed(2)}`);
   console.log(`  parede: guilda sozinha 10 min → +${idleStages} fases; jogando ativo 10 min sem renascer → +${wallStages} fases`);

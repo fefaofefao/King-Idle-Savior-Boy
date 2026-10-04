@@ -348,11 +348,12 @@ export const ptBR = {
   "hud.dps": "DPS {n}",
   "hud.offlineBoost": "Toque e segure para atacar sem parar",
   "welcome.title": "Bem-vindo de volta!",
-  "welcome.streak": "Dia {n} seguido",
+  "welcome.streak": "Sequência: dia {n} de 7",
   "quests.claimAll": "Coletar tudo ({n})",
   "crystal.current": "Atual: {v}",
   "ability.cooling": "{name}: {desc} · pronta em {time}",
   "ability.lockedInfo": "{name}: {desc} · libera na fase {n}",
+  "debug.relic": "+1 relíquia",
 };
 
 export type LocaleKey = keyof typeof ptBR;

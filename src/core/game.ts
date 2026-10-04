@@ -384,12 +384,15 @@ export class Game {
     this.checkAchievements();
   }
 
-  /** Chefe derrotado: chance de relíquia (General 15%, Rei 100%). */
-  private rollRelic(): void {
+  /** Chefe derrotado: chance de relíquia (General 15% depois do 1º Renascer, Rei 100%). */
+  rollRelic(force = false): void {
     const s = this.state;
     const R = BALANCE.relics;
-    const chance = this.monster.type === 'king' ? R.dropChance.king : R.dropChance.general;
-    if (this.rng() >= chance) return;
+    const king = this.monster.type === 'king';
+    // Antes do 1º Renascer só o Rei deixa relíquias (não quebra a parede da 1ª corrida).
+    if (!force && !king && s.stats.prestiges === 0) return;
+    const chance = king ? R.dropChance.king : R.dropChance.general;
+    if (!force && this.rng() >= chance) return;
     const open = R.list.filter((r) => (s.relics[r.id] ?? 0) < R.maxLevel);
     s.stats.relicDrops++;
     this.track('relics', 1);

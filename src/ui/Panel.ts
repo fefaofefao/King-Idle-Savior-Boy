@@ -814,6 +814,7 @@ export class Panel {
       app.scene.setMageVisible(s.maxStage >= BALANCE.mage.unlockStage);
     });
     add(t('debug.offline'), () => app.debugOffline(8 * 3600));
+    add(t('debug.relic'), () => g.rollRelic(true));
     add(t('debug.cooldowns'), () => {
       for (const k of Object.keys(g.state.abilityReadyAt) as (keyof typeof g.state.abilityReadyAt)[]) g.state.abilityReadyAt[k] = 0;
     });

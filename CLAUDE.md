@@ -8,10 +8,11 @@ Especificação: `GAME_SPEC.md` + `ASSETS.md`. Nome do jogo: **King Idle Savior 
 ```bash
 npm install
 npm run dev            # navegador em http://localhost:5173 (use o modo dispositivo do DevTools)
-npm test               # Vitest (fórmulas, save/migração, offline, relógio, cristais, i18n, anúncios)
+npm test               # Vitest (fórmulas, save/migração, offline, relógio, cristais, i18n, anúncios, conteúdo)
 npm run build          # typecheck + build web em dist/
 npm run sim            # simulador de balanceamento (metas de ritmo)
 npm run sim -- --tps=5 --set=enemy.goldPerHp=0.02   # experimentos
+npm run sim -- --minutes=2700   # longo prazo: fase por hora e quando cada capítulo da Jornada termina
 npm run optimize-models   # (opcional) meshopt nos .glb de public/models
 node scripts/render-icon.mjs   # renderiza o knight.glb → assets/knight-render.png (precisa do Playwright)
 npm run icons          # gera ícone adaptativo + splash + public/icon.png a partir do render (ou de assets/icon.svg)
@@ -36,7 +37,7 @@ src/
   config/      app.ts (APP_ID, flags), balance.ts (TODAS as constantes), visual.ts (modelos/câmera/zonas)
   core/        lógica pura e testável: state, formulas, game (classe Game), save, offline, retention, story (Jornada do Rei), format, bignum
   i18n/        index.ts + locales/{pt-BR,en,es}.ts  ← 3 idiomas
-  scene/       Three.js: GameScene, Assets (cache GLB + fallback), Actor, KnightAttack, Zones, Effects, Fallback
+  scene/       Three.js: GameScene, Assets (cache GLB + fallback), Actor, CreatureActor (criaturas procedurais), SpriteActor (Rei), KnightAttack, Zones, Effects, Fallback
   ui/          Hud (com rastreador de missão), Panel (abas), Modals, Floaters, Intro (tela inicial), storyText, icons (SVG), dom
   ads/         AdService (interface), MockAdService, AdMobAdService (UMP), AdPolicy (regras do interstitial)
   audio/       Sfx (Web Audio procedural + música opcional)
@@ -68,7 +69,8 @@ privacy-policy/ store-listing/ app-ads.txt SETUP_CONTAS.md CREDITS.md licenses/
 | 4. Android + AdMob | ✅ código pronto: Capacitor, AdService, UMP, frequência, voltar, safe areas, haptics, notificações, ícone/splash |
 | 5. Build e publicação | ✅ workflows, optimize-models, SETUP_CONTAS, política de privacidade, textos da loja |
 | 6. Revisão final | ✅ testes e build ok, revisão feita; pendências abaixo |
-| Extra: Jornada do Rei | ✅ 36 missões em 5 capítulos + infinitas, tutorial, rastreador no HUD, história por capítulo |
+| Extra: Jornada do Rei | ✅ 71 missões em 10 capítulos + infinitas, tutorial, rastreador no HUD, história por capítulo |
+| Extra: Versão final | ✅ criaturas procedurais, relíquias, visuais, combo, fim de jogo sem platô, passada de UX (DECISIONS.md) |
 | Extra: APK de teste | ✅ gerado no GitHub Actions a cada push, com painel de testes |
 
 ## Pendências (dependem do dono do projeto)

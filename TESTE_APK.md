@@ -19,6 +19,7 @@
 - **+10 min de ouro**, **+25 cristais**, **+10 fases** (troca de zona a cada 50 fases)
 - **Simular 8 h offline** (abre o "Bem-vindo de volta", se a guilda tiver DPS)
 - **Zerar recargas** das habilidades
+- **+1 relíquia** (testa o cartão de prêmio e a coleção na aba Herói)
 - **Apagar progresso** (recomeça do zero, com tela de idioma e tutorial)
 
 ## 4. Roteiro de teste sugerido
@@ -39,6 +40,20 @@
 - [ ] Baú do Mensageiro atravessando a tela (a cada 3–5 min)
 - [ ] Rastreador de missão no topo: fica verde quando cumprida; tocar coleta a recompensa
 - [ ] Fim de capítulo: banner + história do próximo capítulo
+
+**Conteúdo novo (versão final)**
+- [ ] Criaturas: Geleca (fase 2+), Cogumelo (8+), Morcego (16+), Golem (36+), Diabrete (46+), com animações próprias
+- [ ] Relíquias: o Rei Esqueleto (fase 50) sempre deixa uma; cartão de prêmio aparece e some sozinho
+- [ ] Aba Herói: Visuais (tocar num liberado troca a cor do Cavaleiro) e Relíquias
+- [ ] Combo: a partir de 10 toques seguidos aparece o contador à esquerda; marcos 50/100/200… dão ouro
+- [ ] Segurar o botão de compra compra várias vezes (cada vez mais rápido)
+- [ ] Botão de compra "enche" de verde conforme o ouro se aproxima do preço
+- [ ] Selo MELHOR na Guilda; "Dano depois de renascer ×N" na aba Renascer
+- [ ] Missões: "Coletar tudo" quando há 2+ prontas; conquistas prontas aparecem no topo
+- [ ] Deslizar o dedo para os lados no painel troca de aba
+- [ ] Tocar numa habilidade em recarga ou bloqueada mostra o que ela faz
+- [ ] Voltar no dia seguinte: convite da recompensa diária
+- [ ] Jornada: 10 capítulos (Ruínas, Pântano, Cidadela, Abismo, Trono Eterno)
 
 **Anúncios (de teste)**
 - [ ] Consentimento (UMP) na primeira abertura (aparece só em algumas regiões, como Europa)

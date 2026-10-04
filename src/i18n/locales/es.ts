@@ -350,9 +350,10 @@ export const es: Locale = {
   "hud.dps": "DPS {n}",
   "hud.offlineBoost": "Mantén pulsado para atacar sin parar",
   "welcome.title": "¡Bienvenido de nuevo!",
-  "welcome.streak": "Día {n} seguido",
+  "welcome.streak": "Racha: día {n} de 7",
   "quests.claimAll": "Recoger todo ({n})",
   "crystal.current": "Actual: {v}",
   "ability.cooling": "{name}: {desc} · lista en {time}",
   "ability.lockedInfo": "{name}: {desc} · se desbloquea en la fase {n}",
+  "debug.relic": "+1 reliquia",
 };

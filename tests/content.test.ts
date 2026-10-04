@@ -115,3 +115,66 @@ describe('save v5', () => {
     void D;
   });
 });
+
+describe('versão final', () => {
+  it('General só deixa relíquia depois do 1º Renascer', () => {
+    const g = new Game(at(10), { rng: () => 0.01 });
+    killBoss(g);
+    expect(Object.keys(g.state.relics)).toHaveLength(0);
+    const s = at(10);
+    s.stats.prestiges = 1;
+    const g2 = new Game(s, { rng: () => 0.01 });
+    killBoss(g2);
+    expect(Object.keys(g2.state.relics)).toHaveLength(1);
+  });
+
+  it('avisa só dos visuais novos e só troca para um liberado', () => {
+    const s = createInitialState();
+    s.stats.highestStage = 60; // 'royal' já liberado ao carregar: sem aviso
+    const g = new Game(s);
+    const got: string[] = [];
+    g.on((e) => e.type === 'skinUnlocked' && got.push(e.id));
+    g.checkAchievements();
+    expect(got).toEqual([]);
+    g.state.stats.bossKills = 30;
+    g.checkAchievements();
+    expect(got).toEqual(['crimson']);
+    expect(g.setSkin('crimson')).toBe(true);
+    expect(g.state.skin).toBe('crimson');
+    expect(g.setSkin('savior')).toBe(false);
+  });
+
+  it('cristais crescem no fim de jogo (sem platô)', () => {
+    const P = BALANCE.prestige;
+    const c = (st: number) => crystalsForPrestige(st).toNumber();
+    // Antes de lateStart a curva é a antiga; depois cresce bem mais rápido.
+    expect(c(P.lateStart + 40) / c(P.lateStart + 20)).toBeGreaterThan(Math.pow(P.lateGrowth, 20));
+  });
+
+  it('missões novas da Jornada leem o estado', async () => {
+    const { storyProgress } = await import('../src/core/story');
+    const s = createInitialState();
+    s.relics = { sword: 3, eye: 2 };
+    s.stats.maxCombo = 120;
+    s.stats.goldenKills = 4;
+    s.stats.weakHits = 9;
+    const q = (kind: string) => ({ chapter: 6, kind, target: 1 }) as never;
+    expect(storyProgress(s, q('relics'))).toBe(2);
+    expect(storyProgress(s, q('relicLevels'))).toBe(5);
+    expect(storyProgress(s, q('combo'))).toBe(120);
+    expect(storyProgress(s, q('golden'))).toBe(4);
+    expect(storyProgress(s, q('weakHits'))).toBe(9);
+  });
+
+  it('combo: toques seguidos somam e o marco 50 dá ouro', () => {
+    const g = new Game(at(5));
+    g.enemyHp = D(1e30); // inimigo que não morre durante o teste
+    let combo = 0;
+    g.on((e) => e.type === 'combo' && (combo = e.count));
+    for (let i = 0; i < 50; i++) g.tap(1000 + i * 200);
+    expect(g.combo).toBe(50);
+    expect(combo).toBe(50);
+    g.tap(1000 + 50 * 200 + 2000); // pausa longa: zera
+    expect(g.combo).toBe(1);
+  });
+});
