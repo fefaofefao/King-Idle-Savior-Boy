@@ -28,9 +28,8 @@ export class Assets {
 
   constructor() {
     this.loader = new GLTFLoader();
-    const draco = new DRACOLoader();
-    draco.setDecoderPath('draco/');
-    this.loader.setDRACOLoader(draco);
+    // O DRACOLoader do three já empacota o decoder (WASM) junto do build — sem CDN.
+    this.loader.setDRACOLoader(new DRACOLoader());
     this.loader.setMeshoptDecoder(MeshoptDecoder);
   }
 
@@ -41,8 +40,7 @@ export class Assets {
         (g) => resolve(g),
         undefined,
         (err) => {
-          const msg = `[assets] falha ao carregar ${url} — usando forma primitiva`;
-          console.warn(msg, err);
+          console.warn(`[assets] falha ao carregar ${url} — usando forma primitiva`, err);
           this.warnings.push(url);
           resolve(null);
         },
@@ -58,12 +56,15 @@ export class Assets {
     let done = 0;
     const tick = () => onProgress(++done / total);
 
-    // Sem servidor de arquivos estáticos para modelos (ex.: zip ainda não extraído), evita 404 em série.
-    const probe = await this.exists(MODEL_PATHS.knight);
+    // Carrega o Cavaleiro primeiro: se ele falhar (ex.: zip ainda não extraído), não tenta o resto,
+    // evitando uma série de erros 404. (O servidor de dev do Vite devolve index.html para caminhos
+    // inexistentes; o GLTFLoader falha ao interpretá-lo e caímos no fallback do mesmo jeito.)
+    const knight = await this.loadGltf(MODEL_PATHS.knight);
+    const probe = knight !== null;
 
     await Promise.all([
       ...modelKeys.map(async (k) => {
-        const g = probe ? await this.loadGltf(MODEL_PATHS[k] as string) : null;
+        const g = k === 'knight' ? knight : probe ? await this.loadGltf(MODEL_PATHS[k] as string) : null;
         if (g) {
           this.realModels = true;
           g.scene.traverse((o) => {
@@ -90,16 +91,6 @@ export class Assets {
     }
   }
 
-  private async exists(url: string): Promise<boolean> {
-    try {
-      const r = await fetch(url, { method: 'HEAD' });
-      const type = r.headers.get('content-type') ?? '';
-      // O servidor de dev do Vite devolve index.html (200) para caminhos inexistentes.
-      return r.ok && !type.includes('text/html');
-    } catch {
-      return false;
-    }
-  }
 
   /** Instância nova de um personagem (real ou primitivo). */
   character(key: ModelKey): { root: THREE.Object3D; real: boolean } {

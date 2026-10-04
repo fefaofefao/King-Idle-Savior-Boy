@@ -13,7 +13,8 @@
     "optimize-models": "bash scripts/optimize-models.sh",
     "android:sync": "npm run build && cap sync android",
     "android:open": "cap open android",
-    "assets:generate": "capacitor-assets generate --android"
+    "assets:generate": "capacitor-assets generate --android",
+    "icons": "node scripts/gen-icons.mjs && capacitor-assets generate --android"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.1.0",

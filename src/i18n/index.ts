@@ -29,6 +29,7 @@ export function detectLang(languages: readonly string[] = navigator.languages ??
 export function setLang(lang: Lang): void {
   current = LOCALES[lang] ? lang : 'en';
   document.documentElement.lang = current;
+  document.title = LOCALES[current]['app.name'];
   for (const l of listeners) l();
 }
 

@@ -1,0 +1,3 @@
+# app-ads.txt — MODELO. Troque pub-0000000000000000 pelo seu Publisher ID do AdMob.
+# Publique na RAIZ do site do desenvolvedor informado na Play (veja SETUP_CONTAS.md, seção 7).
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

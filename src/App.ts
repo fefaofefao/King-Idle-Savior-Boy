@@ -28,6 +28,7 @@ import {
   onBackButton,
   onPauseResume,
   preferencesStore,
+  requestNotificationPermission,
   scheduleOfflineFull,
   setVibration,
   vibrate,
@@ -114,6 +115,7 @@ export class App {
     onPauseResume(() => this.pause(), () => this.resume());
     onBackButton(() => this.back());
     void this.ads.init().catch((e) => console.warn('[ads] init falhou', e));
+    if (s.settings.notifications) void requestNotificationPermission();
     void this.save();
   }
 
@@ -162,6 +164,7 @@ export class App {
     this.saveTimer += dt;
     if (this.saveTimer >= BALANCE.saveIntervalSec) {
       this.saveTimer = 0;
+      this.refreshMissions(now);
       void this.save();
     }
     if (this.nextChestAt && now >= this.nextChestAt && !this.chestEl && !this.modals.isOpen) {
@@ -282,7 +285,7 @@ export class App {
     const A = BALANCE.ads;
     const now = Date.now();
     const s = this.state;
-    if (s.adGoldBuffUntil - now >= (A.goldBuffMaxMinutes - A.goldBuffMinutesPerAd) * 60_000 + 1000) return;
+    if (this.goldBuffFull(now)) return;
     if (!(await this.watchAd('goldBuff'))) return;
     const base = Math.max(now, s.adGoldBuffUntil);
     s.adGoldBuffUntil = Math.min(base + A.goldBuffMinutesPerAd * 60_000, now + A.goldBuffMaxMinutes * 60_000);
@@ -485,7 +488,25 @@ export class App {
     this.queueSave();
   }
 
+  /** Sorteia as missões do dia quando o dia vira (e redesenha a aba, se aberta). */
+  private refreshMissions(now: number): void {
+    const day = this.state.missions.day;
+    this.game.ensureMissions(now);
+    if (this.state.missions.day !== day) this.panel.build();
+  }
+
+  /** O buff de ouro por anúncio já está no máximo acumulável? */
+  goldBuffFull(now = Date.now()): boolean {
+    const A = BALANCE.ads;
+    return this.state.adGoldBuffUntil - now > (A.goldBuffMaxMinutes - A.goldBuffMinutesPerAd) * 60_000;
+  }
+
   // ---------------- Configurações ----------------
+
+  setNotifications(on: boolean): void {
+    this.state.settings.notifications = on;
+    if (on) void requestNotificationPermission();
+  }
 
   setLanguage(lang: Lang): void {
     this.state.settings.lang = lang;
@@ -553,7 +574,7 @@ export class App {
     void cancelOfflineFull();
     if (!this.adBusy) this.handleOffline(Date.now());
     else this.state.lastSeen = Date.now();
-    this.game.ensureMissions(Date.now());
+    this.refreshMissions(Date.now());
     sfx.resume();
     this.scene.start();
   }

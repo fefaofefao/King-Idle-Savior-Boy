@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ícone monocromático da notificação (elmo do Cavaleiro). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M12,2C7.6,2 5,5.4 5,9.5L5,14L19,14L19,9.5C19,5.4 16.4,2 12,2ZM7,10.5L17,10.5L17,12L7,12ZM6,15L18,15L18,17C18,19.8 15.3,22 12,22C8.7,22 6,19.8 6,17Z" />
+</vector>

@@ -1,0 +1,108 @@
+name: Android Release (AAB)
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'versionName (ex.: 1.0.0). Vazio = versão do package.json'
+        required: false
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    env:
+      HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+      HAS_PLAY: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Testes
+        run: npm test
+
+      - name: Versão
+        id: version
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            NAME="${GITHUB_REF#refs/tags/v}"
+          elif [[ -n "${{ github.event.inputs.version_name }}" ]]; then
+            NAME="${{ github.event.inputs.version_name }}"
+          else
+            NAME="$(node -p "require('./package.json').version")"
+          fi
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "code=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "versionName=$NAME versionCode=${{ github.run_number }}"
+
+      - name: Build web
+        env:
+          APP_VERSION: ${{ steps.version.outputs.name }}
+          VITE_ADMOB_REWARDED_ID: ${{ secrets.ADMOB_REWARDED_ID }}
+          VITE_ADMOB_INTERSTITIAL_ID: ${{ secrets.ADMOB_INTERSTITIAL_ID }}
+        run: npm run build
+
+      - name: Capacitor sync
+        run: npx cap sync android
+
+      - name: Decodificar keystore
+        if: env.HAS_KEYSTORE == 'true'
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+
+      - name: Aviso sem keystore
+        if: env.HAS_KEYSTORE != 'true'
+        run: echo "::warning::Secret ANDROID_KEYSTORE_BASE64 ausente — o AAB sairá SEM assinatura e não pode ser enviado à Play."
+
+      - name: Gradle bundleRelease
+        working-directory: android
+        env:
+          VERSION_CODE: ${{ steps.version.outputs.code }}
+          VERSION_NAME: ${{ steps.version.outputs.name }}
+          ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew bundleRelease --no-daemon
+
+      - name: Conferir tamanho do AAB (< 40 MB)
+        run: |
+          AAB=android/app/build/outputs/bundle/release/app-release.aab
+          SIZE=$(stat -c%s "$AAB")
+          echo "Tamanho do AAB: $((SIZE / 1024 / 1024)) MB ($SIZE bytes)"
+          if [ "$SIZE" -gt $((40 * 1024 * 1024)) ]; then echo "::error::AAB maior que 40 MB"; exit 1; fi
+
+      - name: Publicar AAB como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: idle-tap-knight-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}
+          path: android/app/build/outputs/bundle/release/app-release.aab
+
+      # Opcional: envia para a faixa de TESTE INTERNO da Play (só se o secret existir).
+      - name: Enviar para teste interno da Play
+        if: env.HAS_PLAY == 'true' && env.HAS_KEYSTORE == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: br.com.fernando.idleknight
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed

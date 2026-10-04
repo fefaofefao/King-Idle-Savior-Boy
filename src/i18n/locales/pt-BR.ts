@@ -97,6 +97,8 @@ export const ptBR = {
   'menu.sound': 'Efeitos sonoros',
   'menu.music': 'Música',
   'menu.vibration': 'Vibração',
+  'menu.sfxVolume': 'Volume dos efeitos',
+  'menu.musicVolume': 'Volume da música',
   'menu.notifications': 'Notificações',
   'menu.language': 'Idioma',
   'menu.notation': 'Notação numérica',

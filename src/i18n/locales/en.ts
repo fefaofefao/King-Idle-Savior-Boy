@@ -99,6 +99,8 @@ export const en: Locale = {
   'menu.sound': 'Sound effects',
   'menu.music': 'Music',
   'menu.vibration': 'Vibration',
+  'menu.sfxVolume': 'Effects volume',
+  'menu.musicVolume': 'Music volume',
   'menu.notifications': 'Notifications',
   'menu.language': 'Language',
   'menu.notation': 'Number notation',

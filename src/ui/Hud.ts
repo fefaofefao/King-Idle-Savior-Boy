@@ -84,6 +84,7 @@ export class Hud {
   }
 
   private openBuffModal(): void {
+    if (this.app.goldBuffFull()) return;
     this.app.modals.open({
       title: t('ads.buffTitle'),
       body: [h('p', { text: t('ads.buffText') }), h('p', { class: 'ad-note', text: t('ads.isAd') })],
@@ -115,6 +116,7 @@ export class Hud {
     const buffLeft = Math.max(0, (s.adGoldBuffUntil - now) / 1000);
     setText(E.buffTimer, buffLeft > 0 ? formatTime(buffLeft) : '');
     toggleClass(E.buffBtn, 'active', buffLeft > 0 || s.noAds);
+    toggleClass(E.buffBtn, 'full', app.goldBuffFull(now));
 
     const z = zoneIndex(s.stage);
     setText(E.stage, t('hud.stage', { n: s.stage }));

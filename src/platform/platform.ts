@@ -62,17 +62,27 @@ export async function hideSplash(): Promise<void> {
 // ---------- Notificações locais ----------
 const OFFLINE_FULL_ID = 1001;
 
+/** Pede a permissão de notificação (Android 13+) com o app em primeiro plano. */
+export async function requestNotificationPermission(): Promise<boolean> {
+  if (!isNative()) return false;
+  try {
+    const perm = await LocalNotifications.checkPermissions();
+    if (perm.display === 'granted') return true;
+    if (perm.display === 'denied') return false;
+    return (await LocalNotifications.requestPermissions()).display === 'granted';
+  } catch {
+    return false;
+  }
+}
+
 export async function scheduleOfflineFull(at: Date, title: string, body: string): Promise<void> {
   if (!isNative()) return;
   try {
-    const perm = await LocalNotifications.checkPermissions();
-    if (perm.display !== 'granted') {
-      const req = await LocalNotifications.requestPermissions();
-      if (req.display !== 'granted') return;
-    }
+    // Não pede permissão aqui: o app está indo para segundo plano.
+    if ((await LocalNotifications.checkPermissions()).display !== 'granted') return;
     await LocalNotifications.cancel({ notifications: [{ id: OFFLINE_FULL_ID }] });
     await LocalNotifications.schedule({
-      notifications: [{ id: OFFLINE_FULL_ID, title, body, schedule: { at, allowWhileIdle: true } }],
+      notifications: [{ id: OFFLINE_FULL_ID, title, body, schedule: { at, allowWhileIdle: false } }],
     });
   } catch (e) {
     console.warn('[notif] falha ao agendar', e);

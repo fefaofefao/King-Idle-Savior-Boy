@@ -17,7 +17,7 @@ import {
   tapDamage,
 } from '../core/formulas';
 import type { BuyAmount } from '../core/game';
-import { ACHIEVEMENTS, canClaimDaily, dailyReward, missionDef } from '../core/retention';
+import { ACHIEVEMENTS, canClaimDaily, missionDef } from '../core/retention';
 import type { Notation } from '../core/state';
 import { LANGUAGES, t, tk } from '../i18n';
 import { h, setDisabled, setText, toggleClass } from './dom';
@@ -358,8 +358,7 @@ export class Panel {
         toggleClass(c, 'claimed', i < st.daily.index || (!claimable && i === st.daily.index - 1));
         toggleClass(c, 'today', claimable && i === st.daily.index);
       });
-      const r = dailyReward(st.daily.index);
-      setText(dailyBtn, claimable ? `${t('quests.claim')} · ${t('quests.day', { n: st.daily.index + 1 })}${'crystals' in r ? '' : ''}` : t('quests.comeBack'));
+      setText(dailyBtn, claimable ? `${t('quests.claim')} · ${t('quests.day', { n: st.daily.index + 1 })}` : t('quests.comeBack'));
       setDisabled(dailyBtn, !claimable);
 
       for (const mr of missionRows) {
@@ -404,6 +403,20 @@ export class Panel {
     return h('div', { class: 'setting' }, [h('span', { text: label }), sw]);
   }
 
+  private volumeRow(label: string, get: () => number, set: (v: number) => void): HTMLElement {
+    const input = h('input', { type: 'range', min: '0', max: '100', step: '5', 'aria-label': label });
+    input.value = String(Math.round(get() * 100));
+    input.addEventListener('input', () => {
+      set(Number(input.value) / 100);
+      this.app.applySettings();
+    });
+    input.addEventListener('change', () => {
+      sfx.play('coin');
+      this.app.queueSave();
+    });
+    return h('label', { class: 'slider' }, [h('span', { text: label }), input]);
+  }
+
   private buildMenu(): void {
     const app = this.app;
     const st = app.state.settings;
@@ -413,7 +426,9 @@ export class Panel {
       this.toggleRow(t('menu.sound'), () => st.sound, (v) => (st.sound = v)),
       this.toggleRow(t('menu.music'), () => st.music, (v) => (st.music = v)),
       this.toggleRow(t('menu.vibration'), () => st.vibration, (v) => (st.vibration = v)),
-      this.toggleRow(t('menu.notifications'), () => st.notifications, (v) => (st.notifications = v)),
+      this.toggleRow(t('menu.notifications'), () => st.notifications, (v) => app.setNotifications(v)),
+      this.volumeRow(t('menu.sfxVolume'), () => st.sfxVolume, (v) => (st.sfxVolume = v)),
+      this.volumeRow(t('menu.musicVolume'), () => st.musicVolume, (v) => (st.musicVolume = v)),
     );
 
     // Idioma (3 opções)

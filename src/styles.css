@@ -159,6 +159,9 @@ button {
   color: #3a2600;
   box-shadow: 0 3px 0 #9a6e0b;
 }
+.buff-btn.full {
+  opacity: 0.75;
+}
 .buff-timer:empty {
   display: none;
 }
@@ -1086,4 +1089,21 @@ table.stats td:last-child {
   .abilities {
     bottom: 22px;
   }
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--muted);
+}
+.slider input {
+  flex: 1;
+  max-width: 200px;
+  height: 32px;
+  accent-color: var(--gold);
 }
