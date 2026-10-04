@@ -106,7 +106,44 @@ export const MONSTER_ICONS: Record<string, string> = {
   witch: skull('<path d="M24 0l12 15H12z" fill="#2f4a2f"/><rect x="8" y="13" width="32" height="4" rx="2" fill="#2f4a2f"/>', '#cfe8cf', '#7aff6a'),
   general: skull('<path d="M10 20C10 8 38 8 38 20z" fill="#9aa3ad"/><path d="M10 14l-6-8 9 5zM38 14l6-8-9 5z" fill="#f4ead2"/>', '#f2efe4', '#ff3b3b'),
   king: '<img src="models/sprites/skeleton_king/south.png" alt="" class="pixel">',
+  slime: svg(
+    '<path d="M6 38c0-14 8-26 18-26s18 12 18 26c0 3-3 4-18 4S6 41 6 38z" fill="#5fd35a"/><ellipse cx="16" cy="20" rx="4" ry="2.5" fill="#d8ffd0" opacity=".8"/><circle cx="18" cy="28" r="4" fill="#fff"/><circle cx="30" cy="28" r="4" fill="#fff"/><circle cx="18.5" cy="29" r="2" fill="#123010"/><circle cx="30.5" cy="29" r="2" fill="#123010"/><path d="M20 35q4 3 8 0" stroke="#123010" stroke-width="2" fill="none"/>',
+  ),
+  mushroom: svg(
+    '<rect x="16" y="24" width="16" height="18" rx="6" fill="#f2e2c4"/><path d="M4 26C4 12 14 5 24 5s20 7 20 21z" fill="#d93a32"/><circle cx="24" cy="12" r="3.5" fill="#fff6e8"/><circle cx="13" cy="19" r="3" fill="#fff6e8"/><circle cx="35" cy="19" r="3" fill="#fff6e8"/><circle cx="20" cy="32" r="2.4" fill="#1a1020"/><circle cx="28" cy="32" r="2.4" fill="#1a1020"/><path d="M16.5 28l6 2M31.5 28l-6 2" stroke="#3a1a10" stroke-width="2"/>',
+  ),
+  bat: svg(
+    '<path d="M24 18L4 12l4 8-4 6 8-2 4 6 8-6 8 6 4-6 8 2-4-6 4-8z" fill="#5c3d7d"/><circle cx="24" cy="24" r="9" fill="#4a3266"/><path d="M17 17l2-7 4 6zM31 17l-2-7-4 6z" fill="#4a3266"/><circle cx="20.5" cy="23" r="2.5" fill="#ffe060"/><circle cx="27.5" cy="23" r="2.5" fill="#ffe060"/><circle cx="20.5" cy="23.5" r="1.2" fill="#ff2a2a"/><circle cx="27.5" cy="23.5" r="1.2" fill="#ff2a2a"/><path d="M22 29l1 3 1-3M26 29l-1 3-1-3" fill="#fff"/>',
+  ),
+  golem: svg(
+    '<rect x="8" y="18" width="32" height="22" rx="3" fill="#8d8a86"/><rect x="15" y="6" width="18" height="14" rx="2" fill="#6b6864"/><rect x="2" y="20" width="8" height="16" rx="2" fill="#6b6864"/><rect x="38" y="20" width="8" height="16" rx="2" fill="#6b6864"/><rect x="18" y="11" width="4" height="3" fill="#7af2ff"/><rect x="26" y="11" width="4" height="3" fill="#7af2ff"/><path d="M24 24l4 5-4 5-4-5z" fill="#7af2ff"/><rect x="10" y="17" width="20" height="3" fill="#5c9a3c"/>',
+  ),
+  imp: svg(
+    '<path d="M8 22l8 2-2 8zM40 22l-8 2 2 8z" fill="#8a1a1a"/><circle cx="24" cy="34" r="9" fill="#e0442e"/><circle cx="24" cy="19" r="10" fill="#e0442e"/><path d="M16 12l-3-8 7 5zM32 12l3-8-7 5z" fill="#3a2418"/><circle cx="20" cy="19" r="2.6" fill="#ffd23a"/><circle cx="28" cy="19" r="2.6" fill="#ffd23a"/><path d="M19 24q5 4 10 0" stroke="#2a0400" stroke-width="2" fill="none"/><circle cx="41" cy="34" r="4" fill="#ffb020"/>',
+  ),
 };
+
+/** Ícones das relíquias (flat, mesmo estilo). */
+export const RELIC_ICONS: Record<string, string> = {
+  sword: svg('<path d="M34 6l8-2-2 8-18 18-6-6z" fill="#dfe6ee"/><path d="M34 6l8-2-2 8-9 9-6-6z" fill="#b8c4d2"/><path d="M12 28l8 8-3 3-8-8z" fill="#d9a520"/><path d="M14 34l-8 8-2-2 8-8z" fill="#7a4a24"/>'),
+  banner: svg('<rect x="10" y="4" width="3" height="40" rx="1.5" fill="#7a4a24"/><path d="M13 7h26l-6 9 6 9H13z" fill="#3b7de0"/><path d="M22 11l2 4 4 .5-3 3 .7 4-3.7-2-3.7 2 .7-4-3-3 4-.5z" fill="#ffd54a"/>'),
+  purse: svg('<path d="M14 18h20l6 18c0 4-4 7-8 7H16c-4 0-8-3-8-7z" fill="#a5672e"/><path d="M16 12h16l-2 6H18z" fill="#7a4a24"/><circle cx="24" cy="30" r="6" fill="#ffd54a"/><circle cx="24" cy="30" r="3.5" fill="#f2b520"/>'),
+  eye: svg('<path d="M4 24C10 13 17 9 24 9s14 4 20 15c-6 11-13 15-20 15S10 35 4 24z" fill="#f4ead2"/><circle cx="24" cy="24" r="9" fill="#d9a520"/><circle cx="24" cy="24" r="4.5" fill="#1a1a1a"/><circle cx="21" cy="21" r="2" fill="#fff"/>'),
+  lens: svg('<circle cx="20" cy="20" r="13" fill="#c4ecff" stroke="#d9a520" stroke-width="4"/><path d="M14 16a7 7 0 0 1 7-5" stroke="#fff" stroke-width="2.5" fill="none"/><path d="M29 29l12 12" stroke="#7a4a24" stroke-width="6" stroke-linecap="round"/><circle cx="20" cy="20" r="3" fill="#e04848"/>'),
+  hourglass: svg('<rect x="10" y="4" width="28" height="5" rx="2" fill="#d9a520"/><rect x="10" y="39" width="28" height="5" rx="2" fill="#d9a520"/><path d="M14 9h20c0 9-7 11-7 15s7 6 7 15H14c0-9 7-11 7-15s-7-6-7-15z" fill="#c4ecff"/><path d="M17 36c2-5 5-6 7-6s5 1 7 6zM19 13h10c-1 3-3 5-5 6-2-1-4-3-5-6z" fill="#ffd54a"/>'),
+  clover: svg('<circle cx="17" cy="17" r="8" fill="#ffd54a"/><circle cx="31" cy="17" r="8" fill="#ffd54a"/><circle cx="17" cy="31" r="8" fill="#ffd54a"/><circle cx="31" cy="31" r="8" fill="#ffd54a"/><circle cx="24" cy="24" r="4" fill="#f2b520"/><path d="M28 30l10 14" stroke="#5c9a3c" stroke-width="3" stroke-linecap="round"/>'),
+  lantern: svg('<path d="M18 6h12l-2 5H20z" fill="#3a3a48"/><rect x="14" y="11" width="20" height="26" rx="4" fill="#3a3a48"/><rect x="18" y="15" width="12" height="18" rx="3" fill="#ffd54a"/><path d="M24 18c3 3 3 6 0 10-3-4-3-7 0-10z" fill="#ff8a20"/><rect x="12" y="37" width="24" height="5" rx="2" fill="#3a3a48"/>'),
+  horn: svg('<path d="M6 32C10 18 26 8 42 8l-2 8C30 18 18 26 14 36z" fill="#f4ead2"/><path d="M38 6l6 2-4 10-4-2z" fill="#d9a520"/><path d="M6 32l8 4-2 6-8-4z" fill="#d9a520"/><path d="M14 24l6 4M22 18l5 4M30 13l4 4" stroke="#c9b48a" stroke-width="2"/>'),
+  crown: svg('<path d="M6 36l-2-22 10 9 10-15 10 15 10-9-2 22z" fill="#ffd54a"/><path d="M24 8l-3 28M28 20l-4 6" stroke="#7a4a24" stroke-width="2"/><rect x="6" y="36" width="36" height="6" rx="2" fill="#f2b520"/><circle cx="14" cy="30" r="2.5" fill="#e04848"/><circle cx="34" cy="30" r="2.5" fill="#3b7de0"/>'),
+  chalice: svg('<path d="M10 6h28c0 12-6 18-14 18S10 18 10 6z" fill="#ffd54a"/><path d="M14 8h20c-1 7-4 11-10 11S15 15 14 8z" fill="#b8264a"/><rect x="21" y="23" width="6" height="12" fill="#f2b520"/><path d="M12 42c0-5 5-7 12-7s12 2 12 7z" fill="#f2b520"/>'),
+  grimoire: svg('<rect x="8" y="6" width="30" height="36" rx="3" fill="#5a2a8a"/><rect x="34" y="8" width="6" height="32" rx="2" fill="#f4ead2"/><circle cx="22" cy="24" r="8" fill="none" stroke="#c49aff" stroke-width="2.5"/><path d="M22 14v20M12 24h20" stroke="#c49aff" stroke-width="2"/><rect x="8" y="6" width="4" height="36" fill="#3a1a5a"/>'),
+};
+
+/** Ícone do herói para os visuais (o elmo recebe a cor do visual). */
+export const skinIcon = (tint: string, glow: string): string =>
+  svg(
+    `<circle cx="24" cy="24" r="21" fill="${glow}" opacity=".55"/><path d="M10 28c0-10 6-18 14-18s14 8 14 18v8H10z" fill="${tint}" stroke="rgba(0,0,0,.25)" stroke-width="1.5"/><rect x="14" y="23" width="20" height="5" rx="2" fill="#2d3a55"/><path d="M24 4l3 8h-6z" fill="#e04848"/><rect x="10" y="36" width="28" height="6" rx="2" fill="${tint}" opacity=".8"/>`,
+  );
 
 /** Bandeiras simplificadas (emoji de bandeira não aparece em todos os aparelhos). */
 export const FLAGS: Record<string, string> = {

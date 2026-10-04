@@ -6,6 +6,8 @@ import {
   MONSTER_LOOK,
   SPRITE_BOSS,
   HAND_BONES,
+  CREATURES,
+  isCreature,
   RENDER,
   ZONES,
   type ModelKey,
@@ -13,6 +15,7 @@ import {
 } from '../config/visual';
 import { Actor } from './Actor';
 import { SpriteActor, type EnemyActor } from './SpriteActor';
+import { CreatureActor } from './CreatureActor';
 import type { Assets } from './Assets';
 import { Particles, Projectiles, bossAura, goldenAura } from './Effects';
 import { BALANCE } from '../config/balance';
@@ -155,6 +158,18 @@ export class GameScene {
     this.zone.setZone(index);
   }
 
+  /** Visual do Cavaleiro (cores do traje). */
+  setKnightSkin(id: string): void {
+    const sk = BALANCE.skins.list.find((x) => x.id === id) ?? BALANCE.skins.list[0];
+    this.knight.tint(sk.tint, sk.emissive);
+  }
+
+  /** Brilho de comemoração (visual novo, relíquia). */
+  celebrate(color = '#ffd54a'): void {
+    const at = new THREE.Vector3(...CHARACTER.knight.pos).setY(1.2);
+    this.particles.burst(at, color, 28, 3.2, 5, 1.3);
+  }
+
   setMageVisible(v: boolean): void {
     this.mage.root.visible = v;
   }
@@ -167,10 +182,14 @@ export class GameScene {
       this.spawnSpriteKing();
       return;
     }
-    const look = MONSTER_LOOK[monster.type] ?? MONSTER_LOOK.minion;
-    const e = this.makeActor(look.model, CHARACTER.enemy, look.weapons);
     const z = ZONES[this.zoneIndex];
     const affix = monster.affix ? AFFIX_LOOK[monster.affix as keyof typeof AFFIX_LOOK] : null;
+    if (isCreature(monster.type)) {
+      this.spawnCreature(monster.type, monster.affix, affix);
+      return;
+    }
+    const look = MONSTER_LOOK[monster.type] ?? MONSTER_LOOK.minion;
+    const e = this.makeActor(look.model, CHARACTER.enemy, look.weapons);
     // Tint final = zona × tipo × variação.
     const tint = new THREE.Color(z.enemyTint).multiply(new THREE.Color(look.tint));
     if (affix) tint.multiply(new THREE.Color(affix.tint)).lerp(new THREE.Color(affix.tint), 0.45);
@@ -196,6 +215,31 @@ export class GameScene {
     this.enemy = e;
     this.enemyIsBoss = boss;
     this.enemyScale = scale;
+  }
+
+  private spawnCreature(
+    kind: keyof typeof CREATURES,
+    affixId: string | null,
+    affix: (typeof AFFIX_LOOK)[keyof typeof AFFIX_LOOK] | null,
+  ): void {
+    const e = new CreatureActor(kind);
+    e.root.position.copy(this.enemyPos);
+    this.scene.add(e.root);
+    // Criaturas têm cores próprias: a zona só tinge de leve; variações tingem forte.
+    e.tint(ZONES[this.zoneIndex].enemyTint, null, 0.25);
+    if (affix) e.tint(affix.tint, affix.emissive, 0.7);
+    let scale = CREATURES[kind].scale;
+    if (affixId === 'giant') scale *= BALANCE.monsters.affixes.giant.scale;
+    else if (affixId === 'golden') {
+      this.aura = goldenAura();
+      this.aura.position.copy(this.enemyPos);
+      this.scene.add(this.aura);
+    }
+    e.baseScale = scale;
+    e.spawn();
+    this.enemy = e;
+    this.enemyIsBoss = false;
+    this.enemyScale = scale * (CREATURES[kind].hover > 0.5 ? 1.4 : 0.85);
   }
 
   /** Chamado quando o Rei acerta um soco (App toca som/vibração). */

@@ -1,4 +1,4 @@
-import { BALANCE, type AbilityId, type AffixId, type CrystalUpgradeId, type MonsterId, type RelicId } from '../config/balance';
+import { BALANCE, type AbilityId, type AffixId, type CrystalUpgradeId, type MonsterId, type RelicId, type SkinId } from '../config/balance';
 import { D, Decimal, maxAffordable } from './bignum';
 import {
   arcaneCost,
@@ -13,6 +13,7 @@ import {
   goldMult,
   incomePerSec,
   relicBonus,
+  skinUnlocked,
   mageHitDamage,
   mageUnlocked,
   memberCost,
@@ -40,6 +41,7 @@ export type GameEvent =
   | { type: 'escaped' }
   | { type: 'relic'; id: RelicId; level: number; crystals: number }
   | { type: 'combo'; count: number; gold: Decimal }
+  | { type: 'skinUnlocked'; id: SkinId }
   | { type: 'armorBroken' }
   | { type: 'stageChanged'; stage: number }
   | { type: 'bossTimeout'; canExtend: boolean }
@@ -98,6 +100,7 @@ export class Game {
       offerBossExtension: opts.offerBossExtension ?? false,
       respawnDelaySec: opts.respawnDelaySec ?? 0.6,
     };
+    this.checkSkins();
     this.spawnEnemy();
   }
 
@@ -381,7 +384,7 @@ export class Game {
     this.checkAchievements();
   }
 
-  /** Chefe derrotado: chance de relíquia (General 25%, Rei 100%). */
+  /** Chefe derrotado: chance de relíquia (General 15%, Rei 100%). */
   private rollRelic(): void {
     const s = this.state;
     const R = BALANCE.relics;
@@ -637,6 +640,35 @@ export class Game {
 
   checkAchievements(): void {
     for (const id of checkAchievements(this.state)) this.emit({ type: 'achievement', id });
+    this.checkSkins();
+  }
+
+  // ---------------- Visuais ----------------
+
+  /** Visuais já conhecidos (para avisar só dos novos); refeito em silêncio se o estado for trocado. */
+  private knownSkins: Set<SkinId> | null = null;
+  private knownSkinsFor: GameState | null = null;
+
+  private checkSkins(): void {
+    const s = this.state;
+    const unlocked = BALANCE.skins.list.filter((x) => skinUnlocked(s, x.id)).map((x) => x.id as SkinId);
+    if (!this.knownSkins || this.knownSkinsFor !== s) {
+      this.knownSkins = new Set(unlocked);
+      this.knownSkinsFor = s;
+      return;
+    }
+    for (const id of unlocked) {
+      if (this.knownSkins.has(id)) continue;
+      this.knownSkins.add(id);
+      this.emit({ type: 'skinUnlocked', id });
+    }
+  }
+
+  /** Troca o visual do Cavaleiro (só se liberado). */
+  setSkin(id: SkinId): boolean {
+    if (!skinUnlocked(this.state, id) || this.state.skin === id) return false;
+    this.state.skin = id;
+    return true;
   }
 
   ensureMissions(now: number): void {

@@ -103,6 +103,46 @@ export class Floaters {
     setTimeout(() => el.remove(), ms + 400);
   }
 
+  /** Cartões de prêmio (relíquia, visual novo): um por vez, não bloqueiam o jogo. */
+  private lootQueue: { icon: string; title: string; sub: string; cls: string }[] = [];
+  private lootShowing = false;
+
+  loot(icon: string, title: string, sub: string, cls = ''): void {
+    this.lootQueue.push({ icon, title, sub, cls });
+    if (!this.lootShowing) this.nextLoot();
+  }
+
+  private nextLoot(): void {
+    const item = this.lootQueue.shift();
+    if (!item) {
+      this.lootShowing = false;
+      return;
+    }
+    this.lootShowing = true;
+    const el = h('div', { class: `loot-card ${item.cls}`, role: 'status' }, [
+      h('div', { class: 'loot-rays' }),
+      h('div', { class: 'loot-icon', html: item.icon }),
+      h('div', { class: 'loot-title', text: item.title }),
+      h('div', { class: 'loot-sub', text: item.sub }),
+    ]);
+    this.toastBox.parentElement!.appendChild(el);
+    let gone = false;
+    const close = () => {
+      if (gone) return;
+      gone = true;
+      el.classList.add('out');
+      setTimeout(() => {
+        el.remove();
+        this.nextLoot();
+      }, 300);
+    };
+    el.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      close();
+    });
+    setTimeout(close, 2600);
+  }
+
   banner(text: string, cls = ''): void {
     const el = h('div', { class: `banner ${cls}`, text });
     this.layer.appendChild(el);

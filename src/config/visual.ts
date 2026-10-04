@@ -159,6 +159,17 @@ export const MONSTER_LOOK: Record<
   king: { model: 'skeletonWarrior', weapons: [['skeletonAxe', 'right'], ['skeletonShield', 'left']], tint: '#ffd0d0' },
 };
 
+/** Criaturas procedurais (src/scene/CreatureActor.ts): sombra, altura de voo, giro e escala. */
+export type CreatureKind = 'slime' | 'mushroom' | 'bat' | 'golem' | 'imp';
+export const CREATURES: Record<CreatureKind, { shadow: number; hover: number; rotY: number; scale: number }> = {
+  slime: { shadow: 0.7, hover: 0, rotY: -0.45, scale: 1.1 },
+  mushroom: { shadow: 0.55, hover: 0, rotY: -0.45, scale: 1.15 },
+  bat: { shadow: 0.4, hover: 1.05, rotY: -0.4, scale: 1.25 },
+  golem: { shadow: 0.8, hover: 0, rotY: -0.5, scale: 1.05 },
+  imp: { shadow: 0.4, hover: 0.25, rotY: -0.45, scale: 1.2 },
+};
+export const isCreature = (type: string): type is CreatureKind => type in CREATURES;
+
 /**
  * Rei Esqueleto em pixel art (sprites enviados pelo dono), desenhado como billboard na cena 3D.
  * Medidas em pixels conferidas nos PNGs: pose parada 48×48 (pé a 2 px da borda de baixo);

@@ -351,4 +351,8 @@ export const en: Locale = {
   "hud.offlineBoost": "Tap and hold to attack non-stop",
   "welcome.title": "Welcome back!",
   "welcome.streak": "Day {n} in a row",
+  "quests.claimAll": "Claim all ({n})",
+  "crystal.current": "Current: {v}",
+  "ability.cooling": "{name}: {desc} · ready in {time}",
+  "ability.lockedInfo": "{name}: {desc} · unlocks at stage {n}",
 };

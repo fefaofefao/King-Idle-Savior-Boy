@@ -349,6 +349,10 @@ export const ptBR = {
   "hud.offlineBoost": "Toque e segure para atacar sem parar",
   "welcome.title": "Bem-vindo de volta!",
   "welcome.streak": "Dia {n} seguido",
+  "quests.claimAll": "Coletar tudo ({n})",
+  "crystal.current": "Atual: {v}",
+  "ability.cooling": "{name}: {desc} · pronta em {time}",
+  "ability.lockedInfo": "{name}: {desc} · libera na fase {n}",
 };
 
 export type LocaleKey = keyof typeof ptBR;

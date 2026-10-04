@@ -3,7 +3,8 @@ import { canShowInterstitial } from './ads/AdPolicy';
 import type { AdService, RewardedPlacement } from './ads/AdService';
 import { MockAdService } from './ads/MockAdService';
 import { sfx } from './audio/Sfx';
-import { BALANCE } from './config/balance';
+import { BALANCE, type SkinId } from './config/balance';
+import { relicStatText } from './ui/relicText';
 import { D, Decimal } from './core/bignum';
 import { formatNumber, formatTime } from './core/format';
 import { offlineCapSec, mageUnlocked, totalDps, crystalsForPrestige, prestigeDamageGain } from './core/formulas';
@@ -40,7 +41,7 @@ import { GameScene } from './scene/GameScene';
 import { $, h } from './ui/dom';
 import { Floaters } from './ui/Floaters';
 import { Hud } from './ui/Hud';
-import { ICONS, MONSTER_ICONS } from './ui/icons';
+import { ICONS, MONSTER_ICONS, RELIC_ICONS, skinIcon } from './ui/icons';
 import { showTitleScreen } from './ui/Intro';
 import { Modals } from './ui/Modals';
 import { Panel } from './ui/Panel';
@@ -102,7 +103,8 @@ export class App {
     this.game.on((e) => this.onGameEvent(e));
     this.scene.setZone(zoneIndex(s.stage));
     this.scene.setMageVisible(mageUnlocked(s));
-    this.scene.spawnEnemy(this.game.isBoss);
+    this.scene.setKnightSkin(s.skin);
+    this.scene.spawnEnemy(this.game.isBoss, this.game.monster);
     this.game.ensureMissions(now);
     this.scheduleChest(now);
 
@@ -111,7 +113,8 @@ export class App {
     // Primeira vez: história do capítulo 1 e a dica de toque.
     if (s.story.index === 0 && s.stats.taps === 0) this.showChapterIntro(() => this.showTapHint());
     else this.showTapHint();
-    // (A recompensa diária é indicada pela bolinha na aba Missões — sem aviso em caixa ao abrir.)
+    // Recompensa diária: na 1ª abertura só a bolinha na aba Missões; nos outros dias, um convite.
+    if (s.stats.taps > 0) this.offerDailyWhenFree();
 
     this.scene.onFrame = (dt) => this.frame(dt);
     this.scene.start();
@@ -211,7 +214,10 @@ export class App {
     const now = Date.now();
     this.scene.markInteraction();
     const r = this.game.tap(now);
-    if (r) this.scene.knightSwing();
+    if (r) {
+      this.scene.knightSwing();
+      this.hud.setCombo(this.game.combo);
+    }
   }
 
   /** Cartão de entrada do chefe: retrato + nome + tempo. */
@@ -314,7 +320,38 @@ export class App {
         break;
       case 'bossFailed':
         this.floaters.banner(t('boss.failed'), 'bad');
+        this.floaters.toast(t('boss.tip'), ICONS.hero, 3600);
         break;
+      case 'relic': {
+        const R = BALANCE.relics.list.find((x) => x.id === e.id)!;
+        if (e.crystals > 0) {
+          this.floaters.loot(ICONS.crystal, t('relics.maxed', { n: e.crystals }), '', 'crystal');
+        } else {
+          const title = e.level === 1 ? t('relics.found') : t('relics.upgraded', { n: e.level });
+          this.floaters.loot(RELIC_ICONS[e.id], title, `${tk(`relic.${e.id}`)} · ${relicStatText(R.stat, R.perLevel * e.level)}`, e.level === 1 ? 'new' : '');
+        }
+        sfx.play('chest');
+        vibrate(true);
+        this.scene.celebrate('#c49aff');
+        this.queueSave();
+        break;
+      }
+      case 'skinUnlocked': {
+        const sk = BALANCE.skins.list.find((x) => x.id === e.id)!;
+        this.floaters.loot(skinIcon(sk.tint, sk.emissive === '#000000' ? '#ffd54a' : sk.emissive), t('skins.unlocked', { name: tk(`skin.${e.id}`) }), t('skins.desc'), 'new');
+        sfx.play('levelUp');
+        this.scene.celebrate('#ffd54a');
+        this.queueSave();
+        break;
+      }
+      case 'combo': {
+        const pos = this.scene.enemyScreenPos();
+        this.floaters.banner(`${t('combo.milestone', { n: e.count })}  +${formatNumber(e.gold, s.settings.notation)} 🪙`, 'combo');
+        this.floaters.coins(pos.x, pos.y, this.hud.goldAnchor, 6, () => sfx.play('coin'));
+        sfx.play('levelUp');
+        vibrate(false);
+        break;
+      }
       case 'mageCast':
         this.scene.mageCast();
         sfx.play('magic');
@@ -331,6 +368,7 @@ export class App {
       case 'ability':
         sfx.play(e.id === 'goldRain' ? 'chest' : 'levelUp');
         this.scene.shake(0.08);
+        vibrate(true);
         this.queueSave();
         break;
       case 'achievement': {
@@ -588,6 +626,47 @@ export class App {
     this.queueSave();
   }
 
+  /** Mostra o convite da recompensa diária assim que não houver outro modal aberto. */
+  private offerDailyWhenFree(): void {
+    const tryOpen = () => {
+      if (!canClaimDaily(this.state, Date.now())) return;
+      if (this.modals.isOpen) return void setTimeout(tryOpen, 600);
+      this.showDailyModal();
+    };
+    setTimeout(tryOpen, 700);
+  }
+
+  private showDailyModal(): void {
+    const s = this.state;
+    const today = s.daily.index;
+    const days = h(
+      'div',
+      { class: 'daily' },
+      BALANCE.daily.rewards.map((r, i) =>
+        h('div', { class: `day ${i < today ? 'claimed' : ''} ${i === today ? 'today' : ''}` }, [
+          h('span', { class: 'day-n', text: t('quests.day', { n: i + 1 }) }),
+          h('span', { class: 'ico', html: 'crystals' in r ? ICONS.crystal : ICONS.gold }),
+          h('span', { class: 'day-v', text: 'crystals' in r ? `+${r.crystals}` : '' }),
+        ]),
+      ),
+    );
+    this.modals.open({
+      title: t('welcome.title'),
+      className: 'daily-modal',
+      body: [h('p', { class: 'streak', text: t('welcome.streak', { n: today + 1 }) }), days],
+      buttons: [
+        {
+          label: `${t('quests.claim')} · ${t('quests.day', { n: today + 1 })}`,
+          kind: 'primary',
+          onClick: () => {
+            this.claimDaily();
+            this.panel.update(true);
+          },
+        },
+      ],
+    });
+  }
+
   claimMission(index: number): void {
     const s = this.state;
     const m = s.missions.list[index];
@@ -604,6 +683,15 @@ export class App {
   claimStory(): void {
     this.game.claimStory(Date.now());
     this.panel.update(true);
+  }
+
+  /** Troca o visual do herói (aba Herói). */
+  setSkin(id: SkinId): void {
+    if (!this.game.setSkin(id)) return;
+    this.scene.setKnightSkin(id);
+    this.scene.celebrate('#ffffff');
+    sfx.play('buy');
+    this.queueSave();
   }
 
   /** Modal com a história do capítulo atual. */
@@ -749,6 +837,7 @@ export class App {
     if (!this.adBusy) this.handleOffline(Date.now());
     else this.state.lastSeen = Date.now();
     this.refreshMissions(Date.now());
+    this.offerDailyWhenFree();
     sfx.resume();
     this.scene.start();
   }

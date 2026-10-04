@@ -1810,3 +1810,353 @@ img.pixel,
     box-shadow: 0 0 18px rgba(141, 224, 106, 0.8);
   }
 }
+
+/* ---------- Versão final: coleção, combo, prêmios e UX ---------- */
+
+/* Troca de aba suave */
+.tab-content.enter > * {
+  animation: tab-in 0.22s ease-out both;
+}
+.tab-content.enter > *:nth-child(2) { animation-delay: 0.02s; }
+.tab-content.enter > *:nth-child(3) { animation-delay: 0.04s; }
+.tab-content.enter > *:nth-child(4) { animation-delay: 0.06s; }
+.tab-content.enter > *:nth-child(n + 5) { animation-delay: 0.08s; }
+@keyframes tab-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.tab {
+  transition: transform 0.12s, background 0.2s;
+}
+.tab:active {
+  transform: scale(0.94);
+}
+
+/* Compra: "pop" a cada compra (inclusive segurando) */
+.btn.buy.pop {
+  animation: buy-pop 0.18s ease-out;
+}
+@keyframes buy-pop {
+  40% {
+    transform: scale(1.08);
+    filter: brightness(1.25);
+  }
+}
+.btn.buy {
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+
+/* Melhor compra na Guilda */
+.row {
+  position: relative;
+}
+.best-tag {
+  position: absolute;
+  top: -6px;
+  right: 10px;
+  background: linear-gradient(180deg, #ffe27a, #e0a81e);
+  color: #3a2400;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  box-shadow: 0 2px 0 #7a5200;
+  display: none;
+}
+.row.best .best-tag {
+  display: block;
+}
+.row.best {
+  box-shadow: inset 0 0 0 2px rgba(255, 213, 74, 0.7);
+}
+
+/* Grades de cartões (visuais e relíquias) */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--panel-2);
+  border-radius: 14px;
+  padding: 8px 4px 6px;
+  min-height: 108px;
+  text-align: center;
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+button.card:active:not(:disabled) {
+  transform: scale(0.95);
+}
+.card-icon {
+  width: 46px;
+  height: 46px;
+}
+.card-name {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.card-sub {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.15;
+}
+.card-level {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 10px;
+  color: var(--gold);
+}
+.card.locked .card-icon {
+  filter: grayscale(1) brightness(0.45);
+}
+.card.locked {
+  opacity: 0.75;
+}
+.skin-card.active {
+  box-shadow: inset 0 0 0 2px var(--gold), 0 0 12px rgba(255, 213, 74, 0.35);
+}
+.skin-card.active .card-sub {
+  color: var(--gold);
+}
+.skin-card:not(.locked):not(.active) .card-sub {
+  color: var(--green);
+  font-weight: 600;
+}
+.relic-card.maxed {
+  box-shadow: inset 0 0 0 2px #c49aff;
+}
+.relic-card:not(.locked) .card-sub {
+  color: #d9c4ff;
+}
+@media (max-width: 360px) {
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Combo */
+.combo {
+  position: absolute;
+  left: calc(var(--safe-left) + 12px);
+  top: 46%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+.combo.show {
+  opacity: 1;
+  transform: none;
+}
+.combo-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #ffe9a0;
+  text-shadow: 0 2px 0 #000;
+}
+.combo-num {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 3px 0 #000, 0 0 12px rgba(255, 140, 40, 0.6);
+}
+.combo.hot .combo-num {
+  color: #ffb340;
+}
+.combo.pulse .combo-num {
+  animation: combo-pulse 0.15s ease-out;
+}
+@keyframes combo-pulse {
+  50% {
+    transform: scale(1.18);
+  }
+}
+.combo-bar {
+  width: 70px;
+  height: 5px;
+  margin-top: 3px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+.combo-bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ffb340, #ff5a2a);
+  transition: width 0.12s;
+}
+.banner.combo {
+  color: #ffb340;
+  font-size: 24px;
+  top: 40%;
+}
+
+/* Habilidade acabou de recarregar */
+.ability.just-ready {
+  animation: ability-ready 0.6s ease-out;
+}
+@keyframes ability-ready {
+  30% {
+    transform: scale(1.18);
+    box-shadow: 0 4px 0 #111b33, 0 0 26px rgba(255, 213, 74, 1);
+  }
+}
+
+/* Cartão de prêmio (relíquia, visual novo) */
+.loot-card {
+  position: fixed;
+  left: 50%;
+  top: 30%;
+  z-index: 30;
+  transform: translate(-50%, -50%);
+  width: min(78vw, 300px);
+  padding: 16px 14px 14px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #3b2a7a, #1f2550);
+  border: 3px solid #c49aff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 30px rgba(196, 154, 255, 0.45);
+  text-align: center;
+  overflow: hidden;
+  animation: loot-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.loot-card.new {
+  border-color: var(--gold);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 34px rgba(255, 213, 74, 0.55);
+}
+.loot-card.crystal {
+  border-color: var(--crystal);
+}
+.loot-card.out {
+  opacity: 0;
+  transform: translate(-50%, -60%) scale(0.9);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.loot-rays {
+  position: absolute;
+  left: 50%;
+  top: 46px;
+  width: 260px;
+  height: 260px;
+  margin: -130px 0 0 -130px;
+  background: repeating-conic-gradient(rgba(255, 255, 255, 0.12) 0 10deg, transparent 10deg 30deg);
+  border-radius: 50%;
+  animation: ts-spin 8s linear infinite;
+  pointer-events: none;
+}
+.loot-icon {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 6px;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+  animation: loot-bob 1.6s ease-in-out infinite;
+}
+.loot-title {
+  position: relative;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--gold);
+  text-shadow: 0 2px 0 #000;
+}
+.loot-sub {
+  position: relative;
+  margin-top: 2px;
+  font-size: 13px;
+  color: #e6dcff;
+}
+.loot-sub:empty {
+  display: none;
+}
+@keyframes loot-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+}
+@keyframes loot-bob {
+  50% {
+    transform: translateY(-5px) rotate(-4deg);
+  }
+}
+
+/* Renascer: prévia e recomendação */
+.prestige-gain {
+  margin: 6px 0 2px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--crystal);
+}
+.prestige-gain:empty,
+.prestige-advice:empty {
+  display: none;
+}
+.prestige-advice {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.prestige-box.worth {
+  box-shadow: inset 0 0 0 2px var(--gold), 0 0 18px rgba(255, 213, 74, 0.3);
+}
+.prestige-box.worth .prestige-advice {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* Diário: boas-vindas */
+.daily-modal .daily {
+  margin: 8px 0;
+}
+.streak {
+  font-size: 13px;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* Quanto falta para comprar: o botão vai "enchendo" */
+.btn.buy:disabled {
+  filter: none;
+  background:
+    linear-gradient(90deg, rgba(95, 214, 124, 0.38) calc(var(--afford, 0) * 100%), transparent 0),
+    var(--panel-3);
+  box-shadow: 0 4px 0 #1a2850;
+  color: #c9d3ee;
+}
+.btn.buy:disabled .btn-cost {
+  color: #e9e2b8;
+}
+.row.locked .btn.buy:disabled {
+  background: var(--panel-3);
+}
+.claim-all {
+  width: 100%;
+  margin-bottom: 10px;
+}
+.claim-all.hidden {
+  display: none;
+}
+.ach-list {
+  display: flex;
+  flex-direction: column;
+}
+.ability.cooling .ico,
+.ability.locked {
+  cursor: help;
+}
