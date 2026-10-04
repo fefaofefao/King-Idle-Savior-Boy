@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Game } from '../src/core/game';
 import { D } from '../src/core/bignum';
 import { deserialize, serialize } from '../src/core/save';
-import { createInitialState } from '../src/core/state';
+import { SCHEMA_VERSION, createInitialState } from '../src/core/state';
 import { CHAPTERS, STORY, currentStoryQuest, storyComplete, storyProgress } from '../src/core/story';
 import { BALANCE } from '../src/config/balance';
 
@@ -82,7 +82,7 @@ describe('migração v2 → v3', () => {
     delete raw.tutorial;
     raw.stats.taps = 300;
     const s = deserialize(JSON.stringify(raw));
-    expect(s.schemaVersion).toBe(3);
+    expect(s.schemaVersion).toBe(SCHEMA_VERSION);
     expect(s.story.index).toBe(0);
     expect(s.tutorial.tapHintDone).toBe(true);
   });

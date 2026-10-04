@@ -243,14 +243,177 @@ button {
   text-transform: uppercase;
 }
 .hp-bar {
-  height: 12px;
+  height: 16px;
+  border: 2px solid rgba(0, 0, 0, 0.55);
+  box-sizing: content-box;
+  background: rgba(20, 8, 8, 0.75);
 }
-.hp-bar i {
-  background: linear-gradient(180deg, #ff6b6b, #c93b3b);
+.hp-bar i.hp-fill {
+  background: linear-gradient(180deg, #ff7a7a, #d13c3c 60%, #a82a2a);
+  transition: width 0.12s ease-out;
+  border-radius: 0;
 }
-.hp-bar span {
-  line-height: 12px;
+.hp-bar i.hp-lag {
+  background: rgba(255, 230, 200, 0.75);
+  transition: width 0.5s ease-in 0.15s;
+  border-radius: 0;
+}
+.hp-bar i.armor-fill {
+  background: repeating-linear-gradient(135deg, #8fb4ff 0 6px, #6a90e0 6px 12px);
+  transition: width 0.12s ease-out;
+  border-radius: 0;
+}
+/* Número sempre centralizado DENTRO da barra. */
+.hp-bar span.hp-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 0 #000, 0 0 3px #000;
+  z-index: 2;
+}
+.enemy-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.affix-chip:empty {
+  display: none;
+}
+.affix-chip {
   font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-shadow: none;
+}
+.affix-chip.golden {
+  background: linear-gradient(180deg, #ffe680, #f2b520);
+  color: #4a2a00;
+}
+.affix-chip.armored {
+  background: #6a90e0;
+  color: #fff;
+}
+.affix-chip.giant {
+  background: #e0704a;
+  color: #fff;
+}
+.escape-bar {
+  display: none;
+  height: 5px;
+  margin: 3px auto 0;
+  width: 70%;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+.escape-bar.show {
+  display: block;
+}
+.escape-bar i {
+  display: block;
+  height: 100%;
+  background: #ffd54a;
+}
+/* Ponto Fraco */
+.weak-spot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border-radius: 50%;
+  background: none;
+  z-index: 4;
+  display: none;
+}
+.weak-spot.show {
+  display: block;
+}
+.weak-spot i {
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  border: 4px solid #ffe14a;
+  box-shadow: 0 0 14px 4px rgba(255, 213, 74, 0.85), inset 0 0 10px rgba(255, 213, 74, 0.8);
+  animation: weak-pulse 0.55s ease-in-out infinite alternate;
+}
+.weak-spot b {
+  position: absolute;
+  inset: 26px;
+  border-radius: 50%;
+  background: #fff6c8;
+  box-shadow: 0 0 10px #fff;
+}
+.weak-spot.show i {
+  animation: weak-in 0.25s ease-out, weak-pulse 0.55s 0.25s ease-in-out infinite alternate;
+}
+@keyframes weak-in {
+  from {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+@keyframes weak-pulse {
+  to {
+    transform: scale(0.82);
+  }
+}
+.weak-burst {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.weak-burst i {
+  position: absolute;
+  left: -40px;
+  top: -40px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 5px solid #ffe14a;
+  animation: burst-ring 0.5s ease-out forwards;
+}
+.weak-burst span {
+  position: absolute;
+  left: 50%;
+  top: -30px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 20px;
+  color: #ffe14a;
+  text-shadow: 0 2px 0 #5a2a00, 0 0 8px rgba(0, 0, 0, 0.7);
+  animation: float-up 0.9s ease-out forwards;
+}
+@keyframes burst-ring {
+  to {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.dmg.weak {
+  font-size: 34px;
+  color: #ffe14a;
+}
+.dmg.merge {
+  animation: float-up 0.85s ease-out forwards, dmg-pop 0.12s ease-out;
+}
+@keyframes dmg-pop {
+  from {
+    scale: 1.35;
+  }
 }
 .btn.boss-btn {
   display: none;
@@ -1523,5 +1686,117 @@ table.stats td:last-child {
   }
   .tab {
     min-height: 50px;
+  }
+}
+
+/* ---------- Abas: algo para comprar ---------- */
+.tab.can-buy::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  left: calc(50% + 10px);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+.btn.buy:not(:disabled) {
+  box-shadow: 0 4px 0 #1e6b33, 0 0 10px rgba(95, 214, 124, 0.35);
+}
+.btn-label {
+  white-space: nowrap;
+  font-size: 11.5px;
+}
+
+/* ---------- Bestiário ---------- */
+.bestiary-row .best-icon {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--panel-3);
+  padding: 3px;
+}
+.bestiary-row.unknown .best-icon {
+  filter: brightness(0) opacity(0.5);
+}
+.bestiary-row .stars {
+  color: var(--gold);
+  font-size: 15px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+img.pixel,
+.best-icon img,
+.boss-portrait img {
+  image-rendering: pixelated;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ---------- Entrada do chefe ---------- */
+.boss-intro {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  transform: translate(-50%, -50%);
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px 10px 10px;
+  border-radius: 18px;
+  background: linear-gradient(90deg, rgba(90, 10, 10, 0.92), rgba(30, 6, 6, 0.92));
+  border: 2px solid #ff6b4a;
+  box-shadow: 0 0 24px rgba(255, 60, 30, 0.55);
+  pointer-events: none;
+  animation: boss-in 2.3s ease-out forwards;
+  white-space: nowrap;
+}
+.boss-intro.king {
+  border-color: #ffd54a;
+  box-shadow: 0 0 28px rgba(255, 213, 74, 0.6);
+}
+.boss-portrait {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 2px;
+}
+.boss-tag {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: #ff9a7a;
+}
+.boss-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 2px 0 #000;
+}
+.boss-time {
+  font-size: 13px;
+  color: #ffd54a;
+}
+@keyframes boss-in {
+  0% {
+    opacity: 0;
+    transform: translate(-30%, -50%) scale(0.9);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+  20%,
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-70%, -50%) scale(0.95);
   }
 }

@@ -131,3 +131,23 @@ export function bossAura(): THREE.Group {
   g.add(column);
   return g;
 }
+
+/** Brilho dourado do Esqueleto Dourado. */
+export function goldenAura(): THREE.Group {
+  const g = new THREE.Group();
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.5, 0.75, 32),
+    new THREE.MeshBasicMaterial({ color: '#ffd54a', transparent: true, opacity: 0.6, side: THREE.DoubleSide, depthWrite: false }),
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.03;
+  ring.name = 'ring';
+  g.add(ring);
+  const column = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.55, 0.7, 1.8, 16, 1, true),
+    new THREE.MeshBasicMaterial({ color: '#ffe680', transparent: true, opacity: 0.16, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }),
+  );
+  column.position.y = 0.9;
+  g.add(column);
+  return g;
+}

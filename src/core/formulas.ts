@@ -84,8 +84,22 @@ export function globalDamageMult(s: GameState, crystals: Decimal = s.crystals): 
   return fromCrystals.times(fromShop);
 }
 
+// ---------- Bestiário ----------
+/** Estrelas (0..4) de um tipo de monstro pelo número de abates. */
+export function bestiaryStars(kills: number): number {
+  return BALANCE.monsters.bestiary.tiers.filter((t) => kills >= t).length;
+}
+
+export function totalBestiaryStars(s: GameState): number {
+  return Object.values(s.bestiary).reduce((a, k) => a + bestiaryStars(k ?? 0), 0);
+}
+
+/** Bônus permanente de ouro do Bestiário (+2% por estrela). */
+export const bestiaryGoldMult = (s: GameState): number =>
+  1 + totalBestiaryStars(s) * BALANCE.monsters.bestiary.goldPerStar;
+
 export function goldMult(s: GameState, now: number): number {
-  let m = 1 + crystalLevel(s, 'gold') * perLevel('gold');
+  let m = (1 + crystalLevel(s, 'gold') * perLevel('gold')) * bestiaryGoldMult(s);
   if (s.adGoldBuffUntil > now || s.noAds) m *= BALANCE.ads.goldBuffMult;
   if (s.abilityActiveUntil.goldRain > now) m *= BALANCE.abilities.goldRain.goldMult;
   return m;

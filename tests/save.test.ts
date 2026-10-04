@@ -10,7 +10,7 @@ import {
   importSave,
   serialize,
 } from '../src/core/save';
-import { createInitialState } from '../src/core/state';
+import { SCHEMA_VERSION, createInitialState } from '../src/core/state';
 
 describe('serialização', () => {
   it('ida e volta preserva números grandes', () => {
@@ -41,7 +41,7 @@ describe('migração', () => {
       stats: { taps: 50, totalGold: '500' },
     };
     const s = deserialize(JSON.stringify(v1));
-    expect(s.schemaVersion).toBe(3);
+    expect(s.schemaVersion).toBe(SCHEMA_VERSION);
     expect(s.settings.lang).toBe('pt-BR');
     expect(s.settings.langChosen).toBe(true);
     expect(s.settings.sound).toBe(false);

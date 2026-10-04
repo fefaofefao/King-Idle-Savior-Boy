@@ -2,7 +2,9 @@ import * as THREE from 'three';
 import {
   CAMERA,
   CHARACTER,
-  ENEMY_WEIGHTS,
+  AFFIX_LOOK,
+  MONSTER_LOOK,
+  SPRITE_BOSS,
   HAND_BONES,
   RENDER,
   ZONES,
@@ -10,17 +12,12 @@ import {
   type WeaponKey,
 } from '../config/visual';
 import { Actor } from './Actor';
+import { SpriteActor, type EnemyActor } from './SpriteActor';
 import type { Assets } from './Assets';
-import { Particles, Projectiles, bossAura } from './Effects';
+import { Particles, Projectiles, bossAura, goldenAura } from './Effects';
+import { BALANCE } from '../config/balance';
 import { KnightAttack } from './KnightAttack';
 import { ZoneEnvironment } from './Zones';
-
-const ENEMY_WEAPONS: Record<string, [WeaponKey, 'right' | 'left'][]> = {
-  skeletonMinion: [['skeletonBlade', 'right']],
-  skeletonRogue: [['skeletonBlade', 'left']],
-  skeletonMage: [['skeletonStaff', 'right']],
-  skeletonWarrior: [['skeletonAxe', 'right'], ['skeletonShield', 'left']],
-};
 
 export class GameScene {
   readonly renderer: THREE.WebGLRenderer;
@@ -33,10 +30,11 @@ export class GameScene {
   private knight: Actor;
   private knightAttack: KnightAttack;
   private mage: Actor;
-  private enemy: Actor | null = null;
-  private dying: Actor[] = [];
+  private enemy: EnemyActor | null = null;
+  private dying: EnemyActor[] = [];
   private aura: THREE.Group | null = null;
   private enemyIsBoss = false;
+  private enemyScale = 1;
   private zoneIndex = 0;
   private mageThrowT = -1;
   private mageReleaseAt = 0.12;
@@ -161,35 +159,71 @@ export class GameScene {
     this.mage.root.visible = v;
   }
 
-  spawnEnemy(boss: boolean): void {
+  spawnEnemy(boss: boolean, monster: { type: string; affix: string | null } = { type: boss ? 'king' : 'minion', affix: null }): void {
     if (this.enemy && !this.enemy.dying) this.enemy.dispose();
     this.removeAura();
-    let key: ModelKey = 'skeletonWarrior';
-    if (!boss) {
-      let r = Math.random();
-      key = ENEMY_WEIGHTS[0].key;
-      for (const e of ENEMY_WEIGHTS) {
-        if (r < e.weight) {
-          key = e.key;
-          break;
-        }
-        r -= e.weight;
-      }
+    // Rei Esqueleto (a cada 50 fases): sprite em pixel art.
+    if (monster.type === 'king') {
+      this.spawnSpriteKing();
+      return;
     }
-    const e = this.makeActor(key, CHARACTER.enemy, ENEMY_WEAPONS[key] ?? []);
+    const look = MONSTER_LOOK[monster.type] ?? MONSTER_LOOK.minion;
+    const e = this.makeActor(look.model, CHARACTER.enemy, look.weapons);
     const z = ZONES[this.zoneIndex];
-    e.tint(z.enemyTint, boss ? '#3a0000' : z.enemyEmissive);
+    const affix = monster.affix ? AFFIX_LOOK[monster.affix as keyof typeof AFFIX_LOOK] : null;
+    // Tint final = zona × tipo × variação.
+    const tint = new THREE.Color(z.enemyTint).multiply(new THREE.Color(look.tint));
+    if (affix) tint.multiply(new THREE.Color(affix.tint)).lerp(new THREE.Color(affix.tint), 0.45);
+    e.tint('#' + tint.getHexString(), boss ? '#3a0000' : affix?.emissive ?? look.emissive ?? z.enemyEmissive);
+    let scale = look.scale ?? 1;
     if (boss) {
-      e.baseScale = CHARACTER.bossScale;
+      scale = CHARACTER.bossScale;
       e.setShadowRadius(0.9);
       this.aura = bossAura();
       this.aura.position.copy(this.enemyPos);
       this.aura.scale.setScalar(CHARACTER.bossScale);
       this.scene.add(this.aura);
+    } else if (monster.affix === 'giant') {
+      scale = BALANCE.monsters.affixes.giant.scale;
+      e.setShadowRadius(0.75);
+    } else if (monster.affix === 'golden') {
+      this.aura = goldenAura();
+      this.aura.position.copy(this.enemyPos);
+      this.scene.add(this.aura);
     }
+    e.baseScale = scale;
     e.spawn(boss);
     this.enemy = e;
     this.enemyIsBoss = boss;
+    this.enemyScale = scale;
+  }
+
+  private spawnSpriteKing(): void {
+    const e = new SpriteActor();
+    e.root.position.copy(this.enemyPos);
+    this.scene.add(e.root);
+    this.aura = bossAura();
+    this.aura.position.copy(this.enemyPos);
+    this.aura.scale.setScalar(CHARACTER.bossScale * 1.15);
+    this.scene.add(this.aura);
+    e.spawn();
+    this.enemy = e;
+    this.enemyIsBoss = true;
+    this.enemyScale = SPRITE_BOSS.height / 1.75;
+  }
+
+  /** Esqueleto Dourado fugindo: pulo para trás e some. */
+  enemyEscape(): void {
+    const e = this.enemy;
+    if (!e) return;
+    this.enemy = null;
+    this.removeAura();
+    this.particles.burst(this.enemyPos.clone().setY(0.8), '#ffd54a', 14, 3, 5, 1);
+    e.flee(() => {
+      e.dispose();
+      this.dying = this.dying.filter((d) => d !== e);
+    });
+    this.dying.push(e);
   }
 
   private removeAura(): void {
@@ -209,12 +243,23 @@ export class GameScene {
     this.knightAttack.trigger();
   }
 
-  enemyHit(crit: boolean, strong = false): void {
+  private lastHitFx = 0;
+
+  enemyHit(crit: boolean, strong = false, armor = false): void {
     if (!this.enemy || this.enemy.dying) return;
     this.enemy.hit();
-    const at = this.enemyPos.clone().setY(1.0 * (this.enemyIsBoss ? 1.5 : 1));
-    this.particles.burst(at, crit ? '#ffd54a' : '#ffffff', crit ? 10 : 4, crit ? 3.2 : 2, 6, crit ? 1.2 : 0.8);
-    if (crit || strong) this.shake(strong ? 0.12 : 0.06);
+    // Toques muito rápidos: partículas no máximo a cada 70 ms (críticos sempre).
+    const now = performance.now();
+    if (!crit && !strong && now - this.lastHitFx < 70) return;
+    this.lastHitFx = now;
+    const at = this.enemyPos.clone().setY(1.0 * this.enemyScale);
+    if (armor) {
+      this.particles.burst(at, '#cfe3ff', 5, 2.6, 7, 0.6);
+    } else {
+      this.particles.burst(at, crit ? '#ffd54a' : '#ffffff', crit ? 10 : 3, crit ? 3.2 : 1.8, 6, crit ? 1.2 : 0.7);
+    }
+    if (strong) this.shake(0.12);
+    else if (crit) this.shake(0.05);
   }
 
   enemyDie(): void {
@@ -253,9 +298,16 @@ export class GameScene {
     this.shakeT = 0.25;
   }
 
+  /** Ponto do corpo do inimigo em tela: dx (lateral, mundo) e yFrac (0 = pés, 1 = topo da cabeça). */
+  enemyScreenAt(dx: number, yFrac: number): { x: number; y: number } {
+    const v = this.enemyPos.clone().add(new THREE.Vector3(dx * this.enemyScale, 1.75 * this.enemyScale * yFrac, 0.3)).project(this.camera);
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    return { x: rect.left + ((v.x + 1) / 2) * rect.width, y: rect.top + ((1 - v.y) / 2) * rect.height };
+  }
+
   /** Posição em tela (px CSS, relativa à viewport) da cabeça do inimigo. */
   enemyScreenPos(): { x: number; y: number } {
-    const h = this.enemyIsBoss ? 2.6 : 1.8;
+    const h = 1.75 * this.enemyScale;
     const v = this.enemyPos.clone().setY(h).project(this.camera);
     const rect = this.renderer.domElement.getBoundingClientRect();
     return { x: rect.left + ((v.x + 1) / 2) * rect.width, y: rect.top + ((1 - v.y) / 2) * rect.height };

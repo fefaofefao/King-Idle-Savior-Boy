@@ -1,4 +1,4 @@
-import { BALANCE, type AbilityId, type CrystalUpgradeId } from '../config/balance';
+import { BALANCE, type AbilityId, type AffixId, type CrystalUpgradeId, type MonsterId } from '../config/balance';
 import { D, Decimal, maxAffordable } from './bignum';
 import {
   arcaneCost,
@@ -33,9 +33,11 @@ import { currentStoryQuest, storyProgress } from './story';
 export type BuyAmount = 1 | 10 | 25 | 'max';
 
 export type GameEvent =
-  | { type: 'hit'; amount: Decimal; crit: boolean; source: 'tap' | 'mage' | 'strike' }
-  | { type: 'kill'; gold: Decimal; boss: boolean }
-  | { type: 'spawn'; boss: boolean; stage: number }
+  | { type: 'hit'; amount: Decimal; crit: boolean; source: 'tap' | 'mage' | 'strike' | 'weak'; armor?: boolean }
+  | { type: 'kill'; gold: Decimal; boss: boolean; monster: Monster }
+  | { type: 'spawn'; boss: boolean; stage: number; monster: Monster }
+  | { type: 'escaped' }
+  | { type: 'armorBroken' }
   | { type: 'stageChanged'; stage: number }
   | { type: 'bossTimeout'; canExtend: boolean }
   | { type: 'bossFailed' }
@@ -46,6 +48,12 @@ export type GameEvent =
   | { type: 'achievement'; id: string }
   | { type: 'prestige'; crystals: Decimal }
   | { type: 'storyClaimed'; gold: Decimal; crystals: number; chapterDone: boolean };
+
+/** Inimigo atual: tipo (modelo/nome) e variação rara. */
+export interface Monster {
+  type: MonsterId;
+  affix: AffixId | null;
+}
 
 export interface GameOptions {
   rng?: () => number;
@@ -59,6 +67,13 @@ export class Game {
   enemyHp: Decimal = D(0);
   enemyMaxHp: Decimal = D(1);
   bossTimeLeft = 0;
+  /** Inimigo atual. */
+  monster: Monster = { type: 'minion', affix: null };
+  /** Armadura restante (inimigos Blindados). */
+  armor: Decimal = D(0);
+  armorMax: Decimal = D(0);
+  /** Tempo até o Esqueleto Dourado fugir. */
+  escapeTimer = 0;
   bossExtended = false;
   bossPaused = false;
   /** Tempo até o próximo inimigo aparecer (animação de morte). */
@@ -102,10 +117,67 @@ export class Game {
 
   // ---------------- Ciclo ----------------
 
+  /** Sorteia o tipo e a variação do próximo inimigo. */
+  private rollMonster(): Monster {
+    const s = this.state;
+    // Chefe: Rei Esqueleto no fim de cada zona (a cada 50 fases), General Esqueleto nos demais.
+    if (this.isBoss) return { type: s.stage % 50 === 0 ? 'king' : 'general', affix: null };
+    const M = BALANCE.monsters;
+    const pool = M.types.filter((t) => s.stage >= t.minStage);
+    let r = this.rng() * pool.reduce((a, t) => a + t.weight, 0);
+    let type: MonsterId = pool[0].id;
+    for (const t of pool) {
+      if ((r -= t.weight) < 0) {
+        type = t.id;
+        break;
+      }
+    }
+    let affix: AffixId | null = null;
+    const roll = this.rng();
+    let acc = 0;
+    for (const id of Object.keys(M.affixes) as AffixId[]) {
+      const a = M.affixes[id];
+      if (s.stage < a.minStage) continue;
+      acc += a.chance;
+      if (roll < acc) {
+        affix = id;
+        break;
+      }
+    }
+    return { type, affix };
+  }
+
+  /** Multiplicadores de vida/ouro do inimigo atual (tipo × variação). */
+  private monsterMult(): { hp: number; gold: number } {
+    const M = BALANCE.monsters;
+    const t = M.types.find((x) => x.id === this.monster.type);
+    let hp = t?.hp ?? 1;
+    let gold = t?.gold ?? 1;
+    const a = this.monster.affix;
+    if (a === 'golden') {
+      hp *= M.affixes.golden.hp;
+      gold *= M.affixes.golden.gold;
+    } else if (a === 'armored') {
+      gold *= M.affixes.armored.gold;
+    } else if (a === 'giant') {
+      hp *= M.affixes.giant.hp;
+      gold *= M.affixes.giant.gold;
+    }
+    return { hp, gold };
+  }
+
   spawnEnemy(): void {
     const s = this.state;
-    this.enemyMaxHp = stageEnemyHp(s.stage);
+    this.monster = this.rollMonster();
+    const mult = this.monsterMult();
+    this.enemyMaxHp = stageEnemyHp(s.stage).times(mult.hp);
     this.enemyHp = this.enemyMaxHp;
+    const A = BALANCE.monsters.affixes;
+    // Blindado: parte da vida vira armadura (a vida total continua a mesma).
+    this.armorMax = this.monster.affix === 'armored' ? this.enemyMaxHp.times(A.armored.armorFrac) : D(0);
+    this.armor = this.armorMax;
+    this.enemyHp = this.enemyMaxHp.minus(this.armorMax);
+    this.escapeTimer = this.monster.affix === 'golden' ? A.golden.escapeSec : 0;
     this.awaitingSpawn = false;
     this.respawnTimer = 0;
     if (this.isBoss) {
@@ -113,7 +185,7 @@ export class Game {
       this.bossExtended = false;
       this.bossPaused = false;
     }
-    this.emit({ type: 'spawn', boss: this.isBoss, stage: s.stage });
+    this.emit({ type: 'spawn', boss: this.isBoss, stage: s.stage, monster: this.monster });
   }
 
   update(dt: number, now: number): void {
@@ -127,6 +199,19 @@ export class Game {
       return;
     }
     if (this.bossPaused) return;
+
+    // Esqueleto Dourado foge se demorar.
+    if (this.monster.affix === 'golden' && this.enemyAlive) {
+      this.escapeTimer -= dt;
+      if (this.escapeTimer <= 0) {
+        this.emit({ type: 'escaped' });
+        this.enemyHp = D(0);
+        this.respawnTimer = this.opts.respawnDelaySec;
+        this.awaitingSpawn = true;
+        this.pendingMage = [];
+        return;
+      }
+    }
 
     // DPS contínuo da guilda.
     const dps = totalDps(s);
@@ -148,7 +233,7 @@ export class Game {
     while (this.pendingMage.length && this.pendingMage[0].t <= 0) {
       const p = this.pendingMage.shift()!;
       if (this.enemyAlive) {
-        this.emit({ type: 'hit', amount: p.dmg, crit: false, source: 'mage' });
+        this.emit({ type: 'hit', amount: p.dmg, crit: false, source: 'mage', armor: this.armor.gt(0) });
         this.damage(p.dmg);
       }
     }
@@ -181,13 +266,52 @@ export class Game {
       s.stats.crits++;
       this.track('crits', 1);
     }
-    this.emit({ type: 'hit', amount: dmg, crit, source: 'tap' });
-    this.damage(dmg);
+    this.emit({ type: 'hit', amount: dmg, crit, source: 'tap', armor: this.armor.gt(0) });
+    this.damage(dmg, true);
     return { damage: dmg, crit };
   }
 
-  private damage(amount: Decimal): void {
+  /** Toque num Ponto Fraco: sempre crítico e multiplicado. Ignora a armadura (é um ponto fraco!). */
+  weakSpotHit(now: number): Decimal | null {
+    const s = this.state;
+    this.now = now;
+    if (!this.enemyAlive || this.bossPaused) return null;
+    s.stats.taps++;
+    s.stats.weakHits++;
+    s.stats.crits++;
+    this.track('taps', 1);
+    this.track('crits', 1);
+    this.track('weakHits', 1);
+    const dmg = tapDamage(s, now).times(BALANCE.crit.mult).times(BALANCE.monsters.weakSpot.tapMult);
+    this.emit({ type: 'hit', amount: dmg, crit: true, source: 'weak' });
+    // Ponto fraco atravessa a armadura.
+    this.armor = D(0);
+    this.enemyHp = this.enemyHp.minus(dmg);
+    if (this.enemyHp.lte(0)) this.kill(now);
+    this.checkAchievements();
+    return dmg;
+  }
+
+  /** Vida restante somando a armadura (para a barra de vida). */
+  get enemyTotalHp(): Decimal {
+    return this.enemyHp.plus(this.armor);
+  }
+
+  /** Aplica dano: a armadura absorve primeiro (toques causam só uma fração nela). */
+  private damage(amount: Decimal, tapLike = false): void {
     if (!this.enemyAlive) return;
+    if (this.armor.gt(0)) {
+      const factor = tapLike ? BALANCE.monsters.affixes.armored.tapVsArmor : 1;
+      const onArmor = amount.times(factor);
+      if (onArmor.lt(this.armor)) {
+        this.armor = this.armor.minus(onArmor);
+        return;
+      }
+      // Quebrou a armadura: o que sobrou do golpe vai para a vida.
+      amount = onArmor.minus(this.armor).div(factor);
+      this.armor = D(0);
+      this.emit({ type: 'armorBroken' });
+    }
     this.enemyHp = this.enemyHp.minus(amount);
     if (this.enemyHp.lte(0)) this.kill(this.now);
   }
@@ -196,11 +320,17 @@ export class Game {
     const s = this.state;
     const boss = this.isBoss;
     this.enemyHp = D(0);
-    const gold = stageEnemyGold(s.stage).times(goldMult(s, now)).ceil();
+    // Ouro fracionário (sem arredondar para cima): no começo um inimigo vale menos de 1 de ouro.
+    const gold = stageEnemyGold(s.stage).times(goldMult(s, now)).times(this.monsterMult().gold);
     this.addGold(gold);
     s.stats.kills++;
+    s.bestiary[this.monster.type] = (s.bestiary[this.monster.type] ?? 0) + 1;
+    if (this.monster.affix === 'golden') {
+      s.stats.goldenKills++;
+      this.track('golden', 1);
+    }
     this.track('kills', 1);
-    this.emit({ type: 'kill', gold, boss });
+    this.emit({ type: 'kill', gold, boss, monster: this.monster });
     this.respawnTimer = this.opts.respawnDelaySec;
     this.awaitingSpawn = true;
     this.pendingMage = [];
@@ -355,6 +485,7 @@ export class Game {
       const dmg = totalDps(s).times(BALANCE.abilities.strike.dpsSeconds).max(tapDamage(s, now).times(10));
       if (this.enemyAlive) {
         this.emit({ type: 'hit', amount: dmg, crit: true, source: 'strike' });
+        this.armor = D(0);
         this.damage(dmg);
       }
     } else {

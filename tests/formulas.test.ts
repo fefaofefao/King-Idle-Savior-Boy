@@ -20,14 +20,15 @@ import { formatNumber, formatTime } from '../src/core/format';
 
 describe('inimigos', () => {
   it('HP cresce 1.19 por fase', () => {
-    expect(enemyHp(1).toNumber()).toBeCloseTo(10);
-    expect(enemyHp(2).toNumber()).toBeCloseTo(11.9);
-    expect(enemyHp(11).toNumber()).toBeCloseTo(10 * Math.pow(1.19, 10));
+    const E = BALANCE.enemy;
+    expect(enemyHp(1).toNumber()).toBeCloseTo(E.hpBase);
+    expect(enemyHp(2).toNumber()).toBeCloseTo(E.hpBase * E.hpGrowth);
+    expect(enemyHp(11).toNumber()).toBeCloseTo(E.hpBase * Math.pow(E.hpGrowth, 10));
   });
   it('chefe tem HP ×10 e ouro ×6', () => {
     expect(bossHp(10).div(enemyHp(10)).toNumber()).toBeCloseTo(10);
     expect(bossGold(10).div(enemyGold(10)).toNumber()).toBeCloseTo(6);
-    expect(enemyGold(1).toNumber()).toBeCloseTo(10 * BALANCE.enemy.goldPerHp);
+    expect(enemyGold(1).toNumber()).toBeCloseTo(BALANCE.enemy.hpBase * BALANCE.enemy.goldPerHp);
   });
 });
 
@@ -53,17 +54,19 @@ describe('guilda', () => {
   it('custo e DPS com marcos', () => {
     expect(memberCost(0, 0).toNumber()).toBeCloseTo(50);
     expect(memberCost(1, 2).toNumber()).toBeCloseTo(500 * 1.075 ** 2);
-    expect(memberDps(0, 9).toNumber()).toBe(45);
-    expect(memberDps(0, 10).toNumber()).toBe(100);
-    expect(memberDps(0, 200).toNumber()).toBe(5 * 200 * 2 * 2 * 2 * 2 * 4);
+    const sq = BALANCE.guild.members[0].baseDps;
+    expect(memberDps(0, 9).toNumber()).toBe(sq * 9);
+    expect(memberDps(0, 10).toNumber()).toBe(sq * 10 * 2);
+    expect(memberDps(0, 200).toNumber()).toBe(sq * 200 * 2 * 2 * 2 * 2 * 4);
     expect(memberDps(3, 0).toNumber()).toBe(0);
   });
   it('DPS total inclui o Mago (20%) depois da fase 5', () => {
     const s = createInitialState();
     s.guild[0] = 1;
-    expect(totalDps(s).toNumber()).toBe(5);
+    const sq = BALANCE.guild.members[0].baseDps;
+    expect(totalDps(s).toNumber()).toBe(sq);
     s.maxStage = 5;
-    expect(totalDps(s).toNumber()).toBeCloseTo(6);
+    expect(totalDps(s).toNumber()).toBeCloseTo(sq * 1.2);
   });
 });
 
@@ -80,12 +83,13 @@ describe('maxAffordable', () => {
 describe('toque', () => {
   it('Toque Arcano soma % do DPS e Fúria multiplica', () => {
     const s = createInitialState();
-    s.guild[0] = 10; // 100 DPS
+    s.guild[0] = 10;
+    const dps = totalDps(s).toNumber();
     s.arcaneLevel = 3;
     const now = 1000;
-    expect(tapDamage(s, now).toNumber()).toBeCloseTo(1 + 3);
+    expect(tapDamage(s, now).toNumber()).toBeCloseTo(1 + dps * 0.03);
     s.abilityActiveUntil.fury = now + 1;
-    expect(tapDamage(s, now).toNumber()).toBeCloseTo(12);
+    expect(tapDamage(s, now).toNumber()).toBeCloseTo((1 + dps * 0.03) * 3);
   });
 });
 

@@ -1,4 +1,5 @@
 import { BALANCE } from '../config/balance';
+import { totalBestiaryStars } from './formulas';
 import type { GameState, MissionState } from './state';
 
 /** Chave do dia no fuso local (AAAA-MM-DD). */
@@ -34,7 +35,9 @@ export type TrackKind =
   | 'abilities'
   | 'chests'
   | 'stages'
-  | 'crits';
+  | 'crits'
+  | 'weakHits'
+  | 'golden';
 
 export interface MissionDef {
   id: string;
@@ -59,6 +62,9 @@ export const MISSION_POOL: MissionDef[] = [
   { id: 'chest2', kind: 'chests', target: 2, rewardIncomeSec: 450 },
   { id: 'stages10', kind: 'stages', target: 10, rewardIncomeSec: 600 },
   { id: 'crits50', kind: 'crits', target: 50, rewardIncomeSec: 300 },
+  { id: 'weak15', kind: 'weakHits', target: 15, rewardIncomeSec: 450 },
+  { id: 'weak40', kind: 'weakHits', target: 40, rewardIncomeSec: 600, rewardCrystals: 1 },
+  { id: 'golden1', kind: 'golden', target: 1, rewardIncomeSec: 450 },
 ];
 
 export const missionDef = (id: string): MissionDef | undefined =>
@@ -116,7 +122,7 @@ export interface AchievementDef {
   target: number;
   crystals: number;
   /** Chave i18n do tipo da conquista (recebe {n}). */
-  kind: 'stage' | 'taps' | 'kills' | 'boss' | 'prestige' | 'crits' | 'chests' | 'blade' | 'guild' | 'abilities';
+  kind: 'stage' | 'taps' | 'kills' | 'boss' | 'prestige' | 'crits' | 'chests' | 'blade' | 'guild' | 'abilities' | 'weak' | 'golden' | 'bestiary';
 }
 
 const ach = (
@@ -137,6 +143,9 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   ...ach('blade', (s) => s.bladeLevel, [[100, 2]]),
   ...ach('guild', (s) => s.guild.filter((l) => l > 0).length, [[8, 3]]),
   ...ach('abilities', (s) => s.stats.abilitiesUsed, [[25, 2]]),
+  ...ach('weak', (s) => s.stats.weakHits, [[10, 1], [100, 2], [1000, 4]]),
+  ...ach('golden', (s) => s.stats.goldenKills, [[1, 1], [10, 2], [50, 4]]),
+  ...ach('bestiary', (s) => totalBestiaryStars(s), [[5, 2], [15, 4]]),
 ];
 
 /** Marca conquistas recém-atingidas como 'done'. Retorna os ids novos. */

@@ -52,10 +52,16 @@ export class Hud {
     E.progressFill = h('i');
     E.progressText = h('span');
     E.progress = h('div', { class: 'stage-progress' }, [E.progressFill, E.progressText]);
-    E.enemyName = h('div', { class: 'enemy-name' });
-    E.hpFill = h('i');
-    E.hpText = h('span');
-    E.hp = h('div', { class: 'hp-bar' }, [E.hpFill, E.hpText]);
+    E.enemyName = h('span', { class: 'enemy-name-text' });
+    E.affix = h('span', { class: 'affix-chip' });
+    E.nameRow = h('div', { class: 'enemy-name' }, [E.affix, E.enemyName]);
+    E.hpFill = h('i', { class: 'hp-fill' });
+    E.hpLag = h('i', { class: 'hp-lag' });
+    E.armorFill = h('i', { class: 'armor-fill' });
+    E.hpText = h('span', { class: 'hp-text' });
+    E.hp = h('div', { class: 'hp-bar' }, [E.hpLag, E.hpFill, E.armorFill, E.hpText]);
+    E.escapeFill = h('i');
+    E.escape = h('div', { class: 'escape-bar' }, [E.escapeFill]);
     E.fightBoss = h('button', {
       class: 'btn boss-btn',
       text: t('hud.fightBoss'),
@@ -67,7 +73,7 @@ export class Hud {
       (E.stageBox = h('div', { class: 'stage-box' }, [E.stage, E.zone, E.progress])),
       (E.quest = this.buildQuestTracker()),
     ]);
-    const enemyBox = h('div', { class: 'enemy-box' }, [E.enemyName, E.hp, E.fightBoss]);
+    const enemyBox = h('div', { class: 'enemy-box' }, [E.nameRow, E.hp, E.escape, E.fightBoss]);
     E.enemyBox = enemyBox;
 
     const bar = h('div', { class: 'abilities' });
@@ -146,7 +152,7 @@ export class Hud {
     const now = Date.now();
     const n = s.settings.notation;
     const E = this.els;
-    setText(E.gold, formatNumber(s.gold, n));
+    setText(E.gold, formatNumber(s.gold.floor(), n));
     setText(E.income, `+${formatNumber(incomePerSec(s, now), n)}${t('hud.perSec')}`);
     setText(E.crystals, formatNumber(s.crystals, n));
 
@@ -186,12 +192,25 @@ export class Hud {
     const y = Math.max(minY, pos.y - rect.top - 6);
     E.enemyBox.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
 
-    const baseName = tk(`enemy.${z}`);
-    setText(E.enemyName, boss ? t('enemy.boss', { name: baseName }) : baseName);
-    toggleClass(E.enemyName, 'boss', boss);
-    const hpFrac = g.enemyAlive ? g.enemyHp.div(g.enemyMaxHp).toNumber() : 0;
-    E.hpFill.style.width = `${Math.max(0, Math.min(1, hpFrac)) * 100}%`;
-    setText(E.hpText, g.enemyAlive ? formatNumber(g.enemyHp.max(0), n) : '');
+    // Nome: tipo do monstro + zona; variação rara num selo colorido.
+    const m = g.monster;
+    setText(E.enemyName, t('enemy.name', { monster: tk(`monster.${m.type}`), zone: tk(`zoneOf.${z}`) }));
+    toggleClass(E.nameRow, 'boss', boss);
+    setText(E.affix, m.affix ? tk(`affix.${m.affix}`) : '');
+    E.affix.className = `affix-chip ${m.affix ?? ''}`;
+    // Barra de vida: vermelho = vida, azul = armadura, faixa clara = dano recente (efeito "lag").
+    const max = g.enemyMaxHp;
+    const alive = g.enemyAlive;
+    const hpFrac = alive ? Math.max(0, Math.min(1, g.enemyHp.div(max).toNumber())) : 0;
+    const armorFrac = alive ? Math.max(0, Math.min(1, g.armor.div(max).toNumber())) : 0;
+    E.hpFill.style.width = `${hpFrac * 100}%`;
+    E.armorFill.style.left = `${hpFrac * 100}%`;
+    E.armorFill.style.width = `${armorFrac * 100}%`;
+    E.hpLag.style.width = `${(hpFrac + armorFrac) * 100}%`;
+    setText(E.hpText, alive ? formatNumber(g.enemyTotalHp.max(0), n) : '');
+    const golden = alive && m.affix === 'golden';
+    toggleClass(E.escape, 'show', golden);
+    if (golden) E.escapeFill.style.width = `${(g.escapeTimer / BALANCE.monsters.affixes.golden.escapeSec) * 100}%`;
 
     for (const id of ABILITY_IDS) {
       const el = this.abilityEls[id];

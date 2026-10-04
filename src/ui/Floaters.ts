@@ -1,4 +1,9 @@
+import type { Decimal } from '../core/bignum';
+import { formatNumber } from '../core/format';
+import type { Notation } from '../core/state';
 import { ICONS } from './icons';
+
+export type DamageKind = 'tap' | 'mage' | 'strike' | 'weak';
 import { h } from './dom';
 
 /** Números de dano, moedas voando até o contador e toasts. Tudo em DOM sobre o canvas. */
@@ -13,18 +18,44 @@ export class Floaters {
     root.append(this.layer, this.toastBox);
   }
 
-  damage(x: number, y: number, text: string, crit: boolean, kind: 'tap' | 'mage' | 'strike' = 'tap'): void {
-    if (this.active > 40) return; // limite para aparelhos fracos
-    const el = h('div', { class: `dmg ${crit ? 'crit' : ''} ${kind}`, text });
-    const dx = (Math.random() - 0.5) * 70;
+  /** Último número de toque normal: toques rápidos somam no mesmo número em vez de empilhar. */
+  private lastTap: { el: HTMLElement; sum: Decimal; at: number } | null = null;
+
+  damage(x: number, y: number, amount: Decimal, notation: Notation, crit: boolean, kind: DamageKind = 'tap'): void {
+    const now = performance.now();
+    if (kind === 'tap' && !crit && this.lastTap && now - this.lastTap.at < 220 && this.lastTap.el.isConnected) {
+      // Mescla: atualiza o número existente e reinicia a animação dele.
+      const lt = this.lastTap;
+      lt.sum = lt.sum.plus(amount);
+      lt.at = now;
+      lt.el.textContent = formatNumber(lt.sum, notation);
+      lt.el.classList.remove('merge');
+      void lt.el.offsetWidth;
+      lt.el.classList.add('merge');
+      return;
+    }
+    if (this.active > 24) return; // limite para aparelhos fracos
+    const el = h('div', { class: `dmg ${crit ? 'crit' : ''} ${kind}`, text: formatNumber(amount, notation) });
+    const dx = kind === 'tap' && !crit ? (Math.random() - 0.5) * 40 : (Math.random() - 0.5) * 90;
     el.style.left = `${x + dx}px`;
-    el.style.top = `${y + (Math.random() - 0.5) * 20}px`;
+    el.style.top = `${y + (Math.random() - 0.5) * 16}px`;
     this.layer.appendChild(el);
     this.active++;
-    el.addEventListener('animationend', () => {
+    if (kind === 'tap' && !crit) this.lastTap = { el, sum: amount, at: now };
+    el.addEventListener('animationend', (ev) => {
+      if ((ev as AnimationEvent).animationName !== 'float-up') return;
       el.remove();
       this.active--;
     });
+  }
+
+  /** Efeito do Ponto Fraco: anel que explode + texto. */
+  weakBurst(x: number, y: number, text: string): void {
+    const el = h('div', { class: 'weak-burst' }, [h('i'), h('span', { text })]);
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    this.layer.appendChild(el);
+    setTimeout(() => el.remove(), 900);
   }
 
   /** Moedas saindo de (x,y) até o elemento alvo (contador de ouro). */

@@ -152,6 +152,10 @@ function step(p: PlayerSim, tps: number, track: boolean): void {
   // Toques distribuídos uniformemente.
   const tapsThisStep = Math.floor((p.now / 1000) * tps) - Math.floor(((p.now - DT * 1000) / 1000) * tps);
   for (let i = 0; i < tapsThisStep; i++) g.tap(p.now);
+  // Ponto Fraco a cada ~5 s; o jogador ativo acerta ~70%.
+  if (tps > 0 && g.state.stage >= BALANCE.monsters.weakSpot.minStage && Math.floor(p.now / 5000) > Math.floor((p.now - DT * 1000) / 5000) && Math.random() < 0.7) {
+    g.weakSpotHit(p.now);
+  }
   g.update(DT, p.now);
   // Jornada do Rei: o jogador segue a missão (compra o que ela pede) e coleta assim que fica pronta.
   questBuy(g);
@@ -180,12 +184,35 @@ function step(p: PlayerSim, tps: number, track: boolean): void {
   }
 }
 
+/** Tempo médio para derrotar um inimigo comum (s) em faixas de fases, no modo ativo. */
+function ttkReport(p: PlayerSim, ttk: Map<number, number[]>): void {
+  const bands = [[1, 5], [6, 10], [11, 20], [21, 40]];
+  const parts = bands.map(([a, b]) => {
+    const v: number[] = [];
+    for (let st = a; st <= b; st++) v.push(...(ttk.get(st) ?? []));
+    const avg = v.length ? v.reduce((x, y) => x + y, 0) / v.length : NaN;
+    return `fases ${a}-${b}: ${avg.toFixed(1)}s`;
+  });
+  console.log(`  tempo médio por inimigo — ${parts.join(' | ')}`);
+  void p;
+}
+
 function activeRun(tps: number, minutes: number) {
   console.log(`\n=== Jogador ATIVO (${tps} toques/s, ${minutes} min) ===`);
   const p = newPlayer();
   const marks = [10, 20, 30, 40, 50, 60, 80, 100];
   const hit: Record<number, number> = {};
   let firstPrestigeAt = 0;
+  // Mede o tempo entre o surgimento e a morte de cada inimigo comum.
+  const ttk = new Map<number, number[]>();
+  let spawnAt = 0;
+  p.g.on((e) => {
+    if (e.type === 'spawn') spawnAt = p.now;
+    if (e.type === 'kill' && !e.boss) {
+      const st = p.g.state.stage;
+      ttk.set(st, [...(ttk.get(st) ?? []), (p.now - spawnAt) / 1000]);
+    }
+  });
   while (p.now < minutes * 60_000) {
     step(p, tps, p.now < 2 * 3600_000);
     for (const m of marks) if (!hit[m] && p.g.state.maxStage >= m) hit[m] = p.now / 1000;
@@ -201,7 +228,11 @@ function activeRun(tps: number, minutes: number) {
   console.log(`  cristais se renascer agora: ${crystalsForPrestige(s.maxStage)}`);
   console.log(`  maior intervalo sem nada para comprar (primeiras 2 h): ${formatTime(p.maxGap)}`);
   printStory(p);
-  return { hit, firstPrestigeAt, maxGap: p.maxGap };
+  ttkReport(p, ttk);
+  const early: number[] = [];
+  for (let st = 1; st <= 10; st++) early.push(...(ttk.get(st) ?? []));
+  const earlyTtk = early.reduce((a, b) => a + b, 0) / Math.max(1, early.length);
+  return { hit, firstPrestigeAt, maxGap: p.maxGap, earlyTtk };
 }
 
 /** Jogador casual: 4 sessões de 10 min por dia, 2 toques/s, offline no resto do tempo. */
@@ -266,20 +297,21 @@ function printStory(p: PlayerSim, days = false): void {
   console.log(`  Jornada (${p.story.length}/${STORY.length} coletadas): ${parts.join('  ')}`);
 }
 
-const tps = arg('tps', 3);
+const tps = arg('tps', 5);
 const a = activeRun(tps, arg('minutes', 120));
 const casualBest = casualRun(arg('days', 3));
 
 console.log('\n=== Metas ===');
 const ok = (b: boolean) => (b ? 'OK ' : 'FORA');
 const t10 = a.hit[10] ?? Infinity;
-console.log(`  [${ok(t10 >= 120 && t10 <= 240)}] Fase 10 em 2–4 min: ${formatTime(t10)}`);
+console.log(`  [${ok(a.earlyTtk >= 1.5 && a.earlyTtk <= 4)}] Inimigo das fases 1–10 dura 1,5–4 s: ${a.earlyTtk.toFixed(1)}s`);
+console.log(`  [${ok(t10 >= 240 && t10 <= 420)}] Fase 10 em 4–7 min: ${formatTime(t10)}`);
 console.log(
   `  [${ok(a.firstPrestigeAt >= 35 * 60 && a.firstPrestigeAt <= 60 * 60)}] Renascer (fase 40) em 35–60 min: ${formatTime(a.firstPrestigeAt)}`,
 );
 const c40 = crystalsForPrestige(40).toNumber();
 const c50 = crystalsForPrestige(50).toNumber();
 console.log(`  [${ok(c40 >= 5 && c40 <= 15)}] Cristais no 1º Renascer (fase 40–50): ${c40}–${c50}`);
-console.log(`  [${ok(casualBest >= 90)}] Fase ~100 no 3º dia casual: ${casualBest}`);
+console.log(`  [${ok(casualBest >= 80)}] Fase ~100 (80+) no 3º dia casual: ${casualBest}`);
 console.log(`  [${ok(a.maxGap <= 330)}] Nunca > ~5 min sem nada para comprar (2 h): ${formatTime(a.maxGap)}`);
 void D;

@@ -1,10 +1,12 @@
 import type { App } from '../App';
 import { sfx } from '../audio/Sfx';
 import { FEATURES } from '../config/app';
-import { BALANCE, type CrystalUpgradeId } from '../config/balance';
+import { BALANCE, MONSTER_IDS, type CrystalUpgradeId } from '../config/balance';
 import { formatNumber, formatTime } from '../core/format';
 import {
   arcaneCost,
+  bestiaryGoldMult,
+  bestiaryStars,
   bladeDamage,
   crystalUpgradeCost,
   crystalUpgradeMaxed,
@@ -23,7 +25,7 @@ import { chapterTitle, storyText } from './storyText';
 import type { Notation } from '../core/state';
 import { LANGUAGES, t, tk } from '../i18n';
 import { h, setDisabled, setText, toggleClass } from './dom';
-import { FLAGS, ICONS, MEMBER_ICONS } from './icons';
+import { FLAGS, ICONS, MEMBER_ICONS, MONSTER_ICONS } from './icons';
 
 /** URL pública da política de privacidade (GitHub Pages). Ajuste após publicar — veja SETUP_CONTAS.md. */
 export const PRIVACY_URL = 'https://fefaofefao.github.io/King-Idle-Savior-Boy/privacy-policy/';
@@ -129,6 +131,12 @@ export class Panel {
       Object.values(s.achievements).includes('done');
     toggleClass(this.tabButtons.quests!, 'has-badge', questReady);
     toggleClass(this.tabButtons.prestige!, 'has-badge', this.app.game.canPrestige());
+    // Algo para comprar? Bolinha verde nas abas Herói/Guilda.
+    const g = this.app.game;
+    const heroBuy = s.gold.gte(g.bladeBuyInfo(1).cost);
+    const guildBuy = BALANCE.guild.members.some((_, i) => memberUnlocked(s, i) && s.gold.gte(g.memberBuyInfo(i, 1).cost));
+    toggleClass(this.tabButtons.hero!, 'can-buy', heroBuy);
+    toggleClass(this.tabButtons.guild!, 'can-buy', guildBuy);
   }
 
   private amountSelector(): HTMLElement {
@@ -176,10 +184,11 @@ export class Panel {
           (next ? ` · ${t('hero.nextMilestone', { n: next, m: BALANCE.blade.milestoneMult })}` : ''),
       );
       const info = g.bladeBuyInfo(app.buyAmount);
-      setText(blade.btnLabel, `+${info.n}`);
+      // Mostra quanto o toque vai ganhar com a compra.
+      const gain = bladeDamage(s.bladeLevel + info.n).minus(bladeDamage(s.bladeLevel)).times(globalDamageMult(s));
+      setText(blade.btnLabel, `+${info.n} · ${t('hero.gain', { n: formatNumber(gain, n) })}`);
       setText(blade.btnCost, formatNumber(info.cost, n));
       setDisabled(blade.btn, s.gold.lt(info.cost));
-      void bladeDamage;
 
       setText(arcane.title, t('hero.arcane'));
       setText(arcane.level, `${s.arcaneLevel}/${BALANCE.arcane.maxLevel}`);
@@ -251,7 +260,8 @@ export class Panel {
             : t('guild.locked'),
         );
         const info = g.memberBuyInfo(i, app.buyAmount);
-        setText(r.btnLabel, lvl === 0 ? t('guild.hire') : `+${info.n}`);
+        const dpsGain = memberDps(i, lvl + info.n).minus(memberDps(i, lvl)).times(gm);
+        setText(r.btnLabel, `${lvl === 0 ? t('guild.hire') : `+${info.n}`} · ${t('guild.dpsGain', { n: formatNumber(dpsGain, n) })}`);
         setText(r.btnCost, formatNumber(info.cost, n));
         setDisabled(r.btn, !unlocked || s.gold.lt(info.cost));
       });
@@ -374,6 +384,36 @@ export class Panel {
       ]);
       this.content.appendChild(el);
       return { el, fill, label, btn, i };
+    });
+
+    // Bestiário
+    this.content.appendChild(h('h3', { html: `<span>📖 ${t('bestiary.title')}</span>` }));
+    const bonus = h('div', { class: 'section-note' });
+    this.content.append(h('p', { class: 'section-note', text: t('bestiary.desc') }), bonus);
+    const bestRows = MONSTER_IDS.map((id) => {
+      const stars = h('span', { class: 'stars' });
+      const kills = h('div', { class: 'row-desc' });
+      const name = h('div', { class: 'row-title' });
+      const el = h('div', { class: 'quest bestiary-row' }, [
+        h('div', { class: `best-icon ${id}`, html: MONSTER_ICONS[id] ?? '' }),
+        h('div', { class: 'quest-main' }, [name, kills]),
+        stars,
+      ]);
+      this.content.appendChild(el);
+      return { id, el, stars, kills, name };
+    });
+    this.updaters.push(() => {
+      const st = app.state;
+      setText(bonus, t('bestiary.bonus', { pct: Math.round((bestiaryGoldMult(st) - 1) * 100) }));
+      for (const r of bestRows) {
+        const k = st.bestiary[r.id] ?? 0;
+        const n = bestiaryStars(k);
+        const next = BALANCE.monsters.bestiary.tiers[n];
+        setText(r.name, k > 0 ? tk(`monster.${r.id}`) : t('bestiary.unknown'));
+        setText(r.kills, `${t('bestiary.kills', { n: formatNumber(k) })}${next ? ` · ${t('bestiary.next', { n: formatNumber(next) })}` : ''}`);
+        setText(r.stars, '★'.repeat(n) + '☆'.repeat(BALANCE.monsters.bestiary.tiers.length - n));
+        toggleClass(r.el, 'unknown', k === 0);
+      }
     });
 
     // Conquistas

@@ -40,10 +40,11 @@ import { GameScene } from './scene/GameScene';
 import { $, h } from './ui/dom';
 import { Floaters } from './ui/Floaters';
 import { Hud } from './ui/Hud';
-import { ICONS } from './ui/icons';
+import { ICONS, MONSTER_ICONS } from './ui/icons';
 import { showTitleScreen } from './ui/Intro';
 import { Modals } from './ui/Modals';
 import { Panel } from './ui/Panel';
+import { WeakSpot } from './ui/WeakSpot';
 
 export class App {
   game!: Game;
@@ -57,6 +58,7 @@ export class App {
   hud!: Hud;
   panel!: Panel;
   buyAmount: BuyAmount = 1;
+  weakSpot!: WeakSpot;
 
   private lastRewardedAt = 0;
   private saveTimer = 0;
@@ -128,6 +130,7 @@ export class App {
     this.modals = new Modals(document.body);
     this.hud = new Hud(this, stage);
     this.panel = new Panel(this, panelEl);
+    this.weakSpot = new WeakSpot(this, stage);
 
     // Toque: a área inteira do palco (exceto botões).
     stage.addEventListener('pointerdown', (e) => {
@@ -154,6 +157,7 @@ export class App {
   private frame(dt: number): void {
     const now = Date.now();
     this.game.update(dt, now);
+    this.weakSpot.update(dt);
     this.uiTimer += dt;
     if (this.uiTimer >= 0.1) {
       this.uiTimer = 0;
@@ -178,16 +182,42 @@ export class App {
     if (r) this.scene.knightSwing();
   }
 
+  /** Cartão de entrada do chefe: retrato + nome + tempo. */
+  private showBossIntro(type: string): void {
+    const z = zoneIndex(this.state.stage);
+    const card = h('div', { class: `boss-intro ${type}` }, [
+      h('div', { class: 'boss-portrait', html: MONSTER_ICONS[type] ?? '' }),
+      h('div', { class: 'boss-info' }, [
+        h('div', { class: 'boss-tag', text: t('hud.boss') }),
+        h('div', { class: 'boss-name', text: t('enemy.name', { monster: tk(`monster.${type}`), zone: tk(`zoneOf.${z}`) }) }),
+        h('div', { class: 'boss-time', text: `⏱ ${Math.round(this.game.bossTimeLeft)}s` }),
+      ]),
+    ]);
+    $('#stage').appendChild(card);
+    setTimeout(() => card.remove(), 2300);
+  }
+
+  /** Toque num Ponto Fraco (x, y = posição na tela para o efeito). */
+  weakSpotHit(x: number, y: number): void {
+    this.scene.markInteraction();
+    if (!this.game.weakSpotHit(Date.now())) return;
+    this.scene.knightSwing();
+    this.floaters.weakBurst(x, y, t('weak.hit'));
+  }
+
   private onGameEvent(e: GameEvent): void {
     const s = this.state;
     switch (e.type) {
       case 'hit': {
         const pos = this.scene.enemyScreenPos();
-        const fmt = formatNumber(e.amount, s.settings.notation);
         if (e.source === 'tap') {
-          this.scene.enemyHit(e.crit);
-          sfx.play(e.crit ? 'crit' : 'tap');
+          this.scene.enemyHit(e.crit, false, e.armor);
+          sfx.play(e.armor ? 'armor' : e.crit ? 'crit' : 'tap');
           if (e.crit) vibrate(false);
+        } else if (e.source === 'weak') {
+          this.scene.enemyHit(true, true);
+          sfx.play('weak');
+          vibrate(true);
         } else if (e.source === 'mage') {
           this.scene.enemyHit(false);
         } else {
@@ -195,14 +225,20 @@ export class App {
           sfx.play('crit');
           vibrate(true);
         }
-        this.floaters.damage(pos.x, pos.y, fmt, e.crit, e.source);
+        this.floaters.damage(pos.x, pos.y, e.amount, s.settings.notation, e.crit, e.source);
         break;
       }
       case 'kill': {
         const pos = this.scene.enemyScreenPos();
         this.scene.enemyDie();
         sfx.play('death');
-        this.floaters.coins(pos.x, pos.y + 40, this.hud.goldAnchor, e.boss ? 10 : 3, () => sfx.play('coin'));
+        const golden = e.monster.affix === 'golden';
+        this.floaters.coins(pos.x, pos.y + 40, this.hud.goldAnchor, e.boss || golden ? 12 : 3, () => sfx.play('coin'));
+        if (golden) {
+          this.floaters.banner(`+${formatNumber(e.gold, s.settings.notation)} 🪙`, 'good');
+          sfx.play('chest');
+          vibrate(true);
+        }
         if (e.boss) {
           this.scene.knightCheer();
           this.floaters.banner(t('boss.defeated'), 'good');
@@ -212,8 +248,24 @@ export class App {
         break;
       }
       case 'spawn':
-        this.scene.spawnEnemy(e.boss);
-        if (e.boss) sfx.play('boss');
+        this.scene.spawnEnemy(e.boss, e.monster);
+        if (e.boss) {
+          sfx.play('boss');
+          this.showBossIntro(e.monster.type);
+        }
+        else if (e.monster.affix === 'golden') {
+          sfx.play('chest');
+          this.floaters.toast(t('affix.goldenAlert'), ICONS.gold);
+        }
+        break;
+      case 'escaped':
+        this.scene.enemyEscape();
+        this.floaters.banner(t('affix.escaped'), 'bad');
+        break;
+      case 'armorBroken':
+        this.scene.shake(0.08);
+        sfx.play('crit');
+        this.floaters.banner(t('affix.armorBroken'), 'good');
         break;
       case 'stageChanged': {
         const z = zoneIndex(e.stage);

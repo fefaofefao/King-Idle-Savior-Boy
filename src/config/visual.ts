@@ -135,9 +135,42 @@ export const ZONES: ZoneStyle[] = [
   },
 ];
 
-/** Escolha do tipo de esqueleto comum (o Minion é o mais frequente). */
-export const ENEMY_WEIGHTS: { key: ModelKey; weight: number }[] = [
-  { key: 'skeletonMinion', weight: 0.55 },
-  { key: 'skeletonRogue', weight: 0.25 },
-  { key: 'skeletonMage', weight: 0.2 },
-];
+/**
+ * Aparência de cada tipo de monstro: modelo, armas, tint próprio (multiplicado pelo tint da zona)
+ * e emissivo. Cavaleiro Caído e Bruxa Sombria reutilizam os modelos dos heróis com cores sombrias.
+ */
+export const MONSTER_LOOK: Record<
+  string,
+  { model: ModelKey; weapons: [WeaponKey, 'right' | 'left'][]; tint: string; emissive?: string; scale?: number }
+> = {
+  minion: { model: 'skeletonMinion', weapons: [['skeletonBlade', 'right']], tint: '#ffffff' },
+  rogue: { model: 'skeletonRogue', weapons: [['skeletonBlade', 'left']], tint: '#ffffff' },
+  skmage: { model: 'skeletonMage', weapons: [['skeletonStaff', 'right']], tint: '#ffffff' },
+  fallen: {
+    model: 'knight',
+    weapons: [['knightSword', 'right'], ['skeletonShield', 'left']],
+    tint: '#5a4a78',
+    emissive: '#1a0830',
+    scale: 1.05,
+  },
+  witch: { model: 'mage', weapons: [['mageStaff', 'right']], tint: '#6a8a6a', emissive: '#10300f' },
+  general: { model: 'skeletonWarrior', weapons: [['skeletonAxe', 'right'], ['skeletonShield', 'left']], tint: '#ffffff' },
+  // O Rei Esqueleto usa o sprite em pixel art (SPRITE_BOSS); o modelo 3D é só o fallback.
+  king: { model: 'skeletonWarrior', weapons: [['skeletonAxe', 'right'], ['skeletonShield', 'left']], tint: '#ffd0d0' },
+};
+
+/** Rei Esqueleto em pixel art (8 direções, 48×48), desenhado como billboard na cena 3D. */
+export const SPRITE_BOSS = {
+  dir: 'models/sprites/skeleton_king/',
+  /** Direção usada: o Rei olha para o Cavaleiro (à esquerda da câmera). */
+  facing: 'south-west',
+  /** Altura em unidades de mundo (maior que o General). */
+  height: 2.7,
+};
+
+/** Visual das variações raras. */
+export const AFFIX_LOOK = {
+  golden: { tint: '#ffd54a', emissive: '#5a3a00' },
+  armored: { tint: '#9fb4d8', emissive: '#0a1630' },
+  giant: { tint: '#ffc0a0', emissive: '#2a0a00' },
+} as const;

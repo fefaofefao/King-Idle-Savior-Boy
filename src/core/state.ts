@@ -1,4 +1,4 @@
-import { BALANCE, type AbilityId, type CrystalUpgradeId } from '../config/balance';
+import { BALANCE, type AbilityId, type CrystalUpgradeId, type MonsterId } from '../config/balance';
 import { Decimal, ZERO } from './bignum';
 
 export type Lang = 'pt-BR' | 'en' | 'es';
@@ -30,6 +30,10 @@ export interface Stats {
   guildLevelsBought: number;
   adsWatched: number;
   highestStage: number;
+  /** Pontos Fracos acertados. */
+  weakHits: number;
+  /** Esqueletos Dourados derrotados. */
+  goldenKills: number;
 }
 
 export interface MissionState {
@@ -65,7 +69,9 @@ export interface GameState {
   /** Jornada do Rei: índice da missão principal atual. */
   story: { index: number };
   /** Dicas do tutorial já mostradas. */
-  tutorial: { tapHintDone: boolean };
+  tutorial: { tapHintDone: boolean; weakHintDone?: boolean };
+  /** Bestiário: abates por tipo de monstro (permanente, sobrevive ao Renascer). */
+  bestiary: Partial<Record<MonsterId, number>>;
   missions: { day: string; list: MissionState[] };
   achievements: Record<string, 'done' | 'claimed'>;
   settings: Settings;
@@ -75,7 +81,7 @@ export interface GameState {
   noAds: boolean;
 }
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export function createInitialState(now = Date.now(), lang: Lang = 'en'): GameState {
   return {
@@ -109,11 +115,14 @@ export function createInitialState(now = Date.now(), lang: Lang = 'en'): GameSta
       guildLevelsBought: 0,
       adsWatched: 0,
       highestStage: 1,
+      weakHits: 0,
+      goldenKills: 0,
     },
     runStartedAt: now,
     daily: { lastClaimDay: '', index: 0 },
     story: { index: 0 },
     tutorial: { tapHintDone: false },
+    bestiary: {},
     missions: { day: '', list: [] },
     achievements: {},
     settings: {

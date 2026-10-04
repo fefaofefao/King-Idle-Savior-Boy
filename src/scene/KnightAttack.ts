@@ -11,7 +11,7 @@ import type { Actor } from './Actor';
  */
 export class KnightAttack {
   private t = -1;
-  private readonly half = 0.15;
+  private half = 0.15;
   private upper: THREE.Object3D | null;
   private lower: THREE.Object3D | null;
   /** Pose de repouso (o boneco primitivo não tem mixer para restaurá-la). */
@@ -37,7 +37,21 @@ export class KnightAttack {
     this.dir.copy(target).sub(this.basePos).setY(0).normalize();
   }
 
+  /** Golpe pedido durante outro golpe: começa quando o atual termina (sem reiniciar no meio). */
+  private queued = false;
+
   trigger(): void {
+    // Toques rápidos: em vez de reiniciar o golpe (o que dava "pulos" feios), encadeia.
+    if (this.t >= 0) {
+      this.queued = true;
+      return;
+    }
+    this.start();
+  }
+
+  private start(chained = false): void {
+    // Golpes encadeados são um pouco mais rápidos (combo), sem perder a forma do movimento.
+    this.half = chained ? 0.11 : 0.15;
     if (this.useClip) this.knight.play('attack', { once: true, fade: 0.05, timeScale: 2.2 });
     this.t = 0;
   }
@@ -76,6 +90,12 @@ export class KnightAttack {
     }
     if (k >= 1) {
       this.t = -1;
+      if (this.queued) {
+        // Próximo golpe começa direto, sem voltar à pose de descanso.
+        this.queued = false;
+        this.start(true);
+        return;
+      }
       this.knight.root.position.copy(this.basePos);
       if (!this.knight.real) {
         if (this.upper && this.upperBase) this.upper.quaternion.copy(this.upperBase);

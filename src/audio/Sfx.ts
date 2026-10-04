@@ -1,7 +1,7 @@
 /**
  * Efeitos sonoros procedurais (estilo sfxr) com Web Audio. Nenhum arquivo de áudio.
  */
-export type SfxName = 'tap' | 'crit' | 'coin' | 'death' | 'boss' | 'buy' | 'levelUp' | 'magic' | 'chest';
+export type SfxName = 'tap' | 'crit' | 'coin' | 'death' | 'boss' | 'buy' | 'levelUp' | 'magic' | 'chest' | 'armor' | 'weak' | 'spot';
 
 interface Tone {
   type: OscillatorType;
@@ -45,6 +45,19 @@ const SOUNDS: Record<SfxName, Tone[]> = {
     { type: 'square', from: 1047, to: 1047, dur: 0.18, vol: 0.12, delay: 0.24 },
   ],
   magic: [{ type: 'sine', from: 400, to: 1400, dur: 0.18, vol: 0.1 }],
+  /** Golpe em armadura: metálico. */
+  armor: [
+    { type: 'square', from: 1400, to: 1100, dur: 0.05, vol: 0.09 },
+    { type: 'triangle', from: 2200, to: 1800, dur: 0.12, vol: 0.07, delay: 0.01 },
+  ],
+  /** Ponto Fraco acertado: impacto forte + brilho. */
+  weak: [
+    { type: 'sawtooth', from: 220, to: 60, dur: 0.22, vol: 0.22 },
+    { type: 'sine', from: 0, to: 0, dur: 0.18, vol: 0.2, noise: true },
+    { type: 'triangle', from: 1200, to: 2400, dur: 0.2, vol: 0.12, delay: 0.05 },
+  ],
+  /** Ponto Fraco apareceu. */
+  spot: [{ type: 'sine', from: 900, to: 1500, dur: 0.09, vol: 0.07 }],
   chest: [
     { type: 'triangle', from: 700, to: 1400, dur: 0.12, vol: 0.15 },
     { type: 'triangle', from: 1050, to: 2100, dur: 0.16, vol: 0.12, delay: 0.1 },

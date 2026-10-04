@@ -91,6 +91,23 @@ export const MEMBER_ICONS: Record<string, string> = {
   ),
 };
 
+/** Caveira base para os ícones do Bestiário. */
+const skull = (hat: string, bone = '#f2efe4', eye = '#1a1a1a') =>
+  svg(
+    `${hat}<circle cx="24" cy="22" r="13" fill="${bone}"/><rect x="17" y="30" width="14" height="8" rx="2" fill="${bone}"/><circle cx="19" cy="22" r="3.6" fill="${eye}"/><circle cx="29" cy="22" r="3.6" fill="${eye}"/><path d="M22 28l2-3 2 3z" fill="${eye}"/><path d="M19 34v3M23 34v3M27 34v3" stroke="#bbb" stroke-width="1.5"/>`,
+  );
+
+/** Ícones do Bestiário (flat, mesmo estilo). O Rei usa o sprite em pixel art. */
+export const MONSTER_ICONS: Record<string, string> = {
+  minion: skull(''),
+  rogue: skull('<path d="M9 22C9 9 39 9 39 22l-3-2C33 12 15 12 12 20z" fill="#4b4b5a"/>'),
+  skmage: skull('<path d="M24 0l11 14H13z" fill="#3b5f7a"/><rect x="10" y="12" width="28" height="4" rx="2" fill="#3b5f7a"/>', '#f2efe4', '#62d0ff'),
+  fallen: skull('<path d="M10 22C10 8 38 8 38 22v4H10z" fill="#5a4a78"/><rect x="12" y="19" width="24" height="4" fill="#1a0830"/>', '#c8b8e8', '#ff4a8a'),
+  witch: skull('<path d="M24 0l12 15H12z" fill="#2f4a2f"/><rect x="8" y="13" width="32" height="4" rx="2" fill="#2f4a2f"/>', '#cfe8cf', '#7aff6a'),
+  general: skull('<path d="M10 20C10 8 38 8 38 20z" fill="#9aa3ad"/><path d="M10 14l-6-8 9 5zM38 14l6-8-9 5z" fill="#f4ead2"/>', '#f2efe4', '#ff3b3b'),
+  king: '<img src="models/sprites/skeleton_king/south.png" alt="" class="pixel">',
+};
+
 /** Bandeiras simplificadas (emoji de bandeira não aparece em todos os aparelhos). */
 export const FLAGS: Record<string, string> = {
   'pt-BR': svg(

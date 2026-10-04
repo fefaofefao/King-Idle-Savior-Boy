@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LANGUAGES, LOCALES, detectLang } from '../src/i18n';
 import { ACHIEVEMENTS, MISSION_POOL } from '../src/core/retention';
-import { BALANCE } from '../src/config/balance';
+import { BALANCE, MONSTER_IDS } from '../src/config/balance';
 
 describe('i18n', () => {
   it('3 idiomas com as mesmas chaves e sem textos vazios', () => {
@@ -25,7 +25,9 @@ describe('i18n', () => {
     for (const m of MISSION_POOL) expect(keys.has(`mission.${m.kind}`)).toBe(true);
     for (const a of ACHIEVEMENTS) expect(keys.has(`ach.${a.kind}`)).toBe(true);
     for (const u of BALANCE.crystalShop) expect(keys.has(`crystal.${u.id}`)).toBe(true);
-    for (let z = 0; z < 5; z++) expect(keys.has(`zone.${z}`) && keys.has(`enemy.${z}`)).toBe(true);
+    for (let z = 0; z < 5; z++) expect(keys.has(`zone.${z}`) && keys.has(`zoneOf.${z}`)).toBe(true);
+    for (const id of MONSTER_IDS) expect(keys.has(`monster.${id}`)).toBe(true);
+    for (const id of Object.keys(BALANCE.monsters.affixes)) expect(keys.has(`affix.${id}`)).toBe(true);
   });
   it('detecta o idioma do aparelho', () => {
     expect(detectLang(['pt-PT'])).toBe('pt-BR');

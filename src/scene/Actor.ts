@@ -206,7 +206,8 @@ export class Actor {
   hit(): void {
     if (this.dying) return;
     this.flashT = 0.12;
-    this.squashT = 0.18;
+    // Squash suave: em toques rápidos não reinicia a cada toque (evita tremedeira).
+    if (this.squashT < 0.08) this.squashT = 0.18;
     // Não interrompe o Spawn no meio.
     const r = this.current ? this.roleOf(this.current) : undefined;
     if ((r === 'spawn' || r === 'spawnAir') && this.current!.isRunning()) return;
@@ -227,6 +228,14 @@ export class Actor {
       if (this.real) this.startShrink();
     }
   }
+
+  /** Fuga (Esqueleto Dourado): pula para trás e encolhe. */
+  flee(onDone: () => void): void {
+    this.dying = true;
+    this.fleeT = 0;
+    this.onDeathFinished = onDone;
+  }
+  private fleeT = -1;
 
   private startShrink(): void {
     if (this.shrinkT < 0) this.shrinkT = 0;
@@ -279,6 +288,20 @@ export class Actor {
       const k = Math.sin((this.squashT / 0.18) * Math.PI) * 0.12;
       sx = 1 + k;
       sy = 1 - k;
+    }
+
+    // Fuga: salta para trás/para cima e encolhe.
+    if (this.fleeT >= 0) {
+      this.fleeT += dt;
+      const k = Math.min(1, this.fleeT / 0.45);
+      this.root.position.x += dt * 4;
+      this.root.position.y = Math.sin(k * Math.PI) * 0.8;
+      sx *= 1 - k;
+      sy *= 1 - k;
+      if (k >= 1 && !this.deathDone) {
+        this.deathDone = true;
+        this.onDeathFinished?.();
+      }
     }
 
     // Encolher + girar depois da morte.
