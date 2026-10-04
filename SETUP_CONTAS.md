@@ -102,7 +102,7 @@ O site já está pronto na pasta `docs/` (página inicial, **Política de Privac
    - `https://fefaofefao.github.io/King-Idle-Savior-Boy/privacy-policy/` ← **URL da política para a Play**
    - `https://fefaofefao.github.io/King-Idle-Savior-Boy/terms/`
    O jogo já abre esses links no Menu (no idioma do jogador). Se o endereço for outro, ajuste `SITE_URL` em `src/ui/Panel.ts`.
-4. Troque o e-mail de contato em `docs/index.html`, `docs/privacy-policy/index.html` e `docs/terms/index.html` (procure `CONTATO@EXEMPLO.COM`).
+4. E-mail de contato já preenchido: `fefaofefao@gmail.com` (use o mesmo na ficha da Play).
 5. **app-ads.txt:** precisa ficar na **raiz** do domínio informado como "Site" na ficha da Play.
    - Crie um repositório chamado **`fefaofefao.github.io`** (GitHub Pages de usuário), coloque nele o `app-ads.txt` deste projeto (já com o Publisher ID `pub-7483085200976329`) e ative o Pages.
    - Ele ficará em `https://fefaofefao.github.io/app-ads.txt`. Informe `https://fefaofefao.github.io` no campo **Site** da ficha da Play.
