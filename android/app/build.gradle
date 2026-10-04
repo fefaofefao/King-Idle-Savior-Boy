@@ -16,7 +16,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode Integer.parseInt(envOr('VERSION_CODE', '1'))
-        versionName envOr('VERSION_NAME', '0.1.0')
+        versionName envOr('VERSION_NAME', '1.0.0')
         manifestPlaceholders = [admobAppId: admobAppId]
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {

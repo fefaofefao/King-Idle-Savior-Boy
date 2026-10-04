@@ -96,7 +96,7 @@ jobs:
       - name: Publicar AAB como artifact
         uses: actions/upload-artifact@v4
         with:
-          name: idle-tap-knight-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}
+          name: KingIdleSaviorBoy-AAB-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}
           path: android/app/build/outputs/bundle/release/app-release.aab
 
       # Opcional: envia para a faixa de TESTE INTERNO da Play (só se o secret existir).

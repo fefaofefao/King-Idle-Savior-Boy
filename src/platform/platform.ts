@@ -8,6 +8,15 @@ import type { KeyValueStore } from '../core/save';
 
 export const isNative = (): boolean => Capacitor.isNativePlatform();
 
+/**
+ * Abre um link fora do jogo. No Android, navegar para um domínio externo faz o Capacitor
+ * abrir o navegador do sistema (a WebView do jogo não sai da tela).
+ */
+export function openExternal(url: string): void {
+  if (isNative()) window.location.href = url;
+  else window.open(url, '_blank', 'noopener');
+}
+
 /** Save em Capacitor Preferences (SharedPreferences no Android, localStorage no navegador). */
 export const preferencesStore: KeyValueStore = {
   async get(key) {

@@ -1,0 +1,15 @@
+<!doctype html><html><head><style>
+@font-face{font-family:F;src:url(../../node_modules/@fontsource/fredoka/files/fredoka-latin-700-normal.woff2)}
+html,body{margin:0;width:1024px;height:500px;overflow:hidden}
+body{background:radial-gradient(circle at 50% 120%,#ffb347 0,#e0632e 22%,#5a2a8a 55%,#1b2a4a 100%);font-family:F;position:relative}
+.rays{position:absolute;left:50%;top:60%;width:1400px;height:1400px;margin:-700px;background:repeating-conic-gradient(rgba(255,255,255,.07) 0 8deg,transparent 8deg 24deg);border-radius:50%}
+.ground{position:absolute;bottom:-60px;left:-50px;right:-50px;height:150px;background:#2f6b3a;border-radius:50% 50% 0 0;box-shadow:inset 0 10px 0 #4a9a52}
+.knight{position:absolute;left:30px;bottom:20px;width:440px;filter:drop-shadow(0 10px 12px rgba(0,0,0,.5))}
+.king{position:absolute;right:30px;bottom:30px;width:340px;image-rendering:pixelated;filter:drop-shadow(0 0 30px rgba(255,200,60,.8))}
+.t{position:absolute;left:0;right:0;top:40px;text-align:center;color:#ffd54a;line-height:.92;text-shadow:0 6px 0 #7a3a00,0 10px 20px rgba(0,0,0,.6);-webkit-text-stroke:3px #5a2a00}
+.t .a{font-size:120px}.t .b{font-size:56px;color:#fff;-webkit-text-stroke:2px #2a1a4a;text-shadow:0 5px 0 #2a1a4a}
+.vs{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);font-size:64px;color:#fff;-webkit-text-stroke:3px #a01a1a;text-shadow:0 5px 0 #a01a1a}
+</style></head><body><div class="rays"></div><div class="ground"></div>
+<img class="knight" src="../../assets/knight-render.png"><img class="king" src="../../public/models/sprites/skeleton_king/golden/south-west.png">
+<div class="t"><div class="a">KING</div><div class="b">IDLE SAVIOR BOY</div></div><div class="vs">VS</div>
+</body></html>

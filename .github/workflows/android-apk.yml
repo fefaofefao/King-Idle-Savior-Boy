@@ -5,7 +5,7 @@ name: Android APK (teste)
 on:
   push:
     branches: ['**']
-    paths-ignore: ['**.md', 'store-listing/**', 'privacy-policy/**']
+    paths-ignore: ['**.md', 'store-listing/**', 'docs/**']
   workflow_dispatch:
 
 concurrency:

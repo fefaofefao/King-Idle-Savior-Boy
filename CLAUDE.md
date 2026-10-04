@@ -48,7 +48,8 @@ scripts/       balance-sim.ts, optimize-models.sh, gen-icons.mjs, render-icon.mj
 tests/         *.test.ts (Vitest)
 android/       projeto Capacitor (minSdk 24, targetSdk 36, portrait, AdMob App ID via placeholder)
 .github/workflows/  ci.yml (testes + build), android-apk.yml (APK de teste a cada push), android-release.yml (AAB assinado)
-privacy-policy/ store-listing/ app-ads.txt SETUP_CONTAS.md CREDITS.md licenses/
+docs/ (GitHub Pages: privacidade + termos, pt/en/es)  store-listing/ (textos, notas, ícone, gráfico, screenshots)
+scripts/store/ (gera screenshots e gráfico)  app-ads.txt  PUBLICAR.md  SETUP_CONTAS.md  CREDITS.md  licenses/
 ```
 
 ## Convenções
@@ -75,9 +76,12 @@ privacy-policy/ store-listing/ app-ads.txt SETUP_CONTAS.md CREDITS.md licenses/
 
 ## Pendências (dependem do dono do projeto)
 
+Lista completa e em ordem: **`PUBLICAR.md`**.
+
+
 1. **Contas:** AdMob (app + rewarded + interstitial + UMP), keystore, GitHub Secrets, Play Console — passo a passo em `SETUP_CONTAS.md`.
 2. **Testar o APK** no celular (`TESTE_APK.md`). O APK debug já compila no GitHub Actions (~13 MB). Para a Play, rodar "Android Release (AAB)" depois de cadastrar a keystore.
 3. **Teste em aparelho real:** desempenho (FPS/bateria), anúncios de teste, consentimento UMP, botão voltar, notificação do baú offline.
-4. **Publicar a política de privacidade** (GitHub Pages), trocar o e-mail de contato e conferir `PRIVACY_URL` em `src/ui/Panel.ts`; publicar o `app-ads.txt` com o seu Publisher ID.
-5. **Screenshots** da loja (lista em `store-listing/screenshots.md`).
+4. **Ativar o GitHub Pages** (`main` / `/docs`), trocar o e-mail de contato em `docs/` e conferir `SITE_URL` em `src/ui/Panel.ts`; publicar o `app-ads.txt` com o seu Publisher ID.
+5. Screenshots e gráficos já gerados em `store-listing/` (refazer com `scripts/store/` se o visual mudar).
 6. **Futuro:** "Remover anúncios" com Play Billing (`ENABLE_IAP`, plugin sugerido no DECISIONS.md).

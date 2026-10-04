@@ -31,10 +31,15 @@ import { chapterTitle, storyText } from './storyText';
 import type { Notation } from '../core/state';
 import { LANGUAGES, t, tk } from '../i18n';
 import { h, setDisabled, setText, toggleClass } from './dom';
+import { openExternal } from '../platform/platform';
 import { FLAGS, ICONS, MEMBER_ICONS, MONSTER_ICONS, RELIC_ICONS, skinIcon } from './icons';
 
 /** URL pública da política de privacidade (GitHub Pages). Ajuste após publicar — veja SETUP_CONTAS.md. */
-export const PRIVACY_URL = 'https://fefaofefao.github.io/King-Idle-Savior-Boy/privacy-policy/';
+export const SITE_URL = 'https://fefaofefao.github.io/King-Idle-Savior-Boy/';
+export const PRIVACY_URL = `${SITE_URL}privacy-policy/`;
+export const TERMS_URL = `${SITE_URL}terms/`;
+/** Âncora da página no idioma do jogo (#pt, #en, #es). */
+const langAnchor = (lang: string) => `#${lang.slice(0, 2)}`;
 
 type TabId = 'hero' | 'guild' | 'prestige' | 'quests' | 'menu';
 const TABS: TabId[] = ['hero', 'guild', 'prestige', 'quests', 'menu'];
@@ -777,7 +782,8 @@ export class Panel {
     add(t('menu.export'), () => this.openExport());
     add(t('menu.import'), () => this.openImport());
     add(t('menu.privacy'), () => void app.ads.showPrivacyOptions());
-    add(t('menu.privacyPolicy'), () => window.open(PRIVACY_URL, '_blank'));
+    add(t('menu.privacyPolicy'), () => openExternal(PRIVACY_URL + langAnchor(app.state.settings.lang)));
+    add(t('menu.terms'), () => openExternal(TERMS_URL + langAnchor(app.state.settings.lang)));
     add(t('menu.credits'), () => this.openCredits());
     add(t('menu.removeAds'), () => void app.purchases.buyNoAds(), !FEATURES.ENABLE_IAP);
     c.appendChild(grid);

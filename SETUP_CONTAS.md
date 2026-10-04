@@ -64,13 +64,16 @@ No GitHub: **Settings → Secrets and variables → Actions → New repository s
 2. **Criar app:** nome "King Idle Savior Boy", idioma padrão pt-BR, **Jogo**, **Gratuito**.
 3. **Configurar o app** (painel "Configure seu app"): preencha cada item conforme as seções 5 e 6.
 4. **Play App Signing:** na 1ª versão enviada, aceite "Deixar o Google gerenciar e proteger a chave de assinatura do app". O AAB enviado é assinado com a sua **chave de upload** (a keystore do passo 1).
-5. **Ficha da loja:** use os textos de `store-listing/` (pt-BR, en e es), o ícone `assets/icon-only.png` (512×512, exporte a partir dele) e os screenshots listados em `store-listing/screenshots.md`. Gráfico de destaque: 1024×500.
+5. **Ficha da loja:** textos em `store-listing/pt-BR.md`, `en.md` e `es.md` (adicione os idiomas en-US, es-ES e es-419 em "Traduções"). Ícone: `store-listing/graphics/icon-512.png`. Gráfico de destaque: `store-listing/graphics/feature-graphic-1024x500.png`. Capturas: `store-listing/screenshots/<idioma>/` (8 por idioma). Notas da versão: `store-listing/release-notes.md`.
+   - Categoria: **Jogos → RPG** (ou Casual). Tags sugeridas: Idle, RPG, Clicker, Fantasia, Single player, Offline.
+   - E-mail de contato (obrigatório e público na loja) e o Site do passo 7.
 6. **Política de privacidade:** URL do GitHub Pages (seção 7).
 7. **Anúncios:** marque "Sim, meu app contém anúncios".
 
 ## 5. Classificação de conteúdo e público-alvo
 
 - **Classificação de conteúdo (questionário IARC):** categoria **Jogo**. Violência: **fantasia/cartoon, sem sangue** (esqueletos estilizados). Sem conteúdo sexual, linguagem imprópria, drogas ou apostas. Sem chat nem interação entre usuários. Sem compras no app (por enquanto). O resultado esperado é algo como **Livre/10+ / PEGI 7 / ESRB E10+**, conforme o país.
+- **Outras declarações do "Conteúdo do app":** Anúncios = **Sim**; ID de publicidade = **Sim, para publicidade** (o SDK do AdMob usa a permissão `AD_ID`); Acesso ao app = **todas as funções disponíveis sem login**; App de notícias / governo / financeiro / saúde = **Não**.
 - **Público-alvo e conteúdo:** selecione **apenas 13–15, 16–17 e 18+**. **Não** marque faixas abaixo de 13 anos. Responda que o app **não** foi feito para atrair crianças. Isso mantém o app fora do programa "Famílias" e das restrições de anúncios que vêm com ele (o código já usa `tagForChildDirectedTreatment: false`).
 
 ## 6. Formulário de Segurança dos dados (sugestão)
@@ -80,6 +83,7 @@ O jogo em si não coleta dados: o save fica só no aparelho. Quem coleta dados �
 - **O app coleta ou compartilha dados?** Sim (por causa do SDK de anúncios).
 - **Os dados são criptografados em trânsito?** Sim.
 - **O usuário pode pedir a exclusão dos dados?** O jogo não guarda dados em servidor. Explique que desinstalar remove o save local; os dados de anúncios seguem a política do Google.
+- **Backup do Android:** o save local pode entrar no backup pessoal do usuário (Google). Isso não é coleta pelo desenvolvedor e não precisa ser declarado.
 - **Tipos de dados** (coletados e compartilhados, para **Publicidade ou marketing**, **Análise** e **Prevenção de fraudes, segurança e conformidade**):
   - **Identificadores do dispositivo ou outros IDs** (ID de publicidade).
   - **Local aproximado** (derivado do IP).
@@ -87,14 +91,21 @@ O jogo em si não coleta dados: o save fica só no aparelho. Quem coleta dados �
   - **Informações e desempenho do app → Registros de falhas e Diagnóstico.**
 - A coleta é **obrigatória** (não opcional) enquanto houver anúncios; o consentimento é gerido pelo UMP.
 
-## 7. Política de privacidade e app-ads.txt (GitHub Pages)
+## 7. Site, política de privacidade, termos e app-ads.txt (GitHub Pages)
 
-1. No GitHub: **Settings → Pages → Build and deployment → Deploy from a branch** → branch `main`, pasta `/ (root)`.
-2. A política ficará em `https://SEU_USUARIO.github.io/King-Idle-Savior-Boy/privacy-policy/`. Se o endereço for diferente, atualize `PRIVACY_URL` em `src/ui/Panel.ts`.
-3. Troque o e-mail de contato em `privacy-policy/index.html` (procure `CONTATO@EXEMPLO.COM`).
-4. **app-ads.txt:** precisa ficar na **raiz do domínio do site do desenvolvedor** que você cadastrar na ficha da Play (ex.: `https://seudominio.com/app-ads.txt`).
-   - Copie o arquivo `app-ads.txt` deste repositório e troque `pub-0000000000000000` pelo seu **Publisher ID** (AdMob → Configurações → Informações da conta).
-   - Um GitHub Pages de **projeto** (`usuario.github.io/repo/`) **não** serve, porque o arquivo não fica na raiz. Use um repositório `SEU_USUARIO.github.io` (Pages de usuário) ou um domínio próprio, e informe esse site no campo "Site" da ficha da Play.
+O site já está pronto na pasta `docs/` (página inicial, **Política de Privacidade** e **Termos de Uso**, cada um em pt/en/es).
+
+1. Faça o merge deste trabalho na branch padrão (`main`).
+2. No GitHub: **Settings → Pages → Build and deployment → Deploy from a branch** → branch `main`, pasta **`/docs`** → Save.
+3. Em 1–2 minutos o site fica em:
+   - `https://fefaofefao.github.io/King-Idle-Savior-Boy/` (início)
+   - `https://fefaofefao.github.io/King-Idle-Savior-Boy/privacy-policy/` ← **URL da política para a Play**
+   - `https://fefaofefao.github.io/King-Idle-Savior-Boy/terms/`
+   O jogo já abre esses links no Menu (no idioma do jogador). Se o endereço for outro, ajuste `SITE_URL` em `src/ui/Panel.ts`.
+4. Troque o e-mail de contato em `docs/index.html`, `docs/privacy-policy/index.html` e `docs/terms/index.html` (procure `CONTATO@EXEMPLO.COM`).
+5. **app-ads.txt:** precisa ficar na **raiz** do domínio informado como "Site" na ficha da Play.
+   - Crie um repositório chamado **`fefaofefao.github.io`** (GitHub Pages de usuário), coloque nele o `app-ads.txt` deste projeto com o seu **Publisher ID** no lugar de `pub-0000000000000000` (AdMob → Configurações → Informações da conta) e ative o Pages.
+   - Ele ficará em `https://fefaofefao.github.io/app-ads.txt`. Informe `https://fefaofefao.github.io` no campo **Site** da ficha da Play.
    - O AdMob verifica o arquivo em até 24 h (AdMob → Apps → app-ads.txt).
 
 ## 8. (Opcional) Envio automático para teste interno

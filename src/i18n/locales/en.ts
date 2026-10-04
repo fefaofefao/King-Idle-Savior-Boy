@@ -356,4 +356,5 @@ export const en: Locale = {
   "ability.cooling": "{name}: {desc} · ready in {time}",
   "ability.lockedInfo": "{name}: {desc} · unlocks at stage {n}",
   "debug.relic": "+1 relic",
+  "menu.terms": "Terms of use",
 };

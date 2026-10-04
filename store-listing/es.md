@@ -2,33 +2,39 @@
 
 **Título (máx. 30):** King Idle Savior Boy: RPG
 
-**Descripción breve (máx. 80):** Toca, derrota esqueletos y forma tu gremio. ¡Tu caballero mejora sin conexión!
+**Descripción corta (máx. 80):** Toca, derrota monstruos y forma tu gremio. ¡Tu héroe crece sin conexión!
 
-**Descripción completa:**
+**Descripción completa (máx. 4000):**
 
-¡Toma tu espada y salva el reino! En **King Idle Savior Boy**, cada toque hace que tu caballero ataque a hordas de esqueletos en un colorido mundo de fantasía 3D.
+¡Toma la espada y salva el reino! En **King Idle Savior Boy**, cada toque hace que tu caballero ataque hordas de esqueletos y criaturas en un mundo de fantasía cartoon en 3D.
 
-⚔️ **TOCA Y LUCHA**
-Derrota enemigos, recoge oro y enfréntate a un **jefe cada 10 fases**: ¡tienes 30 segundos para vencerlo!
+⚔️ **TOCA, HAZ COMBOS Y ACIERTA PUNTOS DÉBILES**
+Los toques seguidos forman combos que dan oro extra. Atento a los Puntos Débiles que aparecen en los enemigos para causar un daño enorme. Mantén el dedo en la pantalla para atacar sin parar.
+
+👑 **JEFES ÉPICOS**
+Enfrenta a un General cada 10 fases y al temible **Rey Esqueleto** cada 50: ¡se enfurece cuando va perdiendo! Tienes tiempo limitado para vencer.
+
+🐉 **12 TIPOS DE ENEMIGOS**
+Esqueletos, Babosa Verde, Hongo Furioso, Murciélago Sombrío, Gólem de Piedra, Diablillo de Fuego, Bruja y Caballero Caído, además de variantes raras: **Dorados** (¡huyen con el tesoro!), **Blindados** y **Gigantes**. Completa el Bestiario para ganar oro para siempre.
 
 🛡️ **FORMA TU GREMIO**
-Contrata a 8 héroes (Escudero, Arquera, Clérigo, Pícaro, Bárbaro, Druida, Paladín y Dragontino) que luchan por ti todo el tiempo. Tu Maga compañera lanza hechizos a tu lado.
-
-✨ **HABILIDADES PODEROSAS**
-Golpe Furioso, Furia y Lluvia de Oro para darle la vuelta a cualquier batalla.
+Contrata 8 héroes —Escudero, Arquera, Clérigo, Pícaro, Bárbaro, Druida, Paladín y Dragontino— que luchan por ti todo el tiempo. Tu compañera Maga lanza hechizos a tu lado.
 
 💎 **RENACE MÁS FUERTE**
-Renace para ganar Cristales del Alma y desbloquear mejoras permanentes en la Tienda de Cristales.
+Usa el Renacer para ganar Cristales del Alma y mejoras permanentes. El juego te muestra cuánto más fuerte serás antes de decidir.
 
-🌍 **5 ZONAS**
-Bosque, Cueva, Desierto, Hielo y Volcán, cada una con sus propios esqueletos.
+🏺 **RELIQUIAS Y ASPECTOS**
+Colecciona 12 reliquias legendarias que sueltan los jefes y mejora cada una hasta el nivel 25. Desbloquea 8 aspectos para tu héroe.
+
+📜 **EL VIAJE DEL REY**
+Una campaña con 10 capítulos y más de 70 misiones guiadas —del Bosque Oscuro al Trono Eterno— y misiones infinitas después.
 
 💤 **PROGRESO SIN CONEXIÓN**
-Tu gremio sigue reuniendo oro incluso con el juego cerrado.
+Tu gremio sigue juntando oro incluso con el juego cerrado.
 
 📅 **NOVEDADES CADA DÍA**
-Recompensas diarias, 3 misiones al día, unos 30 logros y el misterioso Cofre del Mensajero.
+Recompensa diaria, 3 misiones al día, decenas de logros y el misterioso Cofre del Mensajero.
 
-🌐 En español, portugués e inglés. Funciona sin internet (los anuncios necesitan conexión).
+🌐 En español, inglés y portugués. Funciona sin internet (los anuncios necesitan conexión).
 
-Gratis, con anuncios opcionales.
+El juego es gratuito y contiene anuncios. Los anuncios con recompensa siempre son opcionales.

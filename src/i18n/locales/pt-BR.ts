@@ -354,6 +354,7 @@ export const ptBR = {
   "ability.cooling": "{name}: {desc} · pronta em {time}",
   "ability.lockedInfo": "{name}: {desc} · libera na fase {n}",
   "debug.relic": "+1 relíquia",
+  "menu.terms": "Termos de uso",
 };
 
 export type LocaleKey = keyof typeof ptBR;

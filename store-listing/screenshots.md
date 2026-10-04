@@ -1,16 +1,30 @@
-# Screenshots para capturar
+# Screenshots e gráficos da loja
 
-Formato: retrato, 1080×1920 (ou a resolução nativa de um celular 9:16/9:19.5). Mínimo 2, ideal 8 por idioma.
-Capture em **pt-BR, en e es** (troque o idioma no Menu). No navegador: `npm run dev`, DevTools → modo dispositivo (ex.: Pixel 7) e `window.__app` no console para preparar cada cena.
+Tudo já gerado e pronto para enviar ao Play Console:
 
-1. **Tela de escolha de idioma** (primeira abertura), mostrando os 3 idiomas.
-2. **Combate na Floresta**: Cavaleiro atacando, número de dano crítico amarelo e moedas voando.
-3. **Chefe**: Rei Esqueleto com aura, barra de tempo do chefe e nome em destaque.
-4. **Guilda**: aba Guilda com vários membros contratados e a Maga lançando um projétil.
-5. **Habilidades ativas**: Fúria + Chuva de Ouro ligadas (botões brilhando).
-6. **Zona Vulcão ou Gelo**, com props procedurais.
-7. **Renascer**: aba Renascer com a Loja de Cristais.
-8. **Missões & Conquistas**: calendário diário com o dia 7 (cristais) visível.
-9. *(opcional)* **Bem-vindo de volta**: modal de ganhos offline.
+| Arquivo | Uso no Play Console |
+|---|---|
+| `graphics/icon-512.png` | Ícone do app (512×512) |
+| `graphics/feature-graphic-1024x500.png` | Gráfico de destaque (1024×500) |
+| `screenshots/pt-BR/*.png` | Capturas de tela do telefone — Português (Brasil) |
+| `screenshots/en/*.png` | Capturas de tela do telefone — English (United States) |
+| `screenshots/es/*.png` | Capturas de tela do telefone — Español (España e Latinoamérica) |
 
-Gráfico de destaque (1024×500): Cavaleiro + Rei Esqueleto frente a frente, com o nome do jogo.
+Capturas: 1080×1920 (9:16), 8 por idioma, na ordem:
+1. Tela inicial com escolha de idioma
+2. Combate com combo
+3. Rei Esqueleto furioso (chefe)
+4. Criaturas (Golem Gigante no Gelo)
+5. Visuais do herói
+6. Guilda
+7. Jornada do Rei e "Coletar tudo"
+8. Renascer com a prévia de dano
+
+## Gerar de novo (depois de mudar o visual)
+```bash
+npm run build && npx vite preview --port 4173 &
+node scripts/store/screenshots.mjs          # precisa do Playwright
+```
+O gráfico de destaque vem de `scripts/store/feature-graphic.html` (abra no navegador em 1024×500 e capture, ou use o Playwright).
+
+> Opcional (melhora a conversão): um vídeo curto de 30 s no YouTube para o campo "Vídeo" da ficha. Grave a tela do celular jogando.
