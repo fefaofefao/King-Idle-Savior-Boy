@@ -1,10 +1,5 @@
-/**
- * Identidade do app. O APP_ID NÃO pode mudar depois da publicação na Play Store.
- */
-export const APP_ID = 'br.com.fernando.idleknight';
-/** Nome do jogo (igual nos 3 idiomas). */
-export const GAME_TITLE = 'King Idle Savior Boy';
-export const APP_NAME_EN = GAME_TITLE;
+// Identidade do app (arquivo separado porque o capacitor.config.ts também a importa, fora do Vite).
+export { APP_ID, APP_NAME_EN, GAME_TITLE } from './identity';
 
 /** Flags de recursos. */
 export const FEATURES = {

@@ -1,5 +1,5 @@
 import type { CapacitorConfig } from '@capacitor/cli';
-import { APP_ID, APP_NAME_EN } from './src/config/app.ts';
+import { APP_ID, APP_NAME_EN } from './src/config/identity.ts';
 
 const config: CapacitorConfig = {
   appId: APP_ID,
