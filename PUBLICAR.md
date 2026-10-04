@@ -27,11 +27,11 @@ Resumo para levar o **King Idle Savior Boy** à Google Play. O passo a passo det
 2. **Testar o APK no celular** (`TESTE_APK.md`): desempenho, anúncios de teste, botão voltar, notificação.
 3. **Conta de desenvolvedor Google Play** (taxa única de US$ 25 e verificação de identidade).
 4. **Keystore de upload:** criar, guardar em 2 lugares, converter para base64 (SETUP §1).
-5. **AdMob:** criar o app, os blocos **Premiado** e **Intersticial**, publicar a mensagem de consentimento (GDPR/UMP) e definir a classificação **T** (SETUP §2).
+5. **AdMob:** ✅ app e blocos **Premiado** e **Intersticial** criados. Falta: publicar a mensagem de consentimento (GDPR/UMP) e definir a classificação **T** (SETUP §2).
 6. **GitHub Secrets** (7): `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `ADMOB_APP_ID`, `ADMOB_REWARDED_ID`, `ADMOB_INTERSTITIAL_ID` (SETUP §3).
 7. **E-mail de contato:** trocar `CONTATO@EXEMPLO.COM` nos 3 arquivos de `docs/` (e usar o mesmo e-mail na ficha da Play).
 8. **Merge na `main` e ativar o GitHub Pages** (Settings → Pages → `main` / `/docs`). Conferir se abre `https://fefaofefao.github.io/King-Idle-Savior-Boy/privacy-policy/` (SETUP §7).
-9. **app-ads.txt:** repositório `fefaofefao.github.io` com o `app-ads.txt` e o seu Publisher ID; usar `https://fefaofefao.github.io` como Site na ficha (SETUP §7).
+9. **app-ads.txt:** ✅ já preenchido com o Publisher ID `pub-7483085200976329`. Falta: copiar para o repositório `fefaofefao.github.io`; usar `https://fefaofefao.github.io` como Site na ficha (SETUP §7).
 10. **Gerar o AAB:** `git tag v1.0.0 && git push origin v1.0.0` → Actions → baixar `KingIdleSaviorBoy-AAB-1.0.0-N`.
 11. **Play Console:**
     - criar o app (Jogo, Gratuito);

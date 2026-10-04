@@ -104,7 +104,7 @@ O site já está pronto na pasta `docs/` (página inicial, **Política de Privac
    O jogo já abre esses links no Menu (no idioma do jogador). Se o endereço for outro, ajuste `SITE_URL` em `src/ui/Panel.ts`.
 4. Troque o e-mail de contato em `docs/index.html`, `docs/privacy-policy/index.html` e `docs/terms/index.html` (procure `CONTATO@EXEMPLO.COM`).
 5. **app-ads.txt:** precisa ficar na **raiz** do domínio informado como "Site" na ficha da Play.
-   - Crie um repositório chamado **`fefaofefao.github.io`** (GitHub Pages de usuário), coloque nele o `app-ads.txt` deste projeto com o seu **Publisher ID** no lugar de `pub-0000000000000000` (AdMob → Configurações → Informações da conta) e ative o Pages.
+   - Crie um repositório chamado **`fefaofefao.github.io`** (GitHub Pages de usuário), coloque nele o `app-ads.txt` deste projeto (já com o Publisher ID `pub-7483085200976329`) e ative o Pages.
    - Ele ficará em `https://fefaofefao.github.io/app-ads.txt`. Informe `https://fefaofefao.github.io` no campo **Site** da ficha da Play.
    - O AdMob verifica o arquivo em até 24 h (AdMob → Apps → app-ads.txt).
 
