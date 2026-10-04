@@ -86,7 +86,7 @@ export function showTitleScreen(root: HTMLElement, firstLaunch: boolean, onPlay?
       h('span', { class: 'ts-w2', text: words.slice(1, -1).join(' ') }),
       h('span', { class: 'ts-w3', text: words[words.length - 1] }),
     ]),
-    h('div', { class: 'ts-badge', html: '<img src="icon.svg" alt="">' }),
+    h('div', { class: 'ts-badge', html: '<img src="icon.png" alt="">' }),
   ]);
 
   const langTitle = h('div', { class: 'ts-lang-title' });

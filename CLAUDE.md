@@ -13,13 +13,15 @@ npm run build          # typecheck + build web em dist/
 npm run sim            # simulador de balanceamento (metas de ritmo)
 npm run sim -- --tps=5 --set=enemy.goldPerHp=0.02   # experimentos
 npm run optimize-models   # (opcional) meshopt nos .glb de public/models
-npm run icons          # regenera ícone adaptativo + splash a partir de assets/icon.svg
+node scripts/render-icon.mjs   # renderiza o knight.glb → assets/knight-render.png (precisa do Playwright)
+npm run icons          # gera ícone adaptativo + splash + public/icon.png a partir do render (ou de assets/icon.svg)
 npm run android:sync   # build + cap sync android
 npm run android:open   # abre no Android Studio
 ```
 
 Depuração no navegador: `window.__app` (ex.: `__app.state.gold = __app.state.gold.plus(1e9)`).
 `?adfail=1` na URL simula falha de anúncio.
+**APK de teste:** cada push gera um APK debug no GitHub Actions ("Android APK (teste)" → Artifacts). Nele, tocar 5× na versão (Menu) libera o painel de testes. Veja `TESTE_APK.md`.
 
 ## Modelos 3D (KayKit)
 
@@ -32,19 +34,19 @@ Se for adicionado `public/models/animations/rig_medium_combat*.glb` (pack KayKit
 ```
 src/
   config/      app.ts (APP_ID, flags), balance.ts (TODAS as constantes), visual.ts (modelos/câmera/zonas)
-  core/        lógica pura e testável: state, formulas, game (classe Game), save, offline, retention, format, bignum
+  core/        lógica pura e testável: state, formulas, game (classe Game), save, offline, retention, story (Jornada do Rei), format, bignum
   i18n/        index.ts + locales/{pt-BR,en,es}.ts  ← 3 idiomas
   scene/       Three.js: GameScene, Assets (cache GLB + fallback), Actor, KnightAttack, Zones, Effects, Fallback
-  ui/          Hud, Panel (abas), Modals, Floaters, Intro (escolha de idioma + loading), icons (SVG), dom
+  ui/          Hud (com rastreador de missão), Panel (abas), Modals, Floaters, Intro (tela inicial), storyText, icons (SVG), dom
   ads/         AdService (interface), MockAdService, AdMobAdService (UMP), AdPolicy (regras do interstitial)
   audio/       Sfx (Web Audio procedural + música opcional)
   platform/    Capacitor: Preferences, App, Haptics, LocalNotifications, SplashScreen
   iap/         PurchaseService (estrutura desligada)
   App.ts       orquestra tudo; main.ts = entrada
-scripts/       balance-sim.ts, optimize-models.sh, gen-icons.mjs
+scripts/       balance-sim.ts, optimize-models.sh, gen-icons.mjs, render-icon.mjs (+ tools/render-icon.*)
 tests/         *.test.ts (Vitest)
 android/       projeto Capacitor (minSdk 24, targetSdk 36, portrait, AdMob App ID via placeholder)
-.github/workflows/  ci.yml (testes + build a cada push), android-release.yml (AAB assinado)
+.github/workflows/  ci.yml (testes + build), android-apk.yml (APK de teste a cada push), android-release.yml (AAB assinado)
 privacy-policy/ store-listing/ app-ads.txt SETUP_CONTAS.md CREDITS.md licenses/
 ```
 
@@ -66,11 +68,13 @@ privacy-policy/ store-listing/ app-ads.txt SETUP_CONTAS.md CREDITS.md licenses/
 | 4. Android + AdMob | ✅ código pronto: Capacitor, AdService, UMP, frequência, voltar, safe areas, haptics, notificações, ícone/splash |
 | 5. Build e publicação | ✅ workflows, optimize-models, SETUP_CONTAS, política de privacidade, textos da loja |
 | 6. Revisão final | ✅ testes e build ok, revisão feita; pendências abaixo |
+| Extra: Jornada do Rei | ✅ 36 missões em 5 capítulos + infinitas, tutorial, rastreador no HUD, história por capítulo |
+| Extra: APK de teste | ✅ gerado no GitHub Actions a cada push, com painel de testes |
 
 ## Pendências (dependem do dono do projeto)
 
 1. **Contas:** AdMob (app + rewarded + interstitial + UMP), keystore, GitHub Secrets, Play Console — passo a passo em `SETUP_CONTAS.md`.
-2. **Primeiro AAB:** rodar o workflow "Android Release (AAB)". O Gradle não pôde rodar nesta sessão (download do Android SDK bloqueado), então o 1º build Android real acontece no GitHub Actions. Confira lá o tamanho do AAB (o workflow falha se passar de 40 MB; o build web tem ~2,5 MB).
+2. **Testar o APK** no celular (`TESTE_APK.md`). O APK debug já compila no GitHub Actions (~13 MB). Para a Play, rodar "Android Release (AAB)" depois de cadastrar a keystore.
 3. **Teste em aparelho real:** desempenho (FPS/bateria), anúncios de teste, consentimento UMP, botão voltar, notificação do baú offline.
 4. **Publicar a política de privacidade** (GitHub Pages), trocar o e-mail de contato e conferir `PRIVACY_URL` em `src/ui/Panel.ts`; publicar o `app-ads.txt` com o seu Publisher ID.
 5. **Screenshots** da loja (lista em `store-listing/screenshots.md`).

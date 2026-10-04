@@ -28,6 +28,7 @@ import {
   type TrackKind,
 } from './retention';
 import { createInitialState, isBossStage, type GameState } from './state';
+import { currentStoryQuest, storyProgress } from './story';
 
 export type BuyAmount = 1 | 10 | 25 | 'max';
 
@@ -43,7 +44,8 @@ export type GameEvent =
   | { type: 'levelMilestone' }
   | { type: 'ability'; id: AbilityId }
   | { type: 'achievement'; id: string }
-  | { type: 'prestige'; crystals: Decimal };
+  | { type: 'prestige'; crystals: Decimal }
+  | { type: 'storyClaimed'; gold: Decimal; crystals: number; chapterDone: boolean };
 
 export interface GameOptions {
   rng?: () => number;
@@ -406,6 +408,23 @@ export class Game {
     return true;
   }
 
+  // ---------------- Jornada do Rei ----------------
+
+  /** Coleta a missão principal atual, se cumprida. Retorna false se ainda não está pronta. */
+  claimStory(now: number): boolean {
+    const s = this.state;
+    const quest = currentStoryQuest(s);
+    if (storyProgress(s, quest) < quest.target) return false;
+    const gold = (quest.incomeSec ? this.incomeReward(quest.incomeSec, now, 5) : D(0)).max(quest.gold ?? 0);
+    this.addGold(gold);
+    const crystals = quest.crystals ?? 0;
+    if (crystals) s.crystals = s.crystals.plus(crystals);
+    s.story.index++;
+    const next = currentStoryQuest(s);
+    this.emit({ type: 'storyClaimed', gold, crystals, chapterDone: next.chapter !== quest.chapter });
+    return true;
+  }
+
   // ---------------- Retenção ----------------
 
   track(kind: TrackKind, amount: number): void {
@@ -425,6 +444,7 @@ export class Game {
     const s = this.state;
     const byIncome = incomePerSec(s, now).times(seconds);
     const byKills = enemyGold(s.stage).times(goldMult(s, now)).times(minKills);
-    return byIncome.max(byKills).floor();
+    // Arredonda para cima: no começo do jogo a recompensa nunca fica em 0.
+    return byIncome.max(byKills).ceil();
   }
 }

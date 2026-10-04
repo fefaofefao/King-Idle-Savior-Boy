@@ -10,6 +10,22 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 - **Save em `@capacitor/preferences`** (localStorage no navegador) com backup do save anterior — simples e funciona offline.
 - **Capacitor 8** (última estável no momento): o template já vem com `minSdk 24` e `targetSdk 36`. A Play exige API 35 para apps novos desde 31/08/2025 e deve passar a exigir 36 em 2026; 36 atende os dois. Confirme no Play Console antes de publicar.
 
+## Jornada do Rei (missões principais)
+- **36 missões em 5 capítulos**, um por zona: Floresta Sombria, Cavernas de Cristal, Deserto do Renascer, Picos Gelados e Vulcão do Rei Esqueleto. Cada capítulo abre com um modal de história (3 idiomas), e o botão 📖 na aba Missões relê a história. Depois da cadeia vêm missões infinitas ("alcance a fase X", a cada 25 fases) que dão cristais.
+- **O progresso é lido do estado** (maior fase, toques, nível da Lâmina, membros...), não acumulado. É robusto a saves antigos e ao Renascer. A migração v2 → v3 começa a jornada do zero para quem já jogava, e as missões já cumpridas aparecem prontas para coletar.
+- **O tutorial está embutido nas primeiras missões** (tocar, derrotar, Lâmina, contratar o Escudeiro). Elas pagam ouro fixo suficiente para a próxima compra, e uma mãozinha "Toque no inimigo" aparece até os 5 primeiros toques.
+- **Rastreador no HUD** abaixo da fase: mostra o objetivo e a barra de progresso. Fica verde e pulsando quando a missão está pronta; tocar nele coleta. Se ainda não estiver pronta, abre a aba Missões.
+- A cadeia foi validada no simulador: o jogador casual completa 35 das 36 missões em ~3 dias.
+
+## APK de teste
+- **Workflow `android-apk.yml`:** gera um APK debug a cada push (anúncios de teste do Google, sem keystore). Baixe em Actions → Artifacts. Guia: `TESTE_APK.md`.
+- **Painel de testes** (`FEATURES.TEST_TOOLS`, ligado só com `VITE_TEST_BUILD=1`, que é o caso do APK de teste): tocar 5× na versão, no Menu. Oferece +ouro, +cristais, +10 fases, simular 8 h offline, zerar recargas e apagar o progresso. Não existe no build de release.
+- **Edge-to-edge (Android 15+):** `SystemBars.insetsHandling = 'css'` no capacitor.config. O CSS usa `--safe-area-inset-*` injetado pelo Capacitor, com `env()` como reserva.
+- **`setup-android`:** a lista de pacotes é explícita, porque o pacote padrão `tools` não existe mais no sdkmanager atual.
+
+## Ícone
+- **Ícone renderizado do `knight.glb`** com espada e escudo, do peito para cima, sobre fundo em gradiente azul. `scripts/render-icon.mjs` abre `tools/render-icon.html` no Chromium headless (Vite + Three.js) e grava `assets/knight-render.png`; `npm run icons` gera o ícone adaptativo, o splash e `public/icon.png`, que também aparece na tela inicial.
+
 ## Nome e tela inicial
 - **Nome do jogo: "King Idle Savior Boy"** (pedido do dono), igual nos 3 idiomas e definido numa única constante (`GAME_TITLE`). O Package ID `br.com.fernando.idleknight` foi mantido, conforme a especificação.
 - **Tela inicial** (`src/ui/Intro.ts`): aparece a cada abertura. Tem um cenário em SVG ao entardecer (castelo, montanhas, raios girando, faíscas), o logo com coroa e o botão Jogar. O carregamento dos modelos aparece no próprio botão ("Carregando… 45%"), e a escolha dos 3 idiomas fica na mesma tela, em destaque na primeira abertura.
@@ -22,46 +38,48 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 - O nome do app no Android é "King Idle Savior Boy" em todos os idiomas.
 
 ## Balanceamento (rodar `npm run sim`)
-- **Ouro por HP: 0,09 → 0,017.** Com 0,09 a fase 40 chegava em ~10 min (meta: 35–60). O formato da fórmula (`ouro = HP × k`) foi mantido; só a constante mudou.
-- **`goldStageDecay`** (ouro crescendo mais devagar que o HP) foi testado e descartado; fica em 1 (desligado) como ponto de ajuste futuro.
-- **Cristais: divisor 5 → 2,5** (`floor(((faseMax − 30) / 2,5)^1,3)`) — com 5, a fase 40 dava só 2 cristais; agora o 1º Renascer (fase 40–50) dá 6–14.
+- **O simulador segue a Jornada do Rei** como um jogador real: compra o que a missão pede, guarda ouro para contratar o membro pedido, coleta as missões e abre o Baú do Mensageiro a cada ~4 min. Com isso o ritmo ficou mais rápido que na versão sem missões, e as constantes foram reajustadas.
+- **Ouro por HP: 0,09 → 0,0095.** O formato `ouro = HP × k` foi mantido; só a constante mudou.
+- **Cristais: `floor(((faseMax − 30) / 3,5)^1,55)`.** A fase 40 dá 5 cristais e a fase 50 dá 14 (meta de 5 a 15 no 1º Renascer). Renascimentos mais tardios rendem mais (fase 70 = 43, fase 100 = 103), o que leva o jogador casual à fase ~100 no 3º dia.
 - **Loja de Cristais:** dano/ouro custam `1 × 1,3^nível`; crítico, tempo do chefe, offline e recarga têm nível máximo (20/15/16/10) e custo mais íngreme.
-- **Toque Arcano:** desbloqueia na fase 20, custa `25 000 × 12^nível` (custo alto, como pedido).
-- **Simulação de referência:** jogador ativo a 3 toques/s (5 toques/s sustentados por 40 min não é realista). O simulador aceita `--tps=N` e `--set=caminho=valor` para experimentos.
-- **Métrica "sem algo para comprar"** mede o tempo sem NENHUM upgrade acessível, não o tempo entre compras (o simulador às vezes espera de propósito pelo melhor upgrade).
+- **Toque Arcano:** desbloqueia na fase 20 e custa `25 000 × 12^nível`.
+- **Jogador de referência:** 3 toques/s no modo ativo. No casual, 4 sessões de 10 min por dia a 2 toques/s, renascendo quando o ganho de cristais iguala tudo o que já obteve.
+- **Métrica "sem algo para comprar"** mede o tempo sem NENHUM upgrade acessível.
+- `goldStageDecay` (ouro crescendo mais devagar que o HP) existe, mas fica em 1 (desligado).
 
 ### Resultado da simulação (constantes atuais)
 ```
 
 === Jogador ATIVO (3 toques/s, 120 min) ===
-  fase  10: 3:12
-  fase  20: 8:33
-  fase  30: 23:45
-  fase  40: 36:16
-  fase  50: 1h 16m
+  fase  10: 2:01
+  fase  20: 6:56
+  fase  30: 18:53
+  fase  40: 35:02
+  fase  50: 1h 02m
   fase  60: —
   fase  80: —
   fase 100: —
-  Renascer disponível em: 36:16
-  final: fase 50, DPS 7.08K, toque 744, lâmina 61, guilda [40,32,7,0,0,0,0,0], arcano 0
-  cristais se renascer agora: 14
-  maior intervalo sem nada para comprar (primeiras 2 h): 1:33
+  Renascer disponível em: 35:02
+  final: fase 57, DPS 13.9K, toque 299, lâmina 67, guilda [46,35,15,0,0,0,0,0], arcano 0
+  cristais se renascer agora: 23
+  maior intervalo sem nada para comprar (primeiras 2 h): 2:33
+  Jornada (19/36 coletadas): 1:taps10@4s  2:kills5@12s  3:blade1@12s  4:hire1@12s  5:stage5@47s  6:member10@16:01  7:boss1@16:01  8:hire1@16:01  9:blade25@18:35  10:stage15@18:35  11:ability1@18:35  12:hire1@34:08  13:stage20@34:08  14:chest1@34:08  15:stage25@34:08  16:boss3@34:08  17:stage30@34:08  18:crits100@34:08  19:stage40@35:02
 
 === Jogador CASUAL (3 dias, 4×10 min/dia, 2 toques/s) ===
-  fim do dia 1: fase máx. da run 59, recorde 59, cristais 0, renascimentos 0
-  dia 2 sessão 2: Renascer na fase 69 (+35 cristais)
-  dia 2 sessão 4: Renascer na fase 67 (+33 cristais)
-  fim do dia 2: fase máx. da run 48, recorde 69, cristais 33, renascimentos 2
-  dia 3 sessão 2: Renascer na fase 84 (+54 cristais)
-  dia 3 sessão 4: Renascer na fase 96 (+70 cristais)
-  fim do dia 3: fase máx. da run 62, recorde 96, cristais 84, renascimentos 4
+  dia 1 sessão 4: Renascer na fase 50 (+14 cristais)
+  fim do dia 1: fase máx. da run 10, recorde 50, cristais 11, renascimentos 1
+  fim do dia 2: fase máx. da run 70, recorde 70, cristais 11, renascimentos 1
+  dia 3 sessão 1: Renascer na fase 70 (+43 cristais)
+  dia 3 sessão 4: Renascer na fase 90 (+81 cristais)
+  fim do dia 3: fase máx. da run 19, recorde 90, cristais 40, renascimentos 3
+  Jornada (28/36 coletadas): 1:taps10@dia 1  2:kills5@dia 1  3:blade1@dia 1  4:hire1@dia 1  5:stage5@dia 1  6:member10@dia 1  7:boss1@dia 1  8:hire1@dia 1  9:blade25@dia 1  10:stage15@dia 1  11:ability1@dia 1  12:hire1@dia 1  13:stage20@dia 1  14:chest1@dia 1  15:stage25@dia 1  16:boss3@dia 1  17:stage30@dia 1  18:crits100@dia 1  19:stage40@dia 1  20:prestige1@dia 1  21:crystalShop2@dia 1  22:stage45@dia 1  23:hire1@dia 2  24:stage50@dia 2  25:blade100@dia 2  26:stage60@dia 2  27:arcane1@dia 2  28:prestige3@dia 3
 
 === Metas ===
-  [OK ] Fase 10 em 2–4 min: 3:12
-  [OK ] Renascer (fase 40) em 35–60 min: 36:16
-  [OK ] Cristais no 1º Renascer (fase 40–50): 6–14
-  [OK ] Fase ~100 no 3º dia casual: 96
-  [OK ] Nunca > ~5 min sem nada para comprar (2 h): 1:33
+  [OK ] Fase 10 em 2–4 min: 2:01
+  [OK ] Renascer (fase 40) em 35–60 min: 35:02
+  [OK ] Cristais no 1º Renascer (fase 40–50): 5–14
+  [OK ] Fase ~100 no 3º dia casual: 90
+  [OK ] Nunca > ~5 min sem nada para comprar (2 h): 2:33
 ```
 
 ## Regras de jogo interpretadas

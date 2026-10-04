@@ -38,6 +38,15 @@ export const MIGRATIONS: Record<number, (raw: Raw) => Raw> = {
       schemaVersion: 2,
     };
   },
+  // v2 → v3: adicionou a Jornada do Rei (missões principais) e o tutorial.
+  // Quem já jogava não vê o tutorial e começa a jornada do início (as missões já cumpridas
+  // aparecem prontas para coletar, porque o progresso é lido do estado).
+  2: (raw) => ({
+    ...raw,
+    story: { index: 0 },
+    tutorial: { tapHintDone: (raw.stats?.taps ?? 0) > 0 },
+    schemaVersion: 3,
+  }),
 };
 
 export function migrate(raw: Raw): Raw {
@@ -68,6 +77,8 @@ export function deserialize(json: string): GameState {
     abilityReadyAt: { ...base.abilityReadyAt, ...raw.abilityReadyAt },
     abilityActiveUntil: { ...base.abilityActiveUntil, ...raw.abilityActiveUntil },
     daily: { ...base.daily, ...raw.daily },
+    story: { ...base.story, ...raw.story },
+    tutorial: { ...base.tutorial, ...raw.tutorial },
     missions: raw.missions ?? base.missions,
     achievements: raw.achievements ?? {},
     guild: base.guild.map((_, i) => Number(raw.guild?.[i] ?? 0)),

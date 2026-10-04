@@ -3,6 +3,7 @@
 interface ImportMetaEnv {
   readonly VITE_ADMOB_REWARDED_ID?: string;
   readonly VITE_ADMOB_INTERSTITIAL_ID?: string;
+  readonly VITE_TEST_BUILD?: string;
 }
 
 declare const __APP_VERSION__: string;

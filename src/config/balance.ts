@@ -14,7 +14,7 @@ export const BALANCE = {
     hpBase: 10,
     hpGrowth: 1.19,
     bossHpMult: 10,
-    goldPerHp: 0.017,
+    goldPerHp: 0.0095,
     /** Ouro cresce um pouco mais devagar que o HP: ouro(n) = HP(n) × goldPerHp × goldStageDecay^(n−1). */
     goldStageDecay: 1,
     bossGoldMult: 6,
@@ -78,8 +78,8 @@ export const BALANCE = {
   prestige: {
     minStage: 40,
     offset: 30,
-    divisor: 2.5,
-    exponent: 1.3,
+    divisor: 3.5,
+    exponent: 1.55,
     /** Bônus de dano global por cristal NÃO gasto. */
     damagePerCrystal: 0.05,
   },

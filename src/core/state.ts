@@ -62,6 +62,10 @@ export interface GameState {
   /** Estatísticas da run atual (zeram no Renascer). */
   runStartedAt: number;
   daily: { lastClaimDay: string; index: number };
+  /** Jornada do Rei: índice da missão principal atual. */
+  story: { index: number };
+  /** Dicas do tutorial já mostradas. */
+  tutorial: { tapHintDone: boolean };
   missions: { day: string; list: MissionState[] };
   achievements: Record<string, 'done' | 'claimed'>;
   settings: Settings;
@@ -71,7 +75,7 @@ export interface GameState {
   noAds: boolean;
 }
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export function createInitialState(now = Date.now(), lang: Lang = 'en'): GameState {
   return {
@@ -108,6 +112,8 @@ export function createInitialState(now = Date.now(), lang: Lang = 'en'): GameSta
     },
     runStartedAt: now,
     daily: { lastClaimDay: '', index: 0 },
+    story: { index: 0 },
+    tutorial: { tapHintDone: false },
     missions: { day: '', list: [] },
     achievements: {},
     settings: {

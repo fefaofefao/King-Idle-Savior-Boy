@@ -28,6 +28,7 @@ import { formatNumber, formatTime } from '../src/core/format';
 import { applyOffline } from '../src/core/offline';
 import { createInitialState } from '../src/core/state';
 import { ABILITY_IDS } from '../src/config/balance';
+import { STORY, currentStoryQuest } from '../src/core/story';
 
 const arg = (name: string, def: number) => {
   const a = process.argv.find((x) => x.startsWith(`--${name}=`));
@@ -103,18 +104,46 @@ function greedyBuy(g: Game, tps: number, now: number): number {
   return bought;
 }
 
+/** Missão atual pede uma compra de guilda ainda não feita? (o jogador guarda ouro para ela) */
+function savingForQuest(g: Game): boolean {
+  const quest = currentStoryQuest(g.state);
+  return (quest.kind === 'hire' || quest.kind === 'member') && g.state.guild[quest.member ?? 0] < quest.target;
+}
+
+/** Compra o que a missão principal atual pede, se der. */
+function questBuy(g: Game): void {
+  const quest = currentStoryQuest(g.state);
+  switch (quest.kind) {
+    case 'hire':
+    case 'member':
+      if (g.state.guild[quest.member ?? 0] < quest.target) g.buyMember(quest.member ?? 0, 1);
+      break;
+    case 'blade':
+      g.buyBlade(1);
+      break;
+    case 'arcane':
+      g.buyArcane();
+      break;
+    case 'crystalShop':
+      for (const u of BALANCE.crystalShop) if (g.buyCrystalUpgrade(u.id)) break;
+      break;
+  }
+}
+
 interface PlayerSim {
   g: Game;
   now: number;
   farmTimer: number;
   lastBuyAt: number;
   maxGap: number;
+  /** Instante (ms de jogo) em que cada missão da Jornada foi coletada. */
+  story: number[];
 }
 
 function newPlayer(): PlayerSim {
   const s = createInitialState(0);
   const g = new Game(s, { rng: Math.random });
-  return { g, now: 0, farmTimer: 0, lastBuyAt: 0, maxGap: 0 };
+  return { g, now: 0, farmTimer: 0, lastBuyAt: 0, maxGap: 0, story: [] };
 }
 
 function step(p: PlayerSim, tps: number, track: boolean): void {
@@ -124,6 +153,14 @@ function step(p: PlayerSim, tps: number, track: boolean): void {
   const tapsThisStep = Math.floor((p.now / 1000) * tps) - Math.floor(((p.now - DT * 1000) / 1000) * tps);
   for (let i = 0; i < tapsThisStep; i++) g.tap(p.now);
   g.update(DT, p.now);
+  // Jornada do Rei: o jogador segue a missão (compra o que ela pede) e coleta assim que fica pronta.
+  questBuy(g);
+  while (g.claimStory(p.now)) p.story.push(p.now);
+  // Baú do Mensageiro: aparece a cada ~4 min e o jogador toca nele.
+  if (tps > 0 && Math.floor(p.now / 240_000) > Math.floor((p.now - DT * 1000) / 240_000)) {
+    g.addGold(g.incomeReward(BALANCE.chest.incomeSeconds, p.now, BALANCE.chest.enemyKills));
+    g.state.stats.chests++;
+  }
   for (const id of ABILITY_IDS) if (tps > 0) g.useAbility(id, p.now);
   if (g.state.farming) {
     p.farmTimer += DT;
@@ -139,7 +176,7 @@ function step(p: PlayerSim, tps: number, track: boolean): void {
       if (anyAffordable) p.lastBuyAt = p.now;
       else p.maxGap = Math.max(p.maxGap, (p.now - p.lastBuyAt) / 1000);
     }
-    greedyBuy(g, tps, p.now);
+    if (!savingForQuest(g)) greedyBuy(g, tps, p.now);
   }
 }
 
@@ -163,6 +200,7 @@ function activeRun(tps: number, minutes: number) {
   );
   console.log(`  cristais se renascer agora: ${crystalsForPrestige(s.maxStage)}`);
   console.log(`  maior intervalo sem nada para comprar (primeiras 2 h): ${formatTime(p.maxGap)}`);
+  printStory(p);
   return { hit, firstPrestigeAt, maxGap: p.maxGap };
 }
 
@@ -174,6 +212,8 @@ function casualRun(days: number) {
   const sessionsPerDay = 4;
   const gapMs = (24 * 60 * 60_000) / sessionsPerDay - sessionMin * 60_000;
   let stagnantSince = 0;
+  /** Cristais obtidos com Renascer (gastos ou não). */
+  let totalCrystals = 0;
   let lastMax = 0;
   for (let d = 0; d < days; d++) {
     for (let k = 0; k < sessionsPerDay; k++) {
@@ -188,17 +228,18 @@ function casualRun(days: number) {
         if (
           p.g.canPrestige() &&
           p.now - stagnantSince > 5 * 60_000 &&
-          crystalsForPrestige(p.g.state.maxStage).gte(p.g.state.crystals.max(5))
+          crystalsForPrestige(p.g.state.maxStage).gte(Math.max(5, totalCrystals))
         ) {
           const c = p.g.prestige(p.now);
+          totalCrystals += c.toNumber();
           console.log(`  dia ${d + 1} sessão ${k + 1}: Renascer na fase ${lastMax} (+${c} cristais)`);
           lastMax = 0;
           stagnantSince = p.now;
-          // Compra upgrades de dano/ouro que custem até 15% dos cristais.
+          // Compra upgrades de dano/ouro que custem até 30% dos cristais.
           for (let i = 0; i < 40; i++) {
             const id = i % 2 ? 'gold' : 'damage';
             const cost = crystalUpgradeCost(id, p.g.state.crystalUpgrades[id]);
-            if (cost.gt(p.g.state.crystals.times(0.15))) continue;
+            if (cost.gt(p.g.state.crystals.times(0.3))) continue;
             p.g.buyCrystalUpgrade(id);
           }
         }
@@ -214,7 +255,15 @@ function casualRun(days: number) {
         `cristais ${p.g.state.crystals}, renascimentos ${p.g.state.stats.prestiges}`,
     );
   }
+  printStory(p, true);
   return p.g.state.stats.highestStage;
+}
+
+/** Linha do tempo da Jornada do Rei. */
+function printStory(p: PlayerSim, days = false): void {
+  const label = (ms: number) => (days ? `dia ${Math.floor(ms / 86_400_000) + 1}` : formatTime(ms / 1000));
+  const parts = p.story.map((ms, i) => `${i + 1}:${STORY[i] ? STORY[i].kind + STORY[i].target : 'inf'}@${label(ms)}`);
+  console.log(`  Jornada (${p.story.length}/${STORY.length} coletadas): ${parts.join('  ')}`);
 }
 
 const tps = arg('tps', 3);

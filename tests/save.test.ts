@@ -29,7 +29,7 @@ describe('serialização', () => {
 });
 
 describe('migração', () => {
-  it('v1 → v2 converte idioma e marca idioma escolhido', () => {
+  it('v1 → v3 converte idioma e marca idioma escolhido', () => {
     const v1 = {
       schemaVersion: 1,
       gold: '100',
@@ -41,7 +41,7 @@ describe('migração', () => {
       stats: { taps: 50, totalGold: '500' },
     };
     const s = deserialize(JSON.stringify(v1));
-    expect(s.schemaVersion).toBe(2);
+    expect(s.schemaVersion).toBe(3);
     expect(s.settings.lang).toBe('pt-BR');
     expect(s.settings.langChosen).toBe(true);
     expect(s.settings.sound).toBe(false);

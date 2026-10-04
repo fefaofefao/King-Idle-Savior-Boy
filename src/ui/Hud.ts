@@ -2,6 +2,8 @@ import type { App } from '../App';
 import { BALANCE, ABILITY_IDS, type AbilityId } from '../config/balance';
 import { formatNumber, formatTime } from '../core/format';
 import { bossTimeSec, incomePerSec } from '../core/formulas';
+import { currentStoryQuest, storyComplete, storyProgress } from '../core/story';
+import { storyText } from './storyText';
 import { zoneIndex } from '../core/state';
 import { t, tk } from '../i18n';
 import { h, setText, toggleClass } from './dom';
@@ -62,6 +64,7 @@ export class Hud {
     const top = h('div', { class: 'hud-top' }, [
       h('div', { class: 'hud-row' }, [this.goldAnchor, crystalBox, buffBtn]),
       (E.stageBox = h('div', { class: 'stage-box' }, [E.stage, E.zone, E.progress])),
+      (E.quest = this.buildQuestTracker()),
     ]);
     const enemyBox = h('div', { class: 'enemy-box' }, [E.enemyName, E.hp, E.fightBoss]);
     E.enemyBox = enemyBox;
@@ -81,6 +84,38 @@ export class Hud {
     }
     this.wrap.append(top, enemyBox, bar);
     this.update();
+  }
+
+  /** Rastreador da missão principal (Jornada do Rei), logo abaixo da fase. */
+  private buildQuestTracker(): HTMLElement {
+    const E = this.els;
+    E.questText = h('span', { class: 'qt-text' });
+    E.questFill = h('i');
+    E.questCount = h('span', { class: 'qt-count' });
+    return h(
+      'button',
+      {
+        class: 'quest-tracker',
+        onClick: () => (storyComplete(this.app.state) ? this.app.claimStory() : this.app.panel.select('quests')),
+      },
+      [
+        h('span', { class: 'ico', html: ICONS.quests }),
+        h('div', { class: 'qt-main' }, [E.questText, h('div', { class: 'qt-bar' }, [E.questFill])]),
+        E.questCount,
+      ],
+    );
+  }
+
+  private updateQuestTracker(): void {
+    const E = this.els;
+    const s = this.app.state;
+    const quest = currentStoryQuest(s);
+    const prog = Math.min(storyProgress(s, quest), quest.target);
+    const done = prog >= quest.target;
+    setText(E.questText, done ? t('story.ready') : storyText(quest));
+    E.questFill.style.width = `${(prog / quest.target) * 100}%`;
+    setText(E.questCount, quest.target > 1 ? `${formatNumber(prog)}/${formatNumber(quest.target)}` : done ? '✓' : '');
+    toggleClass(E.quest, 'ready', done);
   }
 
   private openBuffModal(): void {
@@ -134,12 +169,13 @@ export class Hud {
       setText(E.progressText, s.farming ? `${t('hud.farming')} · ${kills}/${BALANCE.stage.enemiesPerStage}` : `${kills}/${BALANCE.stage.enemiesPerStage}`);
     }
     toggleClass(E.fightBoss, 'show', s.farming);
+    this.updateQuestTracker();
 
     // Nome + HP acompanham a cabeça do inimigo.
     const pos = app.scene.enemyScreenPos();
     const rect = this.wrap.getBoundingClientRect();
     const x = Math.min(rect.width - 90, Math.max(90, pos.x - rect.left));
-    const minY = E.stageBox.offsetTop + E.stageBox.offsetHeight + E.enemyBox.offsetHeight + 6;
+    const minY = E.quest.offsetTop + E.quest.offsetHeight + E.enemyBox.offsetHeight + 6;
     const y = Math.max(minY, pos.y - rect.top - 6);
     E.enemyBox.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
 

@@ -12,4 +12,6 @@ export const FEATURES = {
   ENABLE_BANNER: false,
   /** Compra "Remover anúncios": estrutura pronta, desligada até integrar o Play Billing. */
   ENABLE_IAP: false,
+  /** Painel de testes (tocar 5× na versão, no Menu). Ligado só no APK de teste (VITE_TEST_BUILD=1). */
+  TEST_TOOLS: import.meta.env.VITE_TEST_BUILD === '1' || import.meta.env.DEV,
 } as const;

@@ -18,6 +18,8 @@ import {
 } from '../core/formulas';
 import type { BuyAmount } from '../core/game';
 import { ACHIEVEMENTS, canClaimDaily, missionDef } from '../core/retention';
+import { STORY, currentStoryQuest, storyComplete, storyProgress } from '../core/story';
+import { chapterTitle, storyText } from './storyText';
 import type { Notation } from '../core/state';
 import { LANGUAGES, t, tk } from '../i18n';
 import { h, setDisabled, setText, toggleClass } from './dom';
@@ -121,6 +123,7 @@ export class Panel {
     const s = this.app.state;
     const now = Date.now();
     const questReady =
+      storyComplete(s) ||
       canClaimDaily(s, now) ||
       s.missions.list.some((m) => !m.claimed && m.progress >= m.target) ||
       Object.values(s.achievements).includes('done');
@@ -300,6 +303,46 @@ export class Panel {
   private buildQuests(): void {
     const app = this.app;
     const s = app.state;
+    // Jornada do Rei (missão principal)
+    this.content.appendChild(h('h3', { html: `${ICONS.quests}<span>${t('story.title')}</span>` }));
+    const chTitle = h('div', { class: 'story-chapter' });
+    const chFill = h('i');
+    const qText = h('div', { class: 'row-title' });
+    const qReward = h('div', { class: 'row-desc' });
+    const qFill = h('i');
+    const qLabel = h('span');
+    const qBtn = h('button', { class: 'btn primary small', onClick: () => app.claimStory() });
+    const storyBtn = h('button', { class: 'btn secondary small story-read', text: '📖', 'aria-label': t('story.title'), onClick: () => app.showChapterIntro() });
+    this.content.appendChild(
+      h('div', { class: 'story-card' }, [
+        h('div', { class: 'story-head' }, [chTitle, storyBtn]),
+        h('div', { class: 'story-chbar' }, [chFill]),
+        h('div', { class: 'quest story-quest' }, [
+          h('div', { class: 'quest-main' }, [qText, h('div', { class: 'qbar' }, [qFill, qLabel]), qReward]),
+          qBtn,
+        ]),
+      ]),
+    );
+    this.updaters.push(() => {
+      const st = app.state;
+      const quest = currentStoryQuest(st);
+      const inChapter = STORY.filter((x) => x.chapter === quest.chapter);
+      const doneInChapter = STORY.slice(0, st.story.index).filter((x) => x.chapter === quest.chapter).length;
+      setText(chTitle, chapterTitle(quest.chapter));
+      chFill.style.width = inChapter.length ? `${(doneInChapter / inChapter.length) * 100}%` : '100%';
+      setText(qText, storyText(quest));
+      const prog = Math.min(storyProgress(st, quest), quest.target);
+      qFill.style.width = `${(prog / quest.target) * 100}%`;
+      setText(qLabel, `${formatNumber(prog)}/${formatNumber(quest.target)}`);
+      const rewards = [];
+      if (quest.incomeSec || quest.gold) rewards.push(`🪙 ${formatNumber(app.game.incomeReward(quest.incomeSec ?? 0, Date.now(), 5).max(quest.gold ?? 0), st.settings.notation)}`);
+      if (quest.crystals) rewards.push(`💎 ${quest.crystals}`);
+      setText(qReward, `${t('story.reward')} ${rewards.join('  ')}`);
+      setText(qBtn, t('quests.claim'));
+      setDisabled(qBtn, prog < quest.target);
+      toggleClass(qBtn, 'glow', prog >= quest.target);
+    });
+
     // Recompensa diária
     this.content.appendChild(h('h3', { html: `${ICONS.calendar}<span>${t('quests.daily')}</span>` }));
     const days = h('div', { class: 'daily' });
@@ -476,7 +519,44 @@ export class Panel {
     add(t('menu.credits'), () => this.openCredits());
     add(t('menu.removeAds'), () => void app.purchases.buyNoAds(), !FEATURES.ENABLE_IAP);
     c.appendChild(grid);
-    c.appendChild(h('p', { class: 'version', text: `v${__APP_VERSION__}` }));
+    const version = h('p', { class: 'version', text: `v${__APP_VERSION__}${FEATURES.TEST_TOOLS ? ' · TEST' : ''}` });
+    c.appendChild(version);
+    if (FEATURES.TEST_TOOLS) {
+      let taps = 0;
+      version.addEventListener('click', () => {
+        if (++taps === 5) {
+          app.floaters.toast(t('debug.unlocked'));
+          this.buildTestTools(c);
+        }
+      });
+    }
+  }
+
+  /** Painel de testes (só no APK de teste): atalhos para testar o jogo rapidamente. */
+  private buildTestTools(c: HTMLElement): void {
+    const app = this.app;
+    const g = app.game;
+    const grid = h('div', { class: 'menu-grid test-tools' });
+    const add = (label: string, fn: () => void) => grid.appendChild(h('button', { class: 'btn danger', text: label, onClick: fn }));
+    add(t('debug.gold'), () => g.addGold(g.incomeReward(600, Date.now(), 100)));
+    add(t('debug.crystals'), () => (g.state.crystals = g.state.crystals.plus(25)));
+    add(t('debug.stages'), () => {
+      const s = g.state;
+      s.stage += 10;
+      s.maxStage = Math.max(s.maxStage, s.stage);
+      s.stats.highestStage = Math.max(s.stats.highestStage, s.stage);
+      s.killsInStage = 0;
+      s.farming = false;
+      g.spawnEnemy();
+      app.scene.setZone(Math.floor((s.stage - 1) / 50) % 5);
+      app.scene.setMageVisible(s.maxStage >= BALANCE.mage.unlockStage);
+    });
+    add(t('debug.offline'), () => app.debugOffline(8 * 3600));
+    add(t('debug.cooldowns'), () => {
+      for (const k of Object.keys(g.state.abilityReadyAt) as (keyof typeof g.state.abilityReadyAt)[]) g.state.abilityReadyAt[k] = 0;
+    });
+    add(t('debug.reset'), () => void app.debugReset());
+    c.append(h('h3', { text: t('debug.title') }), grid);
   }
 
   private openStats(): void {

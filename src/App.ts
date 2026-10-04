@@ -18,6 +18,8 @@ import {
 } from './core/retention';
 import { SaveManager, exportSave, importSave } from './core/save';
 import { createInitialState, zoneIndex, type GameState, type Lang } from './core/state';
+import { currentStoryQuest } from './core/story';
+import { chapterTitle, storyText } from './ui/storyText';
 import { detectLang, setLang, t, tk } from './i18n';
 import { DisabledPurchaseService } from './iap/PurchaseService';
 import {
@@ -99,6 +101,9 @@ export class App {
 
     if (restoredFromBackup) this.floaters.toast(t('toast.saveRestored'));
     this.handleOffline(now);
+    // Primeira vez: história do capítulo 1 e a dica de toque.
+    if (s.story.index === 0 && s.stats.taps === 0) this.showChapterIntro(() => this.showTapHint());
+    else this.showTapHint();
     if (canClaimDaily(s, now)) this.floaters.toast(t('quests.daily'), ICONS.calendar);
 
     this.scene.onFrame = (dt) => this.frame(dt);
@@ -250,6 +255,21 @@ export class App {
       }
       case 'prestige':
         break;
+      case 'storyClaimed': {
+        sfx.play('levelUp');
+        vibrate(false);
+        const parts = [];
+        if (e.gold.gt(0)) parts.push(`+${formatNumber(e.gold, s.settings.notation)}`);
+        if (e.crystals) parts.push(`+${e.crystals} 💎`);
+        this.floaters.toast(`${t('story.title')}: ${parts.join('  ')}`, ICONS.quests);
+        this.floaters.coins(innerWidth / 2, 150, this.hud.goldAnchor, 6, () => sfx.play('coin'));
+        if (e.chapterDone) {
+          this.floaters.banner(t('story.chapterDone'), 'good');
+          setTimeout(() => this.showChapterIntro(), 900);
+        }
+        this.queueSave();
+        break;
+      }
     }
   }
 
@@ -309,6 +329,20 @@ export class App {
   }
 
   // ---------------- Offline ----------------
+
+  /** (Painel de testes) Finge que o jogo ficou fechado por `seconds`. */
+  debugOffline(seconds: number): void {
+    this.state.lastSeen = Date.now() - seconds * 1000;
+    this.handleOffline(Date.now());
+  }
+
+  /** (Painel de testes) Apaga o save e recomeça. */
+  async debugReset(): Promise<void> {
+    if (!(await this.modals.confirm(t('debug.reset'), t('debug.resetConfirm')))) return;
+    this.save = async () => {};
+    await this.saves.wipe();
+    location.reload();
+  }
 
   private handleOffline(now: number): void {
     const s = this.state;
@@ -471,6 +505,50 @@ export class App {
     if (def.rewardCrystals) s.crystals = s.crystals.plus(def.rewardCrystals);
     sfx.play('chest');
     this.queueSave();
+  }
+
+  /** Coleta a missão principal atual (Jornada do Rei). */
+  claimStory(): void {
+    this.game.claimStory(Date.now());
+    this.panel.update(true);
+  }
+
+  /** Modal com a história do capítulo atual. */
+  showChapterIntro(onClose?: () => void): void {
+    const ch = currentStoryQuest(this.state).chapter;
+    this.modals.open({
+      title: chapterTitle(ch),
+      className: 'chapter-modal',
+      body: [
+        h('div', { class: 'chapter-art', html: ICONS.quests }),
+        h('p', { class: 'chapter-text', text: tk(`chapterIntro.${ch}`) }),
+        h('p', { class: 'chapter-goal', text: `➜ ${storyText(currentStoryQuest(this.state))}` }),
+      ],
+      buttons: [{ label: ch === 1 && this.state.story.index === 0 ? t('story.start') : t('story.next'), kind: 'primary' }],
+      onClose,
+    });
+  }
+
+  /** Mãozinha do tutorial apontando para o inimigo até os primeiros toques. */
+  private showTapHint(): void {
+    if (this.state.tutorial.tapHintDone) return;
+    const hint = h('div', { class: 'tap-hint' }, [h('div', { class: 'tap-hand', text: '👆' }), h('div', { class: 'tap-label', text: t('tutorial.tap') })]);
+    $('#stage').appendChild(hint);
+    const place = () => {
+      if (!hint.isConnected) return;
+      const pos = this.scene.enemyScreenPos();
+      const rect = $('#stage').getBoundingClientRect();
+      hint.style.left = `${pos.x - rect.left}px`;
+      hint.style.top = `${pos.y - rect.top + 90}px`;
+      if (this.state.stats.taps >= 5) {
+        this.state.tutorial.tapHintDone = true;
+        hint.classList.add('out');
+        setTimeout(() => hint.remove(), 400);
+        return;
+      }
+      requestAnimationFrame(place);
+    };
+    place();
   }
 
   claimAchievement(id: string): void {

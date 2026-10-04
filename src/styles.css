@@ -14,10 +14,11 @@
   --purple: #9b6cff;
   --blue-ad: #2b6be0;
   --crystal: #7fd3ff;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
+  /* Capacitor 8 (SystemBars insetsHandling: 'css') injeta --safe-area-inset-*; no navegador vale env(). */
+  --safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --safe-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+  --safe-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
   --panel-h: min(44vh, 440px);
 }
 
@@ -875,7 +876,7 @@ table.stats td:last-child {
 }
 .toasts {
   inset: auto 0 auto 0;
-  top: calc(var(--safe-top) + 150px);
+  top: calc(var(--safe-top) + 205px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1304,4 +1305,162 @@ table.stats td:last-child {
   max-width: 200px;
   height: 32px;
   accent-color: var(--gold);
+}
+
+/* ---------- Jornada do Rei ---------- */
+.quest-tracker {
+  align-self: center;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: min(92%, 340px);
+  min-height: 44px;
+  padding: 5px 10px 5px 6px;
+  border-radius: 14px;
+  background: rgba(14, 22, 44, 0.7);
+  border: 2px solid rgba(255, 213, 74, 0.35);
+  text-align: left;
+  backdrop-filter: blur(4px);
+}
+.quest-tracker .ico {
+  width: 28px;
+  height: 28px;
+  flex: none;
+}
+.qt-main {
+  flex: 1;
+  min-width: 0;
+}
+.qt-text {
+  display: block;
+  font-size: 12.5px;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.qt-bar {
+  height: 5px;
+  margin-top: 3px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+.qt-bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #ffd54a, #ffb52e);
+  transition: width 0.2s;
+}
+.qt-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gold);
+  white-space: nowrap;
+}
+.quest-tracker.ready {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, rgba(95, 214, 124, 0.9), rgba(47, 154, 74, 0.9));
+  box-shadow: 0 0 16px rgba(255, 213, 74, 0.7);
+  animation: pulse 1s ease-in-out infinite;
+}
+.quest-tracker.ready .qt-text {
+  font-weight: 600;
+}
+.story-card {
+  background: linear-gradient(180deg, #4a3a8a, #2e2560);
+  border: 2px solid rgba(255, 213, 74, 0.45);
+  border-radius: 16px;
+  padding: 10px;
+  margin-bottom: 6px;
+}
+.story-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.story-chapter {
+  font-weight: 600;
+  color: #ffe9a0;
+  font-size: 15px;
+}
+.story-read {
+  min-width: 44px;
+  font-size: 18px;
+}
+.story-chbar {
+  height: 6px;
+  margin: 6px 0 8px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+.story-chbar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #b48cff, #ffd54a);
+  transition: width 0.3s;
+}
+.story-quest {
+  margin: 0;
+  background: rgba(0, 0, 0, 0.25);
+}
+.btn.glow {
+  animation: pulse 1s ease-in-out infinite;
+  box-shadow: 0 4px 0 #1e6b33, 0 0 14px rgba(255, 213, 74, 0.8);
+}
+.modal.chapter-modal {
+  background: linear-gradient(180deg, #3b2a7a, #1f2550);
+  border-color: #ffd54a;
+}
+.chapter-art {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 6px;
+}
+.chapter-text {
+  font-size: 15px;
+  line-height: 1.45 !important;
+}
+.chapter-goal {
+  margin-top: 12px !important;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 213, 74, 0.15);
+  color: #ffe9a0;
+  font-weight: 600;
+  font-size: 14px;
+}
+.tap-hint {
+  position: absolute;
+  z-index: 6;
+  transform: translate(-50%, 0);
+  pointer-events: none;
+  text-align: center;
+  transition: opacity 0.4s;
+}
+.tap-hint.out {
+  opacity: 0;
+}
+.tap-hand {
+  font-size: 44px;
+  animation: tap-bounce 0.9s ease-in-out infinite;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.5));
+}
+.tap-label {
+  margin-top: 2px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: rgba(14, 22, 44, 0.85);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+@keyframes tap-bounce {
+  50% {
+    transform: translateY(-14px) scale(0.92);
+  }
 }
