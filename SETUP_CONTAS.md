@@ -60,7 +60,7 @@ No GitHub: **Settings → Secrets and variables → Actions → New repository s
 
 ## 4. Play Console
 
-1. Crie a conta de desenvolvedor em <https://play.google.com/console> (taxa única). Contas pessoais exigem verificação de identidade.
+1. Crie a conta de desenvolvedor em <https://play.google.com/console> (taxa única). Contas pessoais exigem verificação de identidade. **Nome do desenvolvedor** (aparece na loja): **FSamp Labs**.
 2. **Criar app:** nome "King Idle Savior Boy", idioma padrão pt-BR, **Jogo**, **Gratuito**.
 3. **Configurar o app** (painel "Configure seu app"): preencha cada item conforme as seções 5 e 6.
 4. **Play App Signing:** na 1ª versão enviada, aceite "Deixar o Google gerenciar e proteger a chave de assinatura do app". O AAB enviado é assinado com a sua **chave de upload** (a keystore do passo 1).

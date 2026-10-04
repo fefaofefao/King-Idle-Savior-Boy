@@ -256,7 +256,7 @@ export const en: Locale = {
   "boss.enraged": "The King is ENRAGED!",
   'credits.text': '3D characters, weapons and animations: Kay Lousberg — KayKit (www.kaylousberg.com), CC0.',
   'credits.font': 'Font: Fredoka (SIL Open Font License).',
-  'credits.code': 'Code, sounds and procedural scenery: King Idle Savior Boy team.',
+  'credits.code': 'Code, sounds and procedural scenery: FSamp Labs.',
   "chapter.6": "The Forgotten Ruins",
   "chapter.7": "The Dark Swamp",
   "chapter.8": "The Crystal Citadel",
@@ -358,4 +358,5 @@ export const en: Locale = {
   "debug.relic": "+1 relic",
   "menu.terms": "Terms of use",
   "panel.toggle": "Collapse or open the panel",
+  "credits.studio": "A game by FSamp Labs",
 };

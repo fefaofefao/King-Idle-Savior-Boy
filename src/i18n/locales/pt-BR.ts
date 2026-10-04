@@ -254,7 +254,7 @@ export const ptBR = {
   "boss.enraged": "O Rei está FURIOSO!",
   'credits.text': 'Personagens 3D, armas e animações: Kay Lousberg — KayKit (www.kaylousberg.com), CC0.',
   'credits.font': 'Fonte: Fredoka (SIL Open Font License).',
-  'credits.code': 'Código, sons e cenários procedurais: equipe do King Idle Savior Boy.',
+  'credits.code': 'Código, sons e cenários procedurais: FSamp Labs.',
   "chapter.6": "As Ruínas Esquecidas",
   "chapter.7": "O Pântano Sombrio",
   "chapter.8": "A Cidadela de Cristal",
@@ -356,6 +356,7 @@ export const ptBR = {
   "debug.relic": "+1 relíquia",
   "menu.terms": "Termos de uso",
   "panel.toggle": "Recolher ou abrir o painel",
+  "credits.studio": "Um jogo de FSamp Labs",
 };
 
 export type LocaleKey = keyof typeof ptBR;

@@ -7,3 +7,6 @@ export const APP_ID = 'br.com.fernando.idleknight';
 /** Nome do jogo (igual nos 3 idiomas). */
 export const GAME_TITLE = 'King Idle Savior Boy';
 export const APP_NAME_EN = GAME_TITLE;
+
+/** Estúdio / desenvolvedor (créditos, site e ficha da loja). */
+export const STUDIO = 'FSamp Labs';

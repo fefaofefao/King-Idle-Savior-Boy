@@ -2,6 +2,8 @@
 
 # King Idle Savior Boy
 
+Un juego de **FSamp Labs**.
+
 [Português](README.md) · [English](README.en.md) · **Español**
 
 Clicker + RPG idle en 3D low-poly para **Android** (Capacitor + Three.js) que también funciona en el navegador, en **portugués, inglés y español**.

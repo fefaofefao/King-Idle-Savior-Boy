@@ -2216,3 +2216,9 @@ button.card:active:not(:disabled) {
   width: 18px;
   height: 18px;
 }
+.credits-studio {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold);
+  text-align: center;
+}

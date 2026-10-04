@@ -941,7 +941,7 @@ export class Panel {
   private openCredits(): void {
     this.app.modals.open({
       title: t('menu.credits'),
-      body: [h('p', { text: t('credits.text') }), h('p', { text: t('credits.font') }), h('p', { text: t('credits.code') })],
+      body: [h('p', { class: 'credits-studio', text: t('credits.studio') }), h('p', { text: t('credits.text') }), h('p', { text: t('credits.font') }), h('p', { text: t('credits.code') })],
     });
   }
 }

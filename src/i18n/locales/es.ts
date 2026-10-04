@@ -256,7 +256,7 @@ export const es: Locale = {
   "boss.enraged": "¡El Rey está FURIOSO!",
   'credits.text': 'Personajes 3D, armas y animaciones: Kay Lousberg — KayKit (www.kaylousberg.com), CC0.',
   'credits.font': 'Fuente: Fredoka (SIL Open Font License).',
-  'credits.code': 'Código, sonidos y escenarios procedurales: equipo de King Idle Savior Boy.',
+  'credits.code': 'Código, sonidos y escenarios procedurales: FSamp Labs.',
   "chapter.6": "Las Ruinas Olvidadas",
   "chapter.7": "El Pantano Sombrío",
   "chapter.8": "La Ciudadela de Cristal",
@@ -358,4 +358,5 @@ export const es: Locale = {
   "debug.relic": "+1 reliquia",
   "menu.terms": "Términos de uso",
   "panel.toggle": "Plegar o abrir el panel",
+  "credits.studio": "Un juego de FSamp Labs",
 };

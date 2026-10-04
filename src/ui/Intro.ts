@@ -126,7 +126,7 @@ export function showTitleScreen(root: HTMLElement, firstLaunch: boolean, onPlay?
     h('div', { class: 'ts-bg', html: SCENERY }),
     sparkles,
     h('div', { class: 'ts-content' }, [logo, h('div', { class: 'ts-bottom' }, [langBox, play, barWrap])]),
-    h('div', { class: 'ts-footer', text: `v${__APP_VERSION__} · KayKit CC0` }),
+    h('div', { class: 'ts-footer', text: `v${__APP_VERSION__} · FSamp Labs · KayKit CC0` }),
   ]);
 
   let loaded = false;
