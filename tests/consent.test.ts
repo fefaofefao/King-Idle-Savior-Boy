@@ -92,3 +92,21 @@ describe('consentimento UMP', () => {
     expect(firstLoad).toBeGreaterThan(order.indexOf('consent'));
   });
 });
+
+describe('anúncios não personalizados (ECA Digital)', () => {
+  it('a flag vem ligada por padrão', async () => {
+    const { ADS_NON_PERSONALIZED } = await import('../src/config/app');
+    expect(ADS_NON_PERSONALIZED).toBe(true);
+  });
+
+  it('premiado e intersticial são pedidos com npa: true', async () => {
+    consent = 'ok';
+    vi.mocked(AdMob.prepareRewardVideoAd).mockClear();
+    vi.mocked(AdMob.prepareInterstitial).mockClear();
+    const ads = new AdMobAdService(memStore());
+    await ads.init();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(vi.mocked(AdMob.prepareRewardVideoAd).mock.calls[0][0]).toMatchObject({ npa: true });
+    expect(vi.mocked(AdMob.prepareInterstitial).mock.calls[0][0]).toMatchObject({ npa: true });
+  });
+});

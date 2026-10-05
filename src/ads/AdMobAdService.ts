@@ -5,8 +5,12 @@ import {
   MaxAdContentRating,
   RewardAdPluginEvents,
 } from '@capacitor-community/admob';
+import { ADS_NON_PERSONALIZED } from '../config/app';
 import type { KeyValueStore } from '../core/save';
 import { AD_IDS, type AdService } from './AdService';
+
+/** Opções comuns a toda requisição de anúncio. */
+const requestOptions = (adId: string) => ({ adId, isTesting: AD_IDS.isTesting, npa: ADS_NON_PERSONALIZED });
 
 /** Chave local com o último `canRequestAds` informado pelo UMP (consentimento anterior). */
 export const CONSENT_KEY = 'ads_can_request';
@@ -61,7 +65,7 @@ export class AdMobAdService implements AdService {
 
   private async loadRewarded(): Promise<void> {
     try {
-      await AdMob.prepareRewardVideoAd({ adId: AD_IDS.rewarded, isTesting: AD_IDS.isTesting });
+      await AdMob.prepareRewardVideoAd(requestOptions(AD_IDS.rewarded));
       this.rewardedReady = true;
     } catch (e) {
       this.rewardedReady = false;
@@ -71,7 +75,7 @@ export class AdMobAdService implements AdService {
 
   private async loadInterstitial(): Promise<void> {
     try {
-      await AdMob.prepareInterstitial({ adId: AD_IDS.interstitial, isTesting: AD_IDS.isTesting });
+      await AdMob.prepareInterstitial(requestOptions(AD_IDS.interstitial));
       this.interstitialReady = true;
     } catch (e) {
       this.interstitialReady = false;

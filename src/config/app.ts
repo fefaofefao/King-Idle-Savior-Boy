@@ -10,3 +10,9 @@ export const FEATURES = {
   /** Painel de testes (tocar 5× na versão, no Menu). Ligado só no APK de teste (VITE_TEST_BUILD=1). */
   TEST_TOOLS: import.meta.env.VITE_TEST_BUILD === '1' || import.meta.env.DEV,
 } as const;
+
+/**
+ * Anúncios NÃO personalizados para todos os usuários (ECA Digital, Lei 15.211/2025).
+ * Ligado: toda requisição do AdMob (premiado e intersticial) vai com `npa: true`.
+ */
+export const ADS_NON_PERSONALIZED = true;
