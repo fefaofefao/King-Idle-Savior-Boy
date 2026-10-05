@@ -26,7 +26,7 @@ Resumo para levar o **King Idle Savior Boy** à Google Play. O passo a passo det
 ## ⏳ To-do do dono (em ordem)
 
 ### 1. Revisar e decidir
-- [ ] Conferir o texto do responsável na política e nos termos: **"Fernando Martins Sampaio 400966 128-35 (FSamp Labs)"**. O número fica **público** no site; confirme se quer publicá-lo e se o número/formato está correto (ver CONFORMIDADE §9)
+- [x] Responsável na política e nos termos: **"Fernando Martins Sampaio (FSamp Labs)"** + e-mail de contato (sem CPF)
 - [ ] Revisar a branch `claude/play-compliance` e fazer o merge na branch usada para o Pages/release
 
 ### 2. Conta Google Play (burocracia)

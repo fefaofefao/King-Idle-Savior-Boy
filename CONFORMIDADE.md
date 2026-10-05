@@ -77,7 +77,7 @@ Estado em 2026-10-05, branch `claude/play-compliance`. O que depende do dono est
 
   Se negada, o jogo segue normal e o Menu mostra o aviso desligado; se o Android tirar a permissão depois, o Menu desliga ao abrir. Save v6 (`settings.notifAsked`), com migração e testes.
 - **Política de Privacidade** (pt/en/es): `docs/privacy-policy/index.html` → `https://fefaofefao.github.io/King-Idle-Savior-Boy/privacy-policy/`. Atualizada em **2026-10-05**. Cobre:
-  - responsável pelo tratamento: **Fernando Martins Sampaio 400966 128-35 (FSamp Labs)**;
+  - responsável pelo tratamento: **Fernando Martins Sampaio (FSamp Labs)**;
   - contato e público 13+;
   - dados locais e backup do Android;
   - AdMob: tipos de dado, finalidades e criptografia em trânsito;
@@ -88,7 +88,7 @@ Estado em 2026-10-05, branch `claude/play-compliance`. O que depende do dono est
   - notificações (nova regra de pedido);
   - crianças, direitos LGPD/GDPR/CCPA e alterações.
 - **Termos de Uso** (pt/en/es): `docs/terms/index.html`, atualizados em 2026-10-05. Cobrem:
-  - titular: Fernando Martins Sampaio 400966 128-35 (FSamp Labs);
+  - titular: Fernando Martins Sampaio (FSamp Labs);
   - licença;
   - itens virtuais sem valor monetário;
   - anúncios: não personalizados, PG;
@@ -194,7 +194,7 @@ Resolvidos nesta revisão (branch `claude/play-compliance`):
 - **versionCode** = `github.run_number + 100` (nunca regride; os AABs 1.0.0 antigos usaram 1–4).
 
 Ainda em aberto:
-1. **CPF na política e nos termos:** o texto pedido inclui o número "400966 128-35", que fica **público** no site. A LGPD exige identificar o controlador e um canal de contato, mas não exige publicar o CPF. Avaliar se mantém. O formato também difere do padrão de CPF (000.000.000-00); conferir o número.
+1. ~~CPF na política e nos termos~~ → **removido**. Política e termos identificam o responsável só pelo nome (Fernando Martins Sampaio, FSamp Labs) e o e-mail de contato, como pede a LGPD.
 2. **Relíquia "Cálice do Mensageiro"** (+15% de ouro do baú por nível): o bônus é exibido, mas **não é aplicado** no cálculo do baú (`openChest` não usa `relicBonus('chest')`). Descrição de item diferente do efeito real; recomendo corrigir numa próxima versão (fora do escopo desta revisão: item 5 pedia não alterar).
 3. **Package ID** contém "idleknight" (nome antigo do projeto); não muda após publicar.
 4. **Configurações no painel do AdMob a espelhar:** classificação máxima **PG**; mensagens GDPR e "estados dos EUA" publicadas.
