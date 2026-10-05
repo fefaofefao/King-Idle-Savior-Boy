@@ -357,6 +357,11 @@ export const ptBR = {
   "menu.terms": "Termos de uso",
   "panel.toggle": "Recolher ou abrir o painel",
   "credits.studio": "Um jogo de FSamp Labs",
+  "notif.askTitle": "Avisar quando o baú encher?",
+  "notif.askText": "Seu baú offline encheu enquanto você estava fora. Quer receber uma notificação no celular quando ele encher de novo? Ela é criada no próprio aparelho, nenhum dado é enviado, e você pode desligar no Menu.",
+  "notif.askYes": "Quero ser avisado",
+  "notif.askNo": "Agora não",
+  "notif.denied": "Notificações não permitidas. Você pode liberar nas configurações do Android.",
 };
 
 export type LocaleKey = keyof typeof ptBR;

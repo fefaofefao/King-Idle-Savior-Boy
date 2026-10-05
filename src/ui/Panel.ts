@@ -741,7 +741,7 @@ export class Panel {
 
   // ---------------- Menu ----------------
 
-  private toggleRow(label: string, get: () => boolean, set: (v: boolean) => void): HTMLElement {
+  private toggleRow(label: string, get: () => boolean, set: (v: boolean) => unknown): HTMLElement {
     const sw = h('button', { class: 'switch', role: 'switch' });
     const refresh = () => {
       const on = get();
@@ -749,8 +749,8 @@ export class Panel {
       sw.setAttribute('aria-checked', String(on));
       sw.textContent = on ? t('menu.on') : t('menu.off');
     };
-    sw.addEventListener('click', () => {
-      set(!get());
+    sw.addEventListener('click', async () => {
+      await set(!get());
       refresh();
       this.app.applySettings();
       this.app.queueSave();

@@ -51,6 +51,13 @@ export const MIGRATIONS: Record<number, (raw: Raw) => Raw> = {
   3: (raw) => ({ ...raw, bestiary: {}, schemaVersion: 4 }),
   // v4 → v5: Relíquias e visuais do Cavaleiro.
   4: (raw) => ({ ...raw, relics: {}, skin: 'classic', schemaVersion: 5 }),
+  // v5 → v6: a permissão de notificação deixou de ser pedida na 1ª abertura.
+  // A preferência antiga é mantida; ao abrir, o jogo desliga se o Android não deu a permissão.
+  5: (raw) => ({
+    ...raw,
+    settings: { ...raw.settings, notifAsked: Boolean(raw.settings?.notifications) },
+    schemaVersion: 6,
+  }),
 };
 
 export function migrate(raw: Raw): Raw {

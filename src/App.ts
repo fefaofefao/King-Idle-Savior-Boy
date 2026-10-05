@@ -31,6 +31,7 @@ import {
   onBackButton,
   onPauseResume,
   preferencesStore,
+  notificationsGranted,
   requestNotificationPermission,
   scheduleOfflineFull,
   setVibration,
@@ -124,7 +125,8 @@ export class App {
     onPauseResume(() => this.pause(), () => this.resume());
     onBackButton(() => this.back());
     void this.ads.init().catch((e) => console.warn('[ads] init falhou', e));
-    if (s.settings.notifications) void requestNotificationPermission();
+    // A permissão de notificação NÃO é pedida ao abrir: só no Menu ou quando o baú offline enche.
+    void this.syncNotifications();
     void this.save();
   }
 
@@ -481,6 +483,7 @@ export class App {
     if (r.clockRewound || r.cappedSeconds < BALANCE.offline.minSecondsForModal || r.gold.lte(0)) return;
     const gold = r.gold;
     const fmt = (g: Decimal) => formatNumber(g, s.settings.notation);
+    if (r.seconds >= offlineCapSec(s)) this.offerNotificationsWhenFree();
     this.modals.open({
       title: t('offline.title'),
       className: 'offline-modal',
@@ -764,9 +767,44 @@ export class App {
 
   // ---------------- Configurações ----------------
 
-  setNotifications(on: boolean): void {
-    this.state.settings.notifications = on;
-    if (on) void requestNotificationPermission();
+  /** Liga/desliga o aviso do baú. Ligar pede a permissão do Android; se negada, fica desligado. */
+  async setNotifications(on: boolean): Promise<void> {
+    const st = this.state.settings;
+    if (!on) {
+      st.notifications = false;
+      void cancelOfflineFull();
+    } else {
+      st.notifAsked = true;
+      st.notifications = await requestNotificationPermission();
+      if (!st.notifications) this.floaters.toast(t('notif.denied'), ICONS.chest, 3600);
+    }
+    this.queueSave();
+  }
+
+  /** Se o Android tirou a permissão, o Menu mostra o aviso desligado. */
+  private async syncNotifications(): Promise<void> {
+    const st = this.state.settings;
+    if (st.notifications && !(await notificationsGranted())) st.notifications = false;
+  }
+
+  /** 1ª vez que o baú offline encheu: explica o aviso antes do pedido do sistema. */
+  private offerNotificationsWhenFree(): void {
+    const st = this.state.settings;
+    if (!isNative() || st.notifAsked || st.notifications) return;
+    const tryOpen = () => {
+      if (this.modals.isOpen) return void setTimeout(tryOpen, 600);
+      st.notifAsked = true;
+      this.queueSave();
+      this.modals.open({
+        title: t('notif.askTitle'),
+        body: [h('div', { class: 'chapter-art', html: ICONS.chest }), h('p', { text: t('notif.askText') })],
+        buttons: [
+          { label: t('notif.askNo'), kind: 'secondary' },
+          { label: t('notif.askYes'), kind: 'primary', onClick: () => void this.setNotifications(true) },
+        ],
+      });
+    };
+    setTimeout(tryOpen, 500);
   }
 
   setLanguage(lang: Lang): void {

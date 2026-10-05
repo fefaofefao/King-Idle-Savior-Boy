@@ -91,4 +91,21 @@ describe('SaveManager', () => {
     const r = await new SaveManager(new MemoryStore()).load();
     expect(r.state).toBeNull();
   });
+
+  it('v5 → v6: notificação vira opt-in e guarda se já foi pedida', () => {
+    const v5 = JSON.parse(serialize(createInitialState()));
+    v5.schemaVersion = 5;
+    v5.settings.notifications = true;
+    delete v5.settings.notifAsked;
+    const s = deserialize(JSON.stringify(v5));
+    expect(s.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(s.settings.notifications).toBe(true);
+    expect(s.settings.notifAsked).toBe(true);
+  });
+
+  it('jogo novo: notificação desligada e nunca pedida', () => {
+    const s = createInitialState();
+    expect(s.settings.notifications).toBe(false);
+    expect(s.settings.notifAsked).toBe(false);
+  });
 });

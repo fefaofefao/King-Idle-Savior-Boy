@@ -359,4 +359,9 @@ export const es: Locale = {
   "menu.terms": "Términos de uso",
   "panel.toggle": "Plegar o abrir el panel",
   "credits.studio": "Un juego de FSamp Labs",
+  "notif.askTitle": "¿Avisarte cuando el cofre se llene?",
+  "notif.askText": "Tu cofre sin conexión se llenó mientras no estabas. ¿Quieres una notificación en el móvil cuando se llene de nuevo? Se crea en tu dispositivo, no se envían datos y puedes desactivarla en el Menú.",
+  "notif.askYes": "Quiero el aviso",
+  "notif.askNo": "Ahora no",
+  "notif.denied": "Notificaciones no permitidas. Puedes activarlas en los ajustes de Android.",
 };

@@ -13,7 +13,10 @@ export interface Settings {
   sfxVolume: number;
   musicVolume: number;
   vibration: boolean;
+  /** Aviso do baú cheio. Só fica ligado se o jogador pediu E o Android deu a permissão. */
   notifications: boolean;
+  /** Já explicamos/pedimos a permissão de notificação (não pedir de novo sozinho). */
+  notifAsked: boolean;
   notation: Notation;
 }
 
@@ -89,7 +92,7 @@ export interface GameState {
   noAds: boolean;
 }
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 export function createInitialState(now = Date.now(), lang: Lang = 'en'): GameState {
   return {
@@ -145,7 +148,8 @@ export function createInitialState(now = Date.now(), lang: Lang = 'en'): GameSta
       sfxVolume: 0.8,
       musicVolume: 0.4,
       vibration: true,
-      notifications: true,
+      notifications: false,
+      notifAsked: false,
       notation: 'short',
     },
     lastSeen: now,

@@ -71,6 +71,16 @@ export async function hideSplash(): Promise<void> {
 // ---------- Notificações locais ----------
 const OFFLINE_FULL_ID = 1001;
 
+/** Só consulta (não pede) se as notificações estão permitidas. */
+export async function notificationsGranted(): Promise<boolean> {
+  if (!isNative()) return false;
+  try {
+    return (await LocalNotifications.checkPermissions()).display === 'granted';
+  } catch {
+    return false;
+  }
+}
+
 /** Pede a permissão de notificação (Android 13+) com o app em primeiro plano. */
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!isNative()) return false;

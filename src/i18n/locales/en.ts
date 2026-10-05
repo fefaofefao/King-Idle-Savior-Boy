@@ -359,4 +359,9 @@ export const en: Locale = {
   "menu.terms": "Terms of use",
   "panel.toggle": "Collapse or open the panel",
   "credits.studio": "A game by FSamp Labs",
+  "notif.askTitle": "Notify you when the chest is full?",
+  "notif.askText": "Your offline chest filled up while you were away. Want a notification on your phone when it fills up again? It is created on your device, no data is sent, and you can turn it off in the Menu.",
+  "notif.askYes": "Notify me",
+  "notif.askNo": "Not now",
+  "notif.denied": "Notifications not allowed. You can enable them in Android settings.",
 };
