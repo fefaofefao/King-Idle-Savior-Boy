@@ -7,7 +7,7 @@ let scenario: 'reward' | 'closeEarly' | 'failShow' = 'reward';
 
 vi.mock('@capacitor-community/admob', () => ({
   AdmobConsentStatus: { REQUIRED: 'REQUIRED' },
-  MaxAdContentRating: { Teen: 'Teen' },
+  MaxAdContentRating: { Teen: 'Teen', ParentalGuidance: 'ParentalGuidance' },
   RewardAdPluginEvents: {
     Rewarded: 'onRewardedVideoAdReward',
     Dismissed: 'onRewardedVideoAdDismissed',

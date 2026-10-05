@@ -33,12 +33,12 @@ export class AdMobAdService implements AdService {
   }
 
   private async doInit(): Promise<void> {
-    // 1) Inicializa o SDK (público 13+, não direcionado a crianças). A documentação do plugin
+    // 1) Inicializa o SDK (público 13+, não direcionado a crianças; anúncios até PG, alinhado ao IARC Livre/10+). A documentação do plugin
     //    pede initialize() ANTES do fluxo de consentimento.
     await AdMob.initialize({
       tagForChildDirectedTreatment: false,
       tagForUnderAgeOfConsent: false,
-      maxAdContentRating: MaxAdContentRating.Teen,
+      maxAdContentRating: MaxAdContentRating.ParentalGuidance,
       initializeForTesting: AD_IDS.isTesting,
     });
     // 2) Consentimento UMP antes de carregar anúncios.

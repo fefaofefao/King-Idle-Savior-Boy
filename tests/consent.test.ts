@@ -110,3 +110,11 @@ describe('anúncios não personalizados (ECA Digital)', () => {
     expect(vi.mocked(AdMob.prepareInterstitial).mock.calls[0][0]).toMatchObject({ npa: true });
   });
 });
+
+describe('classificação dos anúncios', () => {
+  it('inicializa com maxAdContentRating = ParentalGuidance (PG)', async () => {
+    vi.mocked(AdMob.initialize).mockClear();
+    await new AdMobAdService(memStore()).init();
+    expect(vi.mocked(AdMob.initialize).mock.calls[0][0]).toMatchObject({ maxAdContentRating: 'ParentalGuidance' });
+  });
+});
