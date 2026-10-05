@@ -44,6 +44,7 @@ Android: `npm run android:sync` e `npm run android:open` (Android Studio). Cada 
 | [CLAUDE.md](CLAUDE.md) | Guia de desenvolvimento e estrutura |
 | [DECISIONS.md](DECISIONS.md) | Decisões técnicas e de balanceamento |
 | [CREDITS.md](CREDITS.md) · [licenses/](licenses/) | Créditos e licenças (KayKit CC0, Fredoka OFL) |
+| [CONFORMIDADE.md](CONFORMIDADE.md) | Relatório de conformidade (Play + AdMob) para revisão |
 
 ## Tecnologia
 Vite · TypeScript · Three.js · break_infinity.js · Capacitor 8 (Android, minSdk 24, targetSdk 36) · @capacitor-community/admob · Vitest.
