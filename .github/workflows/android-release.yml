@@ -50,8 +50,12 @@ jobs:
             NAME="$(node -p "require('./package.json').version")"
           fi
           echo "name=$NAME" >> "$GITHUB_OUTPUT"
-          echo "code=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
-          echo "versionName=$NAME versionCode=${{ github.run_number }}"
+          # versionCode = número do run + deslocamento fixo: nunca regride, mesmo se o workflow
+          # for renomeado/recriado (o run_number recomeça do 1). Os AABs 1.0.0 antigos usaram 1–4.
+          CODE=$(( ${{ github.run_number }} + 100 ))
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "versionName=$NAME versionCode=$CODE"
+          echo "::notice title=Versão::versionName=$NAME versionCode=$CODE"
 
       - name: Build web
         env:
