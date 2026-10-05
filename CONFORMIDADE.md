@@ -132,7 +132,7 @@ Nada no jogo é obtido com dinheiro real:
 
 | Mecânica | Aleatório? | Detalhe |
 |---|---|---|
-| **Baú do Mensageiro**: conteúdo | **Fixo** | Sempre ouro = max(60 s de renda, 8 abates da fase atual); valor mostrado **antes** de escolher |
+| **Baú do Mensageiro**: conteúdo | **Fixo** | Sempre ouro = max(60 s de renda, 8 abates da fase atual) × (1 + 15% por nível do Cálice do Mensageiro); valor mostrado **antes** de escolher |
 | Baú: momento em que aparece | Aleatório | Atravessa a tela a cada 3–5 min (sorteio de tempo), por 8 s |
 | Baú ×5 por anúncio (premiado) | **Fixo** | Multiplica por 5 o valor já mostrado; nada sorteado |
 | Ouro ×2 por anúncio (premiado) | **Fixo** | ×2 de ouro por 5 min (acumula até 30 min) |
@@ -172,7 +172,7 @@ Conclusão: nenhum anúncio libera conteúdo aleatório. Os anúncios só multip
   - migrações versionadas (`SCHEMA_VERSION` 5).
 - **Proteção contra mudar o relógio** para ganhos offline.
 - **Desempenho:** render a 30 fps quando ocioso; pausa total em segundo plano; resolução cai automaticamente em aparelhos lentos.
-- **Testes:** 86 testes automatizados (Vitest) cobrindo:
+- **Testes:** 87 testes automatizados (Vitest) cobrindo:
   - fórmulas, save/migração e offline;
   - política de anúncios e fluxo do premiado;
   - i18n (as mesmas chaves nos 3 idiomas);
@@ -195,7 +195,7 @@ Resolvidos nesta revisão (branch `claude/play-compliance`):
 
 Ainda em aberto:
 1. ~~CPF na política e nos termos~~ → **removido**. Política e termos identificam o responsável só pelo nome (Fernando Martins Sampaio, FSamp Labs) e o e-mail de contato, como pede a LGPD.
-2. **Relíquia "Cálice do Mensageiro"** (+15% de ouro do baú por nível): o bônus é exibido, mas **não é aplicado** no cálculo do baú (`openChest` não usa `relicBonus('chest')`). Descrição de item diferente do efeito real; recomendo corrigir numa próxima versão (fora do escopo desta revisão: item 5 pedia não alterar).
+2. ~~Relíquia "Cálice do Mensageiro" sem efeito~~ → **corrigido**: o ouro do baú agora é multiplicado por (1 + 15% × nível), exatamente como a descrição promete (`Game.chestGold`, com teste). As 12 relíquias foram conferidas: todas aplicam o bônus descrito.
 3. **Package ID** contém "idleknight" (nome antigo do projeto); não muda após publicar.
 4. **Configurações no painel do AdMob a espelhar:** classificação máxima **PG**; mensagens GDPR e "estados dos EUA" publicadas.
 5. **Publicações pendentes:** GitHub Pages da política/termos; `user-site/` no repositório `fefaofefao.github.io`.

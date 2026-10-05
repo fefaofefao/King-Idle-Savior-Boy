@@ -609,6 +609,15 @@ export class Game {
 
   // ---------------- Jornada do Rei ----------------
 
+  /**
+   * Ouro do Baú do Mensageiro: max(60 s de renda, 8 abates da fase), com o bônus da relíquia
+   * Cálice do Mensageiro (+15% por nível). O ×5 do anúncio é aplicado sobre este valor.
+   */
+  chestGold(now: number): Decimal {
+    const C = BALANCE.chest;
+    return this.incomeReward(C.incomeSeconds, now, C.enemyKills).times(1 + relicBonus(this.state, 'chest')).ceil();
+  }
+
   /** Ouro de uma conquista sem cristais: 3 min de renda (piso de 15 abates da fase). */
   achievementGold(now: number): Decimal {
     return this.incomeReward(180, now, 15);

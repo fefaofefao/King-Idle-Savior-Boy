@@ -551,7 +551,7 @@ export class App {
   private openChest(): void {
     const s = this.state;
     const now = Date.now();
-    const gold = this.game.incomeReward(BALANCE.chest.incomeSeconds, now, BALANCE.chest.enemyKills);
+    const gold = this.game.chestGold(now);
     s.stats.chests++;
     this.game.track('chests', 1);
     this.game.checkAchievements();

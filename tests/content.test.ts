@@ -178,3 +178,16 @@ describe('versão final', () => {
     expect(g.combo).toBe(1);
   });
 });
+
+describe('Cálice do Mensageiro', () => {
+  it('aumenta o ouro do baú em 15% por nível (o que a descrição promete)', () => {
+    const base = new Game(at(20));
+    const plain = base.chestGold(0).toNumber();
+    expect(plain).toBe(base.incomeReward(BALANCE.chest.incomeSeconds, 0, BALANCE.chest.enemyKills).toNumber());
+    const s = at(20);
+    s.relics.chalice = 4;
+    const boosted = new Game(s).chestGold(0).toNumber();
+    expect(boosted).toBeCloseTo(Math.ceil(plain * 1.6), 0);
+    expect(BALANCE.relics.list.find((r) => r.id === 'chalice')!.perLevel).toBe(0.15);
+  });
+});
