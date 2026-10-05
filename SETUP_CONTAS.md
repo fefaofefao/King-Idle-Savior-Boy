@@ -36,7 +36,7 @@ O resto o projeto já faz sozinho. Faça na ordem.
    - **Intersticial**: nome "interstitial_rebirth". Copie o ID.
    - **Não** crie banner (o jogo não usa).
 5. **Privacidade e mensagens → GDPR:** crie uma mensagem de consentimento (UMP) para o app e publique. Faça o mesmo para "Regulamentações estaduais dos EUA" se quiser atender esses estados. O jogo já chama o UMP antes de carregar anúncios, e o botão "Privacidade e anúncios" no Menu reabre o formulário.
-6. **Configurações do app → Classificação máxima de conteúdo do anúncio:** **T (Teen)**. O código também envia `maxAdContentRating: Teen`.
+6. **Configurações do app → Classificação máxima de conteúdo do anúncio:** **PG**. O código também envia `maxAdContentRating: ParentalGuidance` e pede anúncios **não personalizados** (`npa`) para todos.
 7. **app-ads.txt:** veja a seção 7.
 
 Enquanto os IDs reais não estiverem nos Secrets, o build usa automaticamente os **IDs de teste oficiais do Google** (anúncios de teste, sem receita e sem risco para a conta).
@@ -136,7 +136,7 @@ Contas pessoais criadas depois de nov./2023 precisam de um **teste fechado com p
 ## Checklist final
 
 - [ ] Keystore criada e guardada em 2 lugares
-- [ ] App + blocos de anúncio no AdMob, mensagem UMP publicada, classificação T
+- [ ] App + blocos de anúncio no AdMob, mensagem UMP publicada, classificação PG
 - [ ] 7 GitHub Secrets cadastrados (+1 opcional)
 - [ ] Workflow gerou um AAB assinado
 - [ ] Política de privacidade publicada (e-mail trocado) e URL na ficha

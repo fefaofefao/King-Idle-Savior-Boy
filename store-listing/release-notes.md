@@ -13,6 +13,7 @@ Primeira versão de King Idle Savior Boy!
 • 12 relíquias e 8 visuais para colecionar
 • Jornada do Rei: 10 capítulos e mais de 70 missões
 • Progresso offline, recompensas diárias e conquistas
+• Aviso opcional quando o baú offline encher (você escolhe)
 </pt-BR>
 
 <en-US>
@@ -24,6 +25,7 @@ The first version of King Idle Savior Boy!
 • 12 relics and 8 looks to collect
 • The King's Journey: 10 chapters and 70+ quests
 • Offline progress, daily rewards and achievements
+• Optional alert when the offline chest is full (your choice)
 </en-US>
 
 <es-ES>
@@ -35,6 +37,7 @@ The first version of King Idle Savior Boy!
 • 12 reliquias y 8 aspectos para coleccionar
 • El Viaje del Rey: 10 capítulos y más de 70 misiones
 • Progreso sin conexión, recompensas diarias y logros
+• Aviso opcional cuando el cofre sin conexión se llene (tú eliges)
 </es-ES>
 
 > Dica: no Play Console, adicione também **es-419** (Espanhol da América Latina) com o mesmo texto do es-ES.

@@ -155,7 +155,8 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 - **Confirmação visível:** "Ouro ×2 ativo: 5:00" ao ganhar o buff; a recompensa da Jornada aparece em destaque (+ouro/+cristais).
 - `AdService` com `MockAdService` (navegador; `?adfail=1` na URL simula falha) e `AdMobAdService` (Android).
 - **Sem IDs reais no código:** padrão = IDs de teste oficiais do Google; os reais entram como `VITE_ADMOB_*` (build web) e `ADMOB_APP_ID` (Gradle), vindos dos GitHub Secrets.
-- UMP antes de `initialize`; `tagForChildDirectedTreatment: false`, `maxAdContentRating: Teen`.
+- `initialize` antes do UMP; `tagForChildDirectedTreatment: false`, `maxAdContentRating: ParentalGuidance` (PG). Anúncios não personalizados (`npa: true`) para todos (ECA Digital). Falha do UMP usa o consentimento anterior guardado; sem ele, sem anúncios.
+- Notificação opt-in: a permissão só é pedida no Menu ou na 1ª vez que o baú offline enche (com explicação).
 - Interstitial apenas após confirmar um Renascer, com mínimo de 3 min entre interstitials, nunca nos 10 primeiros minutos desde o 1º jogo e nunca até 60 s após um rewarded (`src/ads/AdPolicy.ts`, com testes).
 - `ENABLE_BANNER = false` e `ENABLE_IAP = false` em `src/config/app.ts`.
 - **IAP futuro:** usar **`@capgo/native-purchases`** (Play Billing 7+, mantido e compatível com Capacitor 8). Alternativa: RevenueCat (`@revenuecat/purchases-capacitor`) se quiser validação de recibo no servidor sem backend próprio. A interface `PurchaseService` já existe.
