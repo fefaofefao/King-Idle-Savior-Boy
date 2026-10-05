@@ -5,7 +5,11 @@ import {
   MaxAdContentRating,
   RewardAdPluginEvents,
 } from '@capacitor-community/admob';
+import type { KeyValueStore } from '../core/save';
 import { AD_IDS, type AdService } from './AdService';
+
+/** Chave local com o último `canRequestAds` informado pelo UMP (consentimento anterior). */
+export const CONSENT_KEY = 'ads_can_request';
 
 /** Implementação real com @capacitor-community/admob (Android). */
 export class AdMobAdService implements AdService {
@@ -13,8 +17,18 @@ export class AdMobAdService implements AdService {
   private rewardedReady = false;
   private interstitialReady = false;
   privacyOptionsAvailable = false;
+  /** Termina quando o SDK foi inicializado E o fluxo UMP acabou. Nenhum anúncio carrega antes. */
+  private ready: Promise<void> | null = null;
 
-  async init(): Promise<void> {
+  /** `store` guarda o último resultado do UMP; sem store, uma falha do UMP sempre bloqueia anúncios. */
+  constructor(private store?: KeyValueStore) {}
+
+  init(): Promise<void> {
+    this.ready ??= this.doInit();
+    return this.ready;
+  }
+
+  private async doInit(): Promise<void> {
     // 1) Inicializa o SDK (público 13+, não direcionado a crianças). A documentação do plugin
     //    pede initialize() ANTES do fluxo de consentimento.
     await AdMob.initialize({
@@ -31,9 +45,13 @@ export class AdMobAdService implements AdService {
       }
       this.canRequestAds = info.canRequestAds;
       this.privacyOptionsAvailable = String(info.privacyOptionsRequirementStatus) === 'REQUIRED';
+      await this.store?.set(CONSENT_KEY, info.canRequestAds ? '1' : '0').catch(() => {});
     } catch (e) {
-      console.warn('[ads] UMP falhou', e);
-      this.canRequestAds = true; // fora da região UMP o SDK permite anúncios
+      // O plugin rejeita sem devolver `canRequestAds` quando a atualização falha (ex.: sem rede).
+      // Vale o último valor que o SDK informou numa sessão anterior; sem ele, nada de anúncios.
+      console.warn('[ads] UMP falhou; usando o consentimento anterior', e);
+      const prev = await this.store?.get(CONSENT_KEY).catch(() => null);
+      this.canRequestAds = prev === '1';
     }
     if (this.canRequestAds) {
       void this.loadRewarded();
@@ -68,6 +86,7 @@ export class AdMobAdService implements AdService {
    * (Rewarded / Dismissed / FailedToShow) e um tempo-limite de segurança.
    */
   async showRewarded(): Promise<boolean> {
+    await this.init();
     if (!this.canRequestAds) return false;
     if (!this.rewardedReady) await this.loadRewarded();
     if (!this.rewardedReady) return false;
@@ -111,6 +130,7 @@ export class AdMobAdService implements AdService {
   }
 
   async showInterstitial(): Promise<boolean> {
+    await this.init();
     if (!this.canRequestAds || !this.interstitialReady) return false;
     this.interstitialReady = false;
     try {
@@ -126,6 +146,10 @@ export class AdMobAdService implements AdService {
   async showPrivacyOptions(): Promise<void> {
     try {
       await AdMob.showPrivacyOptionsForm();
+      // A escolha pode ter mudado: relê o estado para liberar ou bloquear anúncios.
+      const info = await AdMob.requestConsentInfo({ tagForUnderAgeOfConsent: false });
+      this.canRequestAds = info.canRequestAds;
+      await this.store?.set(CONSENT_KEY, info.canRequestAds ? '1' : '0').catch(() => {});
     } catch (e) {
       console.warn('[ads] formulário de privacidade indisponível', e);
     }

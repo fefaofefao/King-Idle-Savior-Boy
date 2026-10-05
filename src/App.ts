@@ -55,7 +55,7 @@ export class App {
   scene!: GameScene;
   readonly assets = new Assets();
   readonly saves = new SaveManager(preferencesStore);
-  readonly ads: AdService = isNative() ? new AdMobAdService() : new MockAdService();
+  readonly ads: AdService = isNative() ? new AdMobAdService(preferencesStore) : new MockAdService();
   readonly purchases = new DisabledPurchaseService();
   modals!: Modals;
   floaters!: Floaters;
