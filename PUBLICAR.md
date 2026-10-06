@@ -29,7 +29,7 @@ Resumo para levar o **Savior Boy: Idle Monsters** à Google Play. O passo a pass
 - [x] Responsável na política e nos termos: **"Fernando Martins Sampaio (FSamp Labs)"** + e-mail de contato (sem CPF)
 - [ ] Revisar a branch `claude/play-compliance` e fazer o merge na branch usada para o Pages/release
 
-- [ ] **Renomear o repositório no GitHub** para `Savior-Boy-Idle-Monsters` (Settings → General → Repository name). Os links do site, do jogo e da documentação já usam o nome novo.
+- [x] **Repositório renomeado** para `Savior-Boy-Idle-Monsters` (Settings → General → Repository name). Os links do site, do jogo e da documentação já usam o nome novo.
 
 ### 2. Conta Google Play (burocracia)
 - [ ] Verificação de identidade da conta de desenvolvedor (documento + selfie) — *aguardando o Google*
