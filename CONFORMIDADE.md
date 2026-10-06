@@ -13,7 +13,7 @@ Estado em 2026-10-05, branch `claude/play-compliance`. O que depende do dono est
 | Desenvolvedor | FSamp Labs |
 | E-mail de contato | fefaofefao@gmail.com |
 | Package / applicationId | `br.com.fsamplabs.saviorboy` (definitivo após a 1ª publicação) |
-| Versão | versionName `1.0.0`, versionCode `106` (= número do run do workflow de release + 100) |
+| Versão | versionName `1.0.0`, versionCode `107` (= número do run do workflow de release + 100) |
 | Tipo | Jogo, gratuito, com anúncios; sem compras no app (estrutura de IAP existe, desligada: `ENABLE_IAP = false`) |
 | Gênero | Idle/clicker RPG, fantasia cartoon 3D (esqueletos estilizados, sem sangue) |
 | Público-alvo | 13+ (não direcionado a crianças) |
@@ -28,7 +28,7 @@ Estado em 2026-10-05, branch `claude/play-compliance`. O que depende do dono est
 | minSdk / compileSdk / targetSdk | 24 / 36 / 36 |
 | Formato de envio | **AAB** assinado com chave de upload (`bundleRelease`), gerado no GitHub Actions (`.github/workflows/android-release.yml`) |
 | Assinatura | Keystore PKCS12, RSA 2048, alias `idleknight`, validade ~27 anos; guardada fora do repositório; credenciais só em GitHub Secrets. Previsto **Play App Signing** |
-| AAB gerado | `SaviorBoyIdleMonsters-AAB-1.0.0-106` (11,7 MB, assinado), run 37251159104, branch principal `claude/youthful-hamilton-rx1ww2` (com o merge de `claude/play-compliance`) |
+| AAB gerado | `SaviorBoyIdleMonsters-AAB-1.0.0-107` (11,7 MB, assinado, package `br.com.fsamplabs.saviorboy`), run 37532520104, branch principal `claude/youthful-hamilton-rx1ww2`. Inclui talentos, conjuntos e o premiado do Renascer |
 | Tamanho | Verificação automática no workflow: falha se AAB > 40 MB |
 | Orientação | Retrato (`screenOrientation="portrait"`) |
 | Ícone / splash | Ícone adaptativo (foreground/background) + splash, gerados por `@capacitor/assets` |
@@ -187,7 +187,7 @@ Resolvidos nesta revisão (branch `claude/play-compliance`):
 - ~~Notificação pedida na 1ª abertura~~ → opt-in (seção 4).
 - Classificação dos anúncios: Teen → **PG**.
 - Anúncios **não personalizados** para todos (ECA Digital).
-- **Páginas de 16 KB:** checagem automática no workflow de release (`scripts/check-16kb.py`: lê o ELF de cada `.so` do AAB e exige `PT_LOAD p_align ≥ 16 KB`; falha o build se não). Resultado no build `SaviorBoyIdleMonsters-AAB-1.0.0-106` (run 37251159104): **0 bibliotecas nativas (.so) no AAB → compatível com páginas de 16 KB** (o app é WebView + Java/Kotlin; o SDK de anúncios não traz `.so`). A checagem continua ativa para futuras dependências nativas.
+- **Páginas de 16 KB:** checagem automática no workflow de release (`scripts/check-16kb.py`: lê o ELF de cada `.so` do AAB e exige `PT_LOAD p_align ≥ 16 KB`; falha o build se não). Resultado no build `SaviorBoyIdleMonsters-AAB-1.0.0-107` (run 37532520104): **0 bibliotecas nativas (.so) no AAB → compatível com páginas de 16 KB** (o app é WebView + Java/Kotlin; o SDK de anúncios não traz `.so`). A checagem continua ativa para futuras dependências nativas.
 - **Botão voltar / predictive back (targetSdk 36):**
   - o `@capacitor/app` 8 registra um `OnBackPressedCallback` do AndroidX (`getOnBackPressedDispatcher().addCallback`), compatível com `OnBackInvokedCallback` no Android 13+;
   - o jogo trata o evento `backButton` (fecha o modal; sem modal, confirma a saída e chama `App.exitApp()`);
