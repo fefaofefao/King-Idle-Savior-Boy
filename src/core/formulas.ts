@@ -1,4 +1,4 @@
-import { BALANCE, type CrystalUpgradeId, type RelicStat, type SkinId } from '../config/balance';
+import { BALANCE, type BonusStat, type CrystalUpgradeId, type RelicSetId, type RelicStat, type SkinId, type TalentBranch, type TalentId } from '../config/balance';
 import { D, Decimal, bulkCost } from './bignum';
 import { isBossStage, type GameState } from './state';
 
@@ -74,7 +74,7 @@ const perLevel = (id: CrystalUpgradeId): number =>
 export function crystalsForPrestige(maxStage: number, s?: GameState): Decimal {
   const P = BALANCE.prestige;
   if (maxStage < P.minStage) return D(0);
-  const crown = s ? 1 + relicBonus(s, 'crystals') : 1;
+  const crown = s ? 1 + statBonus(s, 'crystals') : 1;
   const late = Math.pow(P.lateGrowth, Math.max(0, maxStage - P.lateStart));
   return D(Math.floor(Math.pow((maxStage - P.offset) / P.divisor, P.exponent) * late * crown));
 }
@@ -89,11 +89,75 @@ export function globalDamageMult(s: GameState, crystals: Decimal = s.crystals): 
 
 // ---------- Relíquias e visuais ----------
 /** Soma do bônus das relíquias de um tipo de efeito. */
-export function relicBonus(s: GameState, stat: RelicStat): number {
+export function relicBonus(s: GameState, stat: BonusStat | RelicStat): number {
   let b = 0;
   for (const r of BALANCE.relics.list) if (r.stat === stat) b += (s.relics[r.id] ?? 0) * r.perLevel;
   return b;
 }
+
+// ---------- Árvore de Talentos ----------
+export const talentLevel = (s: GameState, id: TalentId): number => s.talents[id] ?? 0;
+const talentDef = (id: TalentId) => BALANCE.talents.list.find((t) => t.id === id)!;
+
+export function talentBonus(s: GameState, stat: BonusStat): number {
+  let b = 0;
+  for (const t of BALANCE.talents.list) if (t.stat === stat) b += talentLevel(s, t.id) * t.perLevel;
+  return b;
+}
+
+/** A árvore abre no 1º Renascer (não quebra a parede da 1ª corrida). */
+export const talentsUnlocked = (s: GameState): boolean => s.stats.prestiges > 0;
+
+/** Pontos ganhos: 1 por Renascer + 1 a cada 25 fases da maior fase (lidos do estado). */
+export const talentPointsEarned = (s: GameState): number =>
+  talentsUnlocked(s)
+    ? s.stats.prestiges * BALANCE.talents.pointsPerPrestige + Math.floor(s.stats.highestStage / BALANCE.talents.stagesPerPoint)
+    : 0;
+
+export const talentPointsSpent = (s: GameState, branch?: TalentBranch): number =>
+  BALANCE.talents.list
+    .filter((t) => !branch || t.branch === branch)
+    .reduce((a, t) => a + talentLevel(s, t.id) * t.cost, 0);
+
+export const talentPointsFree = (s: GameState): number => talentPointsEarned(s) - talentPointsSpent(s);
+
+/** Posição do talento no ramo (0..4): exige `unlockPerTier × posição` pontos gastos no ramo. */
+export function talentTier(id: TalentId): number {
+  const t = talentDef(id);
+  return BALANCE.talents.list.filter((x) => x.branch === t.branch).findIndex((x) => x.id === id);
+}
+
+export const talentUnlocked = (s: GameState, id: TalentId): boolean =>
+  talentPointsSpent(s, talentDef(id).branch) >= talentTier(id) * BALANCE.talents.unlockPerTier;
+
+export function canBuyTalent(s: GameState, id: TalentId): boolean {
+  const t = talentDef(id);
+  return talentUnlocked(s, id) && talentLevel(s, id) < t.max && talentPointsFree(s) >= t.cost;
+}
+
+// ---------- Conjuntos de relíquias ----------
+/** 0 = inativo, 1 = as 3 relíquias, 2 = as 3 no nível tier2Level. */
+export function relicSetTier(s: GameState, id: RelicSetId): number {
+  const set = BALANCE.relicSets.list.find((x) => x.id === id)!;
+  const levels = set.relics.map((r) => s.relics[r as keyof typeof s.relics] ?? 0);
+  if (levels.some((l) => l < 1)) return 0;
+  return levels.every((l) => l >= BALANCE.relicSets.tier2Level) ? 2 : 1;
+}
+
+export function relicSetBonus(s: GameState, stat: BonusStat): number {
+  let b = 0;
+  for (const set of BALANCE.relicSets.list) {
+    const tier = relicSetTier(s, set.id);
+    set.tiers.forEach((t, i) => {
+      if (i < tier && t.stat === stat) b += t.value;
+    });
+  }
+  return b;
+}
+
+/** Bônus total de um efeito: relíquias + talentos + conjuntos. */
+export const statBonus = (s: GameState, stat: BonusStat): number =>
+  relicBonus(s, stat) + talentBonus(s, stat) + relicSetBonus(s, stat);
 
 export const relicCount = (s: GameState): number => Object.values(s.relics).filter((l) => (l ?? 0) > 0).length;
 export const relicLevels = (s: GameState): number => Object.values(s.relics).reduce((a, l) => a + (l ?? 0), 0);
@@ -142,29 +206,42 @@ export const bestiaryGoldMult = (s: GameState): number =>
   1 + totalBestiaryStars(s) * BALANCE.monsters.bestiary.goldPerStar;
 
 export function goldMult(s: GameState, now: number): number {
-  let m = (1 + crystalLevel(s, 'gold') * perLevel('gold')) * bestiaryGoldMult(s) * (1 + relicBonus(s, 'gold'));
+  let m = (1 + crystalLevel(s, 'gold') * perLevel('gold')) * bestiaryGoldMult(s) * (1 + statBonus(s, 'gold'));
   if (s.adGoldBuffUntil > now || s.noAds) m *= BALANCE.ads.goldBuffMult;
   if (s.abilityActiveUntil.goldRain > now) m *= BALANCE.abilities.goldRain.goldMult;
   return m;
 }
 
 export const critChance = (s: GameState): number =>
-  Math.min(1, BALANCE.crit.chance + crystalLevel(s, 'crit') * perLevel('crit') + relicBonus(s, 'crit'));
+  Math.min(1, BALANCE.crit.chance + crystalLevel(s, 'crit') * perLevel('crit') + statBonus(s, 'crit'));
 
 export const bossTimeSec = (s: GameState): number =>
-  BALANCE.stage.bossTimeSec + crystalLevel(s, 'bossTime') * perLevel('bossTime') + relicBonus(s, 'bossTime');
+  BALANCE.stage.bossTimeSec + crystalLevel(s, 'bossTime') * perLevel('bossTime') + statBonus(s, 'bossTime');
 
 export const offlineCapSec = (s: GameState): number =>
-  (BALANCE.offline.baseCapHours + crystalLevel(s, 'offline') * perLevel('offline') + relicBonus(s, 'offline')) * 3600;
+  (BALANCE.offline.baseCapHours + crystalLevel(s, 'offline') * perLevel('offline') + statBonus(s, 'offline')) * 3600;
 
 export const cooldownMult = (s: GameState): number =>
-  Math.max(0.2, 1 - crystalLevel(s, 'cooldown') * perLevel('cooldown') - relicBonus(s, 'cooldown'));
+  Math.max(0.2, 1 - crystalLevel(s, 'cooldown') * perLevel('cooldown') - statBonus(s, 'cooldown'));
+
+/** Multiplicador do golpe crítico (talento Golpe Final). */
+export const critMult = (s: GameState): number => BALANCE.crit.mult * (1 + statBonus(s, 'critMult'));
+
+/** Combo Furioso: bônus de dano de toque pelo combo atual (até o teto do talento). */
+export const comboDamageBonus = (s: GameState, combo: number): number =>
+  Math.min(statBonus(s, 'comboDmg'), combo * BALANCE.talents.comboDmgPerTap);
+
+/** Desconto no preço da guilda (talento Contratos). */
+export const guildCostMult = (s: GameState): number => Math.max(0.5, 1 - statBonus(s, 'guildCost'));
+
+/** Intervalo do Ponto Fraco (conjunto do Caçador: aparece mais vezes). */
+export const weakSpotIntervalMult = (s: GameState): number => Math.max(0.4, 1 - statBonus(s, 'weakFreq'));
 
 // ---------- Dano total ----------
 export function guildDps(s: GameState): Decimal {
   let sum = D(0);
   s.guild.forEach((lvl, i) => (sum = sum.plus(memberDps(i, lvl))));
-  return sum.times(globalDamageMult(s)).times(1 + relicBonus(s, 'dps'));
+  return sum.times(globalDamageMult(s)).times(1 + statBonus(s, 'dps'));
 }
 
 export const mageUnlocked = (s: GameState): boolean => s.maxStage >= BALANCE.mage.unlockStage;
@@ -177,10 +254,10 @@ export function totalDps(s: GameState): Decimal {
 
 /** Dano do projétil do Mago (um pacote a cada intervalo). */
 export const mageHitDamage = (s: GameState): Decimal =>
-  guildDps(s).times(BALANCE.mage.dpsShare * BALANCE.mage.intervalSec).times(1 + relicBonus(s, 'mage'));
+  guildDps(s).times(BALANCE.mage.dpsShare * BALANCE.mage.intervalSec).times(1 + statBonus(s, 'mage'));
 
 export function tapDamage(s: GameState, now: number): Decimal {
-  let dmg = bladeDamage(s.bladeLevel).times(globalDamageMult(s)).times(1 + relicBonus(s, 'tap'));
+  let dmg = bladeDamage(s.bladeLevel).times(globalDamageMult(s)).times(1 + statBonus(s, 'tap'));
   if (s.arcaneLevel > 0) {
     dmg = dmg.plus(totalDps(s).times(s.arcaneLevel * BALANCE.arcane.dpsSharePerLevel));
   }

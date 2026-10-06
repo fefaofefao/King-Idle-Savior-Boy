@@ -7,7 +7,7 @@ import { BALANCE, type SkinId } from './config/balance';
 import { relicStatText } from './ui/relicText';
 import { D, Decimal } from './core/bignum';
 import { formatNumber, formatTime } from './core/format';
-import { offlineCapSec, mageUnlocked, totalDps, crystalsForPrestige, prestigeDamageGain } from './core/formulas';
+import { offlineCapSec, mageUnlocked, totalDps, crystalsForPrestige, prestigeDamageGain, relicSetTier, talentPointsEarned } from './core/formulas';
 import { Game, type BuyAmount, type GameEvent } from './core/game';
 import { applyOffline } from './core/offline';
 import {
@@ -105,6 +105,7 @@ export class App {
     this.scene.setZone(zoneIndex(s.stage));
     this.scene.setMageVisible(mageUnlocked(s));
     this.scene.setKnightSkin(s.skin);
+    this.announceRelicSets(); // guarda o estado inicial dos conjuntos (sem aviso)
     this.scene.spawnEnemy(this.game.isBoss, this.game.monster);
     this.game.ensureMissions(now);
     this.scheduleChest(now);
@@ -335,6 +336,7 @@ export class App {
         sfx.play('chest');
         vibrate(true);
         this.scene.celebrate('#c49aff');
+        this.announceRelicSets();
         this.queueSave();
         break;
       }
@@ -588,11 +590,14 @@ export class App {
     );
     if (!ok) return;
     const now = Date.now();
+    const talentsBefore = talentPointsEarned(s);
     this.game.prestige(now);
     sfx.play('levelUp');
     this.scene.setZone(0);
     this.scene.setMageVisible(mageUnlocked(s));
     this.floaters.banner(`+${formatNumber(gain)}`, 'crystal');
+    const pts = talentPointsEarned(s) - talentsBefore;
+    if (pts > 0) this.floaters.loot(ICONS.prestige, t('talents.gained', { n: pts }), t('talents.title'), 'new');
     await this.save();
     // Interstitial: somente após confirmar um Renascer, com regras de frequência.
     if (
@@ -686,6 +691,23 @@ export class App {
   claimStory(): void {
     this.game.claimStory(Date.now());
     this.panel.update(true);
+  }
+
+  /** Nível de cada conjunto de relíquias já anunciado (para avisar só quando sobe). */
+  private setTiers: Record<string, number> | null = null;
+
+  private announceRelicSets(): void {
+    const s = this.state;
+    const now: Record<string, number> = {};
+    for (const set of BALANCE.relicSets.list) now[set.id] = relicSetTier(s, set.id);
+    const before = this.setTiers;
+    this.setTiers = now;
+    if (!before) return;
+    for (const set of BALANCE.relicSets.list) {
+      if (now[set.id] > (before[set.id] ?? 0)) {
+        this.floaters.loot(RELIC_ICONS[set.relics[0]], t('sets.activated', { name: tk(`set.${set.id}`) }), t('sets.title'), 'new');
+      }
+    }
   }
 
   /** Troca o visual do herói (aba Herói). */

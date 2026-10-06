@@ -2222,3 +2222,178 @@ button.card:active:not(:disabled) {
   color: var(--gold);
   text-align: center;
 }
+
+/* ---------- Árvore de Talentos ---------- */
+.talent-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.talent-points {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--muted);
+}
+.talent-points.has {
+  color: var(--gold);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+.section-note.hidden {
+  display: none;
+}
+.talent-tree {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.talent-tree.disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.talent-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+.talent-branch {
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 4px 0;
+  border-radius: 10px;
+  background: var(--panel-3);
+}
+.talent-col.blade .talent-branch { color: #ffb08a; }
+.talent-col.guild .talent-branch { color: #9fd0ff; }
+.talent-col.fortune .talent-branch { color: var(--gold); }
+.talent {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 3px 5px;
+  border-radius: 12px;
+  background: var(--panel-2);
+  border: 2px solid transparent;
+  min-height: 104px;
+  text-align: center;
+  transition: transform 0.1s, border-color 0.2s;
+}
+.talent::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 3px;
+  height: 8px;
+  background: var(--line);
+  transform: translateX(-50%);
+}
+.talent.owned::before {
+  background: var(--gold);
+}
+.talent-icon {
+  width: 32px;
+  height: 32px;
+}
+.talent-name {
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.talent-lvl {
+  font-size: 11px;
+  color: var(--gold);
+  font-weight: 700;
+}
+.talent-eff {
+  font-size: 9.5px;
+  color: var(--muted);
+  line-height: 1.15;
+}
+.talent-req {
+  font-size: 9.5px;
+  color: #c9d3ee;
+}
+.talent.locked {
+  opacity: 0.5;
+}
+.talent.locked .talent-icon {
+  filter: grayscale(1);
+}
+.talent.owned {
+  border-color: rgba(255, 213, 74, 0.45);
+}
+.talent.maxed {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, #3b4a2a, var(--panel-2));
+}
+.talent.can {
+  border-color: var(--green);
+  box-shadow: 0 0 10px rgba(95, 214, 124, 0.35);
+}
+.talent.can:active {
+  transform: scale(0.95);
+}
+.talent.capstone .talent-icon {
+  width: 38px;
+  height: 38px;
+  filter: drop-shadow(0 0 6px rgba(255, 213, 74, 0.7));
+}
+.talent:disabled {
+  cursor: default;
+}
+
+/* ---------- Conjuntos de relíquias ---------- */
+.set-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: var(--panel-2);
+  border-radius: 14px;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 2px solid transparent;
+}
+.set-row.active {
+  border-color: #c49aff;
+}
+.set-icons {
+  display: flex;
+  flex: none;
+}
+.set-relic {
+  width: 30px;
+  height: 30px;
+  margin-right: -4px;
+}
+.set-relic.missing {
+  filter: grayscale(1) brightness(0.45);
+}
+.set-main {
+  flex: 1;
+  min-width: 0;
+}
+.set-tier {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+.set-tier.on {
+  color: #d9c4ff;
+  font-weight: 600;
+}
+.combo-dmg {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffb340;
+  text-shadow: 0 1px 0 #000;
+}
+.combo-dmg:empty {
+  display: none;
+}

@@ -1,4 +1,4 @@
-import { BALANCE, type AbilityId, type AffixId, type CrystalUpgradeId, type MonsterId, type RelicId, type SkinId } from '../config/balance';
+import { BALANCE, type AbilityId, type AffixId, type CrystalUpgradeId, type MonsterId, type RelicId, type SkinId, type TalentId } from '../config/balance';
 import { D, Decimal, maxAffordable } from './bignum';
 import {
   arcaneCost,
@@ -12,7 +12,11 @@ import {
   enemyGold,
   goldMult,
   incomePerSec,
-  relicBonus,
+  canBuyTalent,
+  comboDamageBonus,
+  critMult,
+  guildCostMult,
+  statBonus,
   skinUnlocked,
   mageHitDamage,
   mageUnlocked,
@@ -79,6 +83,8 @@ export class Game {
   armorMax: Decimal = D(0);
   /** Tempo até o Esqueleto Dourado fugir. */
   escapeTimer = 0;
+  /** Tempo total de fuga do Dourado atual (para a barra). */
+  escapeMax: number = BALANCE.monsters.affixes.golden.escapeSec;
   bossExtended = false;
   bossPaused = false;
   /** Tempo até o próximo inimigo aparecer (animação de morte). */
@@ -145,7 +151,7 @@ export class Game {
       const a = M.affixes[id];
       if (s.stage < a.minStage) continue;
       // Trevo da Sorte (relíquia) aumenta a chance do Dourado.
-      acc += id === 'golden' ? a.chance * (1 + relicBonus(s, 'golden')) : a.chance;
+      acc += id === 'golden' ? a.chance * (1 + statBonus(s, 'golden')) : a.chance;
       if (roll < acc) {
         affix = id;
         break;
@@ -184,7 +190,8 @@ export class Game {
     this.armorMax = this.monster.affix === 'armored' ? this.enemyMaxHp.times(A.armored.armorFrac) : D(0);
     this.armor = this.armorMax;
     this.enemyHp = this.enemyMaxHp.minus(this.armorMax);
-    this.escapeTimer = this.monster.affix === 'golden' ? A.golden.escapeSec : 0;
+    this.escapeMax = A.golden.escapeSec * (1 + statBonus(s, 'goldenTime'));
+    this.escapeTimer = this.monster.affix === 'golden' ? this.escapeMax : 0;
     this.awaitingSpawn = false;
     this.respawnTimer = 0;
     if (this.isBoss) {
@@ -267,10 +274,10 @@ export class Game {
     s.stats.taps++;
     this.track('taps', 1);
     this.registerCombo(now);
-    let dmg = tapDamage(s, now);
+    let dmg = tapDamage(s, now).times(1 + comboDamageBonus(s, this.combo));
     const crit = this.rng() < critChance(s);
     if (crit) {
-      dmg = dmg.times(BALANCE.crit.mult);
+      dmg = dmg.times(critMult(s));
       s.stats.crits++;
       this.track('crits', 1);
     }
@@ -315,9 +322,9 @@ export class Game {
     this.track('crits', 1);
     this.track('weakHits', 1);
     const dmg = tapDamage(s, now)
-      .times(BALANCE.crit.mult)
+      .times(critMult(s))
       .times(BALANCE.monsters.weakSpot.tapMult)
-      .times(1 + relicBonus(s, 'weak'));
+      .times(1 + statBonus(s, 'weak'));
     this.emit({ type: 'hit', amount: dmg, crit: true, source: 'weak' });
     // Ponto fraco atravessa a armadura.
     this.armor = D(0);
@@ -391,7 +398,7 @@ export class Game {
     const king = this.monster.type === 'king';
     // Antes do 1º Renascer só o Rei deixa relíquias (não quebra a parede da 1ª corrida).
     if (!force && !king && s.stats.prestiges === 0) return;
-    const chance = king ? R.dropChance.king : R.dropChance.general;
+    const chance = king ? R.dropChance.king : R.dropChance.general + statBonus(s, 'relicDrop');
     if (!force && this.rng() >= chance) return;
     const open = R.list.filter((r) => (s.relics[r.id] ?? 0) < R.maxLevel);
     s.stats.relicDrops++;
@@ -510,8 +517,9 @@ export class Game {
   memberBuyInfo(i: number, amount: BuyAmount): { n: number; cost: Decimal } {
     const m = BALANCE.guild.members[i];
     const L = this.state.guild[i];
-    const n = Math.max(1, this.resolveAmount(m.baseCost, BALANCE.guild.costGrowth, L, amount));
-    return { n, cost: memberCost(i, L, n) };
+    const disc = guildCostMult(this.state);
+    const n = Math.max(1, this.resolveAmount(m.baseCost * disc, BALANCE.guild.costGrowth, L, amount));
+    return { n, cost: memberCost(i, L, n).times(disc) };
   }
 
   buyMember(i: number, amount: BuyAmount): boolean {
@@ -615,7 +623,7 @@ export class Game {
    */
   chestGold(now: number): Decimal {
     const C = BALANCE.chest;
-    return this.incomeReward(C.incomeSeconds, now, C.enemyKills).times(1 + relicBonus(this.state, 'chest')).ceil();
+    return this.incomeReward(C.incomeSeconds, now, C.enemyKills).times(1 + statBonus(this.state, 'chest')).ceil();
   }
 
   /** Ouro de uma conquista sem cristais: 3 min de renda (piso de 15 abates da fase). */
@@ -653,6 +661,22 @@ export class Game {
   checkAchievements(): void {
     for (const id of checkAchievements(this.state)) this.emit({ type: 'achievement', id });
     this.checkSkins();
+  }
+
+  // ---------------- Árvore de Talentos ----------------
+
+  buyTalent(id: TalentId): boolean {
+    const s = this.state;
+    if (!canBuyTalent(s, id)) return false;
+    s.talents[id] = (s.talents[id] ?? 0) + 1;
+    this.emit({ type: 'purchase', what: 'talent' });
+    return true;
+  }
+
+  /** Redistribuir: devolve todos os pontos (grátis). */
+  resetTalents(): void {
+    this.state.talents = {};
+    this.emit({ type: 'purchase', what: 'talent' });
   }
 
   // ---------------- Visuais ----------------

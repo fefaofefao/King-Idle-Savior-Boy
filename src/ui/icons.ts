@@ -160,3 +160,22 @@ export const FLAGS: Record<string, string> = {
     '0 0 48 34',
   ),
 };
+
+/** Ícones dos talentos (reaproveitam os ícones existentes). */
+export const TALENT_ICONS: Record<string, string> = {
+  sharpBlade: ICONS.blade,
+  quickHands: RELIC_ICONS.eye,
+  hunterEye: RELIC_ICONS.lens,
+  furyCombo: ICONS.fury,
+  finalBlow: ICONS.strike,
+  commander: RELIC_ICONS.banner,
+  apprentice: ICONS.mage,
+  camp: RELIC_ICONS.lantern,
+  contracts: ICONS.guild,
+  warCry: RELIC_ICONS.horn,
+  heavyPurse: RELIC_ICONS.purse,
+  goldenNose: RELIC_ICONS.clover,
+  courierVault: ICONS.chest,
+  crystalline: ICONS.crystal,
+  midas: RELIC_ICONS.crown,
+};

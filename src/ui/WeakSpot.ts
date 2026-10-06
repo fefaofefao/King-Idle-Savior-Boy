@@ -1,3 +1,4 @@
+import { weakSpotIntervalMult } from '../core/formulas';
 import type { App } from '../App';
 import { BALANCE } from '../config/balance';
 import { sfx } from '../audio/Sfx';
@@ -50,7 +51,7 @@ export class WeakSpot {
       this.life -= dt;
       if (this.life <= 0 || !canShow) {
         this.hide();
-        this.timer = W.intervalMin + Math.random() * (W.intervalMax - W.intervalMin);
+        this.timer = (W.intervalMin + Math.random() * (W.intervalMax - W.intervalMin)) * weakSpotIntervalMult(g.state);
         return;
       }
       this.place();

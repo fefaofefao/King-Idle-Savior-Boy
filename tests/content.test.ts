@@ -191,3 +191,80 @@ describe('Cálice do Mensageiro', () => {
     expect(BALANCE.relics.list.find((r) => r.id === 'chalice')!.perLevel).toBe(0.15);
   });
 });
+
+describe('Árvore de Talentos', () => {
+  it('abre só no 1º Renascer; pontos = Renascer + maior fase / 25', async () => {
+    const F = await import('../src/core/formulas');
+    const s = createInitialState();
+    s.stats.highestStage = 60;
+    expect(F.talentPointsEarned(s)).toBe(0);
+    s.stats.prestiges = 3;
+    expect(F.talentPointsEarned(s)).toBe(3 + 2);
+  });
+
+  it('nó k do ramo exige 3×k pontos gastos no ramo; capstone custa 5', async () => {
+    const F = await import('../src/core/formulas');
+    const s = createInitialState();
+    s.stats.prestiges = 30;
+    const g = new Game(s);
+    expect(F.talentUnlocked(s, 'quickHands')).toBe(false);
+    for (let i = 0; i < 3; i++) expect(g.buyTalent('sharpBlade')).toBe(true);
+    expect(F.talentUnlocked(s, 'quickHands')).toBe(true);
+    expect(g.buyTalent('finalBlow')).toBe(false); // precisa de 12 pts no ramo
+    expect(F.talentPointsFree(s)).toBe(30 - 3);
+  });
+
+  it('efeitos: toque, crítico, desconto da guilda e combo', async () => {
+    const F = await import('../src/core/formulas');
+    const s = createInitialState();
+    const base = F.tapDamage(s, 0).toNumber();
+    s.talents = { sharpBlade: 2, finalBlow: 1, contracts: 5, furyCombo: 5 };
+    expect(F.tapDamage(s, 0).toNumber()).toBeCloseTo(base * 1.3);
+    expect(F.critMult(s)).toBeCloseTo(BALANCE.crit.mult * 1.5);
+    expect(F.guildCostMult(s)).toBeCloseTo(0.85);
+    expect(F.comboDamageBonus(s, 100)).toBeCloseTo(0.2);
+    expect(F.comboDamageBonus(s, 1000)).toBeCloseTo(0.5); // teto
+  });
+
+  it('redistribuir devolve todos os pontos', () => {
+    const s = createInitialState();
+    s.stats.prestiges = 5;
+    const g = new Game(s);
+    g.buyTalent('commander');
+    g.buyTalent('heavyPurse');
+    g.resetTalents();
+    expect(Object.keys(s.talents)).toHaveLength(0);
+  });
+
+  it('save v6 → v7 ganha talentos vazios', () => {
+    const v6 = JSON.parse(serialize(createInitialState()));
+    v6.schemaVersion = 6;
+    delete v6.talents;
+    const s = deserialize(JSON.stringify(v6));
+    expect(s.talents).toEqual({});
+  });
+});
+
+describe('Conjuntos de relíquias', () => {
+  it('3 relíquias ligam o 1º bônus; as 3 no nível 10 ligam o 2º', async () => {
+    const F = await import('../src/core/formulas');
+    const s = createInitialState();
+    s.relics = { banner: 1, horn: 1 };
+    expect(F.relicSetTier(s, 'warlord')).toBe(0);
+    s.relics.grimoire = 1;
+    expect(F.relicSetTier(s, 'warlord')).toBe(1);
+    expect(F.relicSetBonus(s, 'dps')).toBeCloseTo(0.25);
+    expect(F.relicSetBonus(s, 'cooldown')).toBe(0);
+    s.relics = { banner: 10, horn: 10, grimoire: 10 };
+    expect(F.relicSetTier(s, 'warlord')).toBe(2);
+    expect(F.relicSetBonus(s, 'cooldown')).toBeCloseTo(0.1);
+  });
+
+  it('Caçador deixa o Ponto Fraco mais frequente; Tesoureiro dá mais tempo ao Dourado', async () => {
+    const F = await import('../src/core/formulas');
+    const s = createInitialState();
+    s.relics = { sword: 10, eye: 10, lens: 10, purse: 10, chalice: 10, clover: 10 };
+    expect(F.weakSpotIntervalMult(s)).toBeCloseTo(0.75);
+    expect(F.statBonus(s, 'goldenTime')).toBeCloseTo(0.5);
+  });
+});

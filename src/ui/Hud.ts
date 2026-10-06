@@ -1,7 +1,7 @@
 import type { App } from '../App';
 import { BALANCE, ABILITY_IDS, type AbilityId } from '../config/balance';
 import { formatNumber, formatTime } from '../core/format';
-import { bossTimeSec, incomePerSec } from '../core/formulas';
+import { bossTimeSec, comboDamageBonus, incomePerSec } from '../core/formulas';
 import { currentStoryQuest, storyComplete, storyProgress } from '../core/story';
 import { storyText } from './storyText';
 import { zoneIndex } from '../core/state';
@@ -96,6 +96,7 @@ export class Hud {
     E.combo = h('div', { class: 'combo' }, [
       h('span', { class: 'combo-label', text: t('combo.label') }),
       E.comboNum,
+      (E.comboDmg = h('span', { class: 'combo-dmg' })),
       h('div', { class: 'combo-bar' }, [E.comboFill]),
     ]);
     this.wrap.append(top, enemyBox, E.combo, bar);
@@ -128,6 +129,8 @@ export class Hud {
     toggleClass(E.combo, 'show', show);
     if (!show) return;
     setText(E.comboNum, `×${n}`);
+    const bonus = comboDamageBonus(this.app.state, n);
+    setText(E.comboDmg, bonus > 0 ? t('combo.dmg', { v: Math.round(bonus * 100) }) : '');
     const next = BALANCE.combo.milestones.find((m) => m > n) ?? n;
     const prev = [...BALANCE.combo.milestones].reverse().find((m) => m <= n) ?? 0;
     E.comboFill.style.width = `${next > prev ? ((n - prev) / (next - prev)) * 100 : 100}%`;
@@ -262,7 +265,7 @@ export class Hud {
     setText(E.hpText, alive ? formatNumber(g.enemyTotalHp.max(0), n) : '');
     const golden = alive && m.affix === 'golden';
     toggleClass(E.escape, 'show', golden);
-    if (golden) E.escapeFill.style.width = `${(g.escapeTimer / BALANCE.monsters.affixes.golden.escapeSec) * 100}%`;
+    if (golden) E.escapeFill.style.width = `${(g.escapeTimer / g.escapeMax) * 100}%`;
 
     if (!g.comboAlive(now)) toggleClass(E.combo, 'show', false);
 

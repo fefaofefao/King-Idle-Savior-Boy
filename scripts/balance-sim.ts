@@ -24,7 +24,26 @@ import {
   memberUnlocked,
   tapDamage,
   totalDps,
+  canBuyTalent,
+  talentPointsEarned,
+  weakSpotIntervalMult,
 } from '../src/core/formulas';
+import type { TalentId } from '../src/config/balance';
+
+/** Como um jogador típico gasta os talentos: dano primeiro, depois economia, capstones quando liberam. */
+const TALENT_PRIORITY: TalentId[] = [
+  'finalBlow', 'warCry', 'midas',
+  'commander', 'sharpBlade', 'heavyPurse', 'contracts', 'furyCombo', 'quickHands', 'hunterEye',
+  'crystalline', 'apprentice', 'goldenNose', 'courierVault', 'camp',
+];
+function spendTalents(g: Game): void {
+  if (process.argv.includes('--no-talents')) return;
+  for (let guard = 0; guard < 500; guard++) {
+    const id = TALENT_PRIORITY.find((t) => canBuyTalent(g.state, t));
+    if (!id) return;
+    g.buyTalent(id);
+  }
+}
 import { formatNumber, formatTime } from '../src/core/format';
 import { applyOffline } from '../src/core/offline';
 import { createInitialState } from '../src/core/state';
@@ -157,8 +176,9 @@ function step(p: PlayerSim, tps: number, track: boolean): void {
   // Toques distribuídos uniformemente.
   const tapsThisStep = Math.floor((p.now / 1000) * tps) - Math.floor(((p.now - DT * 1000) / 1000) * tps);
   for (let i = 0; i < tapsThisStep; i++) g.tap(p.now);
-  // Ponto Fraco a cada ~5 s; o jogador ativo acerta ~70%.
-  if (tps > 0 && g.state.stage >= BALANCE.monsters.weakSpot.minStage && Math.floor(p.now / 5000) > Math.floor((p.now - DT * 1000) / 5000) && Math.random() < 0.7) {
+  // Ponto Fraco a cada ~5 s (menos com o conjunto do Caçador); o jogador ativo acerta ~70%.
+  const weakEvery = 5000 * weakSpotIntervalMult(g.state);
+  if (tps > 0 && g.state.stage >= BALANCE.monsters.weakSpot.minStage && Math.floor(p.now / weakEvery) > Math.floor((p.now - DT * 1000) / weakEvery) && Math.random() < 0.7) {
     g.weakSpotHit(p.now);
   }
   g.update(DT, p.now);
@@ -167,9 +187,11 @@ function step(p: PlayerSim, tps: number, track: boolean): void {
   while (g.claimStory(p.now)) p.story.push(p.now);
   // Baú do Mensageiro: aparece a cada ~4 min e o jogador toca nele.
   if (tps > 0 && Math.floor(p.now / 240_000) > Math.floor((p.now - DT * 1000) / 240_000)) {
-    g.addGold(g.incomeReward(BALANCE.chest.incomeSeconds, p.now, BALANCE.chest.enemyKills));
+    g.addGold(g.chestGold(p.now));
     g.state.stats.chests++;
   }
+  // Pontos de talento da maior fase (1 a cada 25 fases) também são gastos durante a corrida.
+  if (Math.floor(p.now / 60_000) > Math.floor((p.now - DT * 1000) / 60_000)) spendTalents(g);
   for (const id of ABILITY_IDS) if (tps > 0) g.useAbility(id, p.now);
   if (g.state.farming) {
     p.farmTimer += DT;
@@ -348,6 +370,7 @@ function resetRun(tps: number, minutes: number) {
     if (p.g.canPrestige() && p.now - lastProgressAt > 150_000) {
       const max = s.maxStage;
       const c = p.g.prestige(p.now).toNumber();
+      spendTalents(p.g);
       runs.push({ start: runStart, end: p.now, max, crystals: c });
       // Loja: compra "Dano" só quando aumenta o dano total (cada cristal guardado vale +10%).
       for (let i = 0; i < 200; i++) {
@@ -370,7 +393,7 @@ function resetRun(tps: number, minutes: number) {
     console.log(
       `  [debug] cristais ${formatNumber(s.crystals)}, loja dano ${s.crystalUpgrades.damage}, mult global ${formatNumber(globalDamageMult(s))}, ` +
         `DPS ${formatNumber(totalDps(s))}, toque ${formatNumber(tapDamage(s, p.now))}, HP fase ${s.maxStage}: ${formatNumber(enemyHp(s.maxStage))}, ` +
-        `ouro ${formatNumber(s.gold)}, lâmina ${s.bladeLevel}, guilda [${s.guild.join(',')}], relíquias ${JSON.stringify(s.relics)}`,
+        `ouro ${formatNumber(s.gold)}, lâmina ${s.bladeLevel}, guilda [${s.guild.join(',')}], relíquias ${JSON.stringify(s.relics)}, talentos (${talentPointsEarned(s)} pts) ${JSON.stringify(s.talents)}`,
     );
   }
   runs.forEach((r, i) =>

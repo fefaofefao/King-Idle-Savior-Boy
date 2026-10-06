@@ -32,6 +32,12 @@ describe('i18n', () => {
     for (let c = 1; c <= CHAPTERS + 1; c++) expect(keys.has(`chapter.${c}`) && keys.has(`chapterIntro.${c}`), `chapter ${c}`).toBe(true);
     for (const q of STORY) expect(keys.has(`story.${q.kind}`), q.kind).toBe(true);
     for (const r of BALANCE.relics.list) expect(keys.has(`relic.${r.id}`) && keys.has(`relicStat.${r.stat}`), r.id).toBe(true);
+    for (const tl of BALANCE.talents.list) expect(keys.has(`talent.${tl.id}`) && keys.has(`relicStat.${tl.stat}`), tl.id).toBe(true);
+    for (const b of BALANCE.talents.branches) expect(keys.has(`branch.${b}`), b).toBe(true);
+    for (const set of BALANCE.relicSets.list) {
+      expect(keys.has(`set.${set.id}`), set.id).toBe(true);
+      for (const tr of set.tiers) expect(keys.has(`relicStat.${tr.stat}`), tr.stat).toBe(true);
+    }
     for (const sk of BALANCE.skins.list) {
       expect(keys.has(`skin.${sk.id}`), sk.id).toBe(true);
       if (sk.unlock) expect(keys.has(`skinLock.${sk.unlock.kind}`), sk.unlock.kind).toBe(true);

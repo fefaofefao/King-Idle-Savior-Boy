@@ -1,4 +1,4 @@
-import { BALANCE, type AbilityId, type CrystalUpgradeId, type MonsterId, type RelicId, type SkinId } from '../config/balance';
+import { BALANCE, type AbilityId, type CrystalUpgradeId, type MonsterId, type RelicId, type SkinId, type TalentId } from '../config/balance';
 import { Decimal, ZERO } from './bignum';
 
 export type Lang = 'pt-BR' | 'en' | 'es';
@@ -81,6 +81,8 @@ export interface GameState {
   bestiary: Partial<Record<MonsterId, number>>;
   /** Relíquias: nível de cada uma (permanente). */
   relics: Partial<Record<RelicId, number>>;
+  /** Níveis da Árvore de Talentos (permanentes). */
+  talents: Partial<Record<TalentId, number>>;
   /** Visual do Cavaleiro em uso. */
   skin: SkinId;
   missions: { day: string; list: MissionState[] };
@@ -92,7 +94,7 @@ export interface GameState {
   noAds: boolean;
 }
 
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;
 
 export function createInitialState(now = Date.now(), lang: Lang = 'en'): GameState {
   return {
@@ -137,6 +139,7 @@ export function createInitialState(now = Date.now(), lang: Lang = 'en'): GameSta
     tutorial: { tapHintDone: false },
     bestiary: {},
     relics: {},
+    talents: {},
     skin: 'classic',
     missions: { day: '', list: [] },
     achievements: {},

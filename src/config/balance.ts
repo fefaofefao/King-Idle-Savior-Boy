@@ -90,8 +90,8 @@ export const BALANCE = {
      * Fim de jogo: a partir de lateStart os cristais crescem ×lateGrowth por fase.
      * Sem isso o jogo "empacava" (a vida dos monstros cresce exponencialmente e os cristais não).
      */
-    lateStart: 60,
-    lateGrowth: 1.06,
+    lateStart: 65,
+    lateGrowth: 1.05,
   },
 
   /** Loja de Cristais: passos pequenos e custo crescente (antes +25% por 1 cristal quebrava o jogo). */
@@ -217,6 +217,51 @@ export const BALANCE = {
     ],
   },
 
+  /**
+   * Árvore de Talentos (permanente, sobrevive ao Renascer).
+   * Abre no 1º Renascer. Pontos = 1 por Renascer + 1 a cada 25 fases da maior fase já alcançada.
+   * Nó k de um ramo exige `unlockPerTier × k` pontos gastos naquele ramo. Redistribuir é grátis.
+   */
+  talents: {
+    pointsPerPrestige: 1,
+    stagesPerPoint: 25,
+    unlockPerTier: 3,
+    branches: ['blade', 'guild', 'fortune'],
+    list: [
+      { id: 'sharpBlade', branch: 'blade', stat: 'tap', perLevel: 0.15, max: 10, cost: 1 },
+      { id: 'quickHands', branch: 'blade', stat: 'crit', perLevel: 0.01, max: 5, cost: 1 },
+      { id: 'hunterEye', branch: 'blade', stat: 'weak', perLevel: 0.2, max: 5, cost: 1 },
+      { id: 'furyCombo', branch: 'blade', stat: 'comboDmg', perLevel: 0.1, max: 5, cost: 1 },
+      { id: 'finalBlow', branch: 'blade', stat: 'critMult', perLevel: 0.5, max: 1, cost: 5 },
+      { id: 'commander', branch: 'guild', stat: 'dps', perLevel: 0.15, max: 10, cost: 1 },
+      { id: 'apprentice', branch: 'guild', stat: 'mage', perLevel: 0.2, max: 5, cost: 1 },
+      { id: 'camp', branch: 'guild', stat: 'offlineRate', perLevel: 0.1, max: 5, cost: 1 },
+      { id: 'contracts', branch: 'guild', stat: 'guildCost', perLevel: 0.03, max: 5, cost: 1 },
+      { id: 'warCry', branch: 'guild', stat: 'cooldown', perLevel: 0.15, max: 1, cost: 5 },
+      { id: 'heavyPurse', branch: 'fortune', stat: 'gold', perLevel: 0.1, max: 10, cost: 1 },
+      { id: 'goldenNose', branch: 'fortune', stat: 'golden', perLevel: 0.15, max: 5, cost: 1 },
+      { id: 'courierVault', branch: 'fortune', stat: 'chest', perLevel: 0.2, max: 5, cost: 1 },
+      { id: 'crystalline', branch: 'fortune', stat: 'crystals', perLevel: 0.04, max: 5, cost: 1 },
+      { id: 'midas', branch: 'fortune', stat: 'relicDrop', perLevel: 0.1, max: 1, cost: 5 },
+    ],
+    /** Combo Furioso: +0,2% de dano de toque por toque do combo, até o teto do talento. */
+    comboDmgPerTap: 0.002,
+  },
+
+  /**
+   * Conjuntos de relíquias: com as 3 relíquias do conjunto (nível ≥ 1) liga o 1º bônus;
+   * com as 3 no nível `tier2Level`, liga também o 2º.
+   */
+  relicSets: {
+    tier2Level: 10,
+    list: [
+      { id: 'hunter', relics: ['sword', 'eye', 'lens'], tiers: [{ stat: 'weakFreq', value: 0.25 }, { stat: 'weak', value: 0.5 }] },
+      { id: 'warlord', relics: ['banner', 'horn', 'grimoire'], tiers: [{ stat: 'dps', value: 0.25 }, { stat: 'cooldown', value: 0.1 }] },
+      { id: 'treasurer', relics: ['purse', 'chalice', 'clover'], tiers: [{ stat: 'gold', value: 0.25 }, { stat: 'goldenTime', value: 0.5 }] },
+      { id: 'royal', relics: ['crown', 'hourglass', 'lantern'], tiers: [{ stat: 'bossTime', value: 2 }, { stat: 'crystals', value: 0.1 }] },
+    ],
+  },
+
   /** Combo: toques seguidos (até 0,6 s entre eles) somam; marcos dão um pouco de ouro. */
   combo: { windowSec: 0.6, milestones: [50, 100, 200, 400, 800], rewardKills: 3 },
 
@@ -234,5 +279,13 @@ export const MONSTER_IDS: MonsterId[] = [
 ];
 export type RelicId = (typeof BALANCE.relics.list)[number]['id'];
 export type RelicStat = (typeof BALANCE.relics.list)[number]['stat'];
+export type TalentId = (typeof BALANCE.talents.list)[number]['id'];
+export type TalentBranch = (typeof BALANCE.talents.branches)[number];
+export type RelicSetId = (typeof BALANCE.relicSets.list)[number]['id'];
+/** Tudo que relíquias, talentos e conjuntos podem aumentar. */
+export type BonusStat =
+  | RelicStat
+  | (typeof BALANCE.talents.list)[number]['stat']
+  | (typeof BALANCE.relicSets.list)[number]['tiers'][number]['stat'];
 export type SkinId = (typeof BALANCE.skins.list)[number]['id'];
 export const ABILITY_IDS: AbilityId[] = ['strike', 'fury', 'goldRain'];

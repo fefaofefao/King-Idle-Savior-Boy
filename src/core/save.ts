@@ -58,6 +58,8 @@ export const MIGRATIONS: Record<number, (raw: Raw) => Raw> = {
     settings: { ...raw.settings, notifAsked: Boolean(raw.settings?.notifications) },
     schemaVersion: 6,
   }),
+  // v6 → v7: Árvore de Talentos (pontos vêm dos Renascer e da maior fase: quem já jogava ganha os pontos).
+  6: (raw) => ({ ...raw, talents: {}, schemaVersion: 7 }),
 };
 
 export function migrate(raw: Raw): Raw {
@@ -92,6 +94,7 @@ export function deserialize(json: string): GameState {
     tutorial: { ...base.tutorial, ...raw.tutorial },
     bestiary: { ...raw.bestiary },
     relics: { ...raw.relics },
+    talents: { ...raw.talents },
     skin: raw.skin ?? 'classic',
     missions: raw.missions ?? base.missions,
     achievements: raw.achievements ?? {},

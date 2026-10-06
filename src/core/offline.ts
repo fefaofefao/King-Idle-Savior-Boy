@@ -1,6 +1,6 @@
 import { BALANCE } from '../config/balance';
 import { D, Decimal } from './bignum';
-import { incomePerSec, offlineCapSec } from './formulas';
+import { incomePerSec, offlineCapSec, statBonus } from './formulas';
 import type { GameState } from './state';
 
 export interface OfflineResult {
@@ -25,7 +25,7 @@ export function computeOffline(s: GameState, now: number): OfflineResult {
   // Buffs temporários não contam offline: usa a renda "base" no instante now=lastSeen
   // sem buffs de tempo limitado (ouro ×2 permanente do "remover anúncios" conta).
   const base = { ...s, adGoldBuffUntil: 0, abilityActiveUntil: { strike: 0, fury: 0, goldRain: 0 } };
-  const gold = incomePerSec(base, s.lastSeen).times(cappedSeconds).times(BALANCE.offline.rate).floor();
+  const gold = incomePerSec(base, s.lastSeen).times(cappedSeconds).times(BALANCE.offline.rate * (1 + statBonus(s, 'offlineRate'))).floor();
   return { seconds, cappedSeconds, gold, clockRewound: false };
 }
 

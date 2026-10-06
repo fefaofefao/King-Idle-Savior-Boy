@@ -1,7 +1,7 @@
 import type { App } from '../App';
 import { sfx } from '../audio/Sfx';
 import { FEATURES } from '../config/app';
-import { BALANCE, MONSTER_IDS, type CrystalUpgradeId, type SkinId } from '../config/balance';
+import { BALANCE, MONSTER_IDS, type CrystalUpgradeId, type RelicSetId, type SkinId, type TalentBranch, type TalentId } from '../config/balance';
 import { formatNumber, formatTime } from '../core/format';
 import type { Decimal } from '../core/bignum';
 import {
@@ -18,7 +18,16 @@ import {
   memberMilestoneMult,
   memberUnlocked,
   prestigeDamageGain,
+  canBuyTalent,
   relicCount,
+  relicSetTier,
+  talentLevel,
+  talentPointsEarned,
+  talentPointsFree,
+  talentPointsSpent,
+  talentTier,
+  talentUnlocked,
+  talentsUnlocked,
   skinProgress,
   skinUnlocked,
   tapDamage,
@@ -32,7 +41,7 @@ import type { Notation } from '../core/state';
 import { LANGUAGES, t, tk } from '../i18n';
 import { h, setDisabled, setText, toggleClass } from './dom';
 import { openExternal } from '../platform/platform';
-import { FLAGS, ICONS, MEMBER_ICONS, MONSTER_ICONS, RELIC_ICONS, skinIcon } from './icons';
+import { FLAGS, ICONS, MEMBER_ICONS, MONSTER_ICONS, RELIC_ICONS, TALENT_ICONS, skinIcon } from './icons';
 
 /** URL pública da política de privacidade (GitHub Pages). Ajuste após publicar — veja SETUP_CONTAS.md. */
 export const SITE_URL = 'https://fefaofefao.github.io/King-Idle-Savior-Boy/';
@@ -265,7 +274,11 @@ export class Panel {
       Object.values(s.achievements).includes('done');
     toggleClass(this.tabButtons.quests!, 'has-badge', questReady);
     // Renascer: bolinha só quando vale a pena (dano pelo menos ×2).
-    toggleClass(this.tabButtons.prestige!, 'has-badge', this.app.game.canPrestige() && prestigeDamageGain(s).gte(2));
+    toggleClass(
+      this.tabButtons.prestige!,
+      'has-badge',
+      (this.app.game.canPrestige() && prestigeDamageGain(s).gte(2)) || talentPointsFree(s) > 0,
+    );
     // Algo para comprar? Bolinha verde nas abas Herói/Guilda.
     const g = this.app.game;
     const heroBuy = s.gold.gte(g.bladeBuyInfo(1).cost);
@@ -417,6 +430,39 @@ export class Panel {
         toggleClass(c.el, 'maxed', level >= R.maxLevel);
       }
     });
+    this.buildRelicSets();
+  }
+
+  /** Conjuntos: 3 relíquias = 1º bônus; as 3 no nível 10 = 2º bônus. */
+  private buildRelicSets(): void {
+    const app = this.app;
+    const S = BALANCE.relicSets;
+    this.content.appendChild(h('h3', { html: `${RELIC_ICONS.chalice}<span>${t('sets.title')}</span>` }));
+    this.content.appendChild(h('p', { class: 'section-note', text: t('sets.desc', { n: S.tier2Level }) }));
+    const rows = S.list.map((set) => {
+      const icons = set.relics.map((r) => h('span', { class: 'set-relic', html: RELIC_ICONS[r] }));
+      const t1 = h('div', { class: 'set-tier' });
+      const t2 = h('div', { class: 'set-tier' });
+      const el = h('div', { class: 'set-row' }, [
+        h('div', { class: 'set-icons' }, icons),
+        h('div', { class: 'set-main' }, [h('div', { class: 'row-title', text: tk(`set.${set.id}`) }), t1, t2]),
+      ]);
+      this.content.appendChild(el);
+      return { set, el, icons, t1, t2 };
+    });
+    this.updaters.push(() => {
+      const s = app.state;
+      for (const r of rows) {
+        const tier = relicSetTier(s, r.set.id as RelicSetId);
+        r.set.relics.forEach((id, i) => toggleClass(r.icons[i], 'missing', (s.relics[id as keyof typeof s.relics] ?? 0) < 1));
+        const [a, b] = r.set.tiers;
+        setText(r.t1, `${tier >= 1 ? '✓' : '○'} ${relicStatText(a.stat, a.value)}`);
+        setText(r.t2, `${tier >= 2 ? '✓' : '○'} ${t('sets.tier2', { n: S.tier2Level })} ${relicStatText(b.stat, b.value)}`);
+        toggleClass(r.t1, 'on', tier >= 1);
+        toggleClass(r.t2, 'on', tier >= 2);
+        toggleClass(r.el, 'active', tier >= 1);
+      }
+    });
   }
 
   // ---------------- Guilda ----------------
@@ -502,6 +548,7 @@ export class Panel {
     const btn = h('button', { class: 'btn primary big prestige-btn', onClick: () => void app.prestige() });
     const box = h('div', { class: 'prestige-box' }, [crystals, desc, gain, advice, locked, btn]);
     this.content.append(box);
+    this.buildTalents();
     this.content.appendChild(h('h3', { text: t('prestige.shop') }));
     const rows = BALANCE.crystalShop.map((u) => {
       const r = row(ICONS.crystal, () => g.buyCrystalUpgrade(u.id as CrystalUpgradeId), 'crystal-row');
@@ -545,6 +592,73 @@ export class Panel {
         setDisabled(r.btn, maxed || s.crystals.lt(cost));
         afford(r.btn, maxed ? s.crystals.times(0) : s.crystals, cost);
       }
+    });
+  }
+
+  // ---------------- Árvore de Talentos ----------------
+
+  private buildTalents(): void {
+    const app = this.app;
+    const T = BALANCE.talents;
+    this.content.appendChild(h('h3', { html: `${ICONS.prestige}<span>${t('talents.title')}</span>` }));
+    const points = h('div', { class: 'talent-points' });
+    const reset = h('button', {
+      class: 'btn secondary small',
+      text: t('talents.reset'),
+      onClick: async () => {
+        if (await app.modals.confirm(t('talents.reset'), t('talents.resetConfirm'))) {
+          app.game.resetTalents();
+          this.update(true);
+        }
+      },
+    });
+    const locked = h('p', { class: 'section-note warn', text: t('talents.locked') });
+    this.content.append(h('div', { class: 'talent-head' }, [points, reset]), locked, h('p', { class: 'section-note', text: t('talents.desc') }));
+    const tree = h('div', { class: 'talent-tree' });
+    this.content.appendChild(tree);
+    const nodes = T.branches.map((branch) => {
+      const col = h('div', { class: `talent-col ${branch}` }, [h('div', { class: 'talent-branch', text: tk(`branch.${branch}`) })]);
+      tree.appendChild(col);
+      return T.list
+        .filter((x) => x.branch === branch)
+        .map((def) => {
+          const lvl = h('span', { class: 'talent-lvl' });
+          const eff = h('div', { class: 'talent-eff' });
+          const req = h('div', { class: 'talent-req' });
+          const btn = h('button', { class: `talent ${def.cost > 1 ? 'capstone' : ''}`, onClick: () => app.game.buyTalent(def.id as TalentId) && this.update(true) }, [
+            h('div', { class: 'talent-icon', html: TALENT_ICONS[def.id] ?? '' }),
+            h('div', { class: 'talent-name', text: tk(`talent.${def.id}`) }),
+            lvl,
+            eff,
+            req,
+          ]);
+          col.appendChild(btn);
+          return { def, btn, lvl, eff, req, branch: branch as TalentBranch };
+        });
+    });
+    this.updaters.push(() => {
+      const s = app.state;
+      const open = talentsUnlocked(s);
+      toggleClass(locked, 'hidden', open);
+      toggleClass(tree, 'disabled', !open);
+      setText(points, t('talents.points', { n: talentPointsFree(s), total: talentPointsEarned(s) }));
+      toggleClass(points, 'has', talentPointsFree(s) > 0);
+      reset.disabled = talentPointsSpent(s) === 0;
+      for (const col of nodes)
+        for (const n of col) {
+          const id = n.def.id as TalentId;
+          const L = talentLevel(s, id);
+          const unl = talentUnlocked(s, id);
+          setText(n.lvl, L >= n.def.max ? t('talents.max') : `${L}/${n.def.max}`);
+          setText(n.eff, relicStatText(n.def.stat, n.def.perLevel * Math.max(1, L)));
+          const need = talentTier(id) * T.unlockPerTier;
+          setText(n.req, !unl ? `🔒 ${t('talents.need', { n: need })}` : L < n.def.max ? t('talents.cost', { n: n.def.cost }) : '');
+          toggleClass(n.btn, 'locked', !unl);
+          toggleClass(n.btn, 'owned', L > 0);
+          toggleClass(n.btn, 'maxed', L >= n.def.max);
+          toggleClass(n.btn, 'can', canBuyTalent(s, id));
+          n.btn.disabled = !canBuyTalent(s, id);
+        }
     });
   }
 
