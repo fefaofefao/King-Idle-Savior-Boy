@@ -59,7 +59,7 @@ Estado em 2026-10-05, branch `claude/play-compliance`. O que depende do dono est
 | Falha do UMP | O plugin rejeita sem devolver `canRequestAds` quando a consulta falha (ex.: sem rede). O app guarda localmente o último `canRequestAds` informado pelo SDK (`ads_can_request`) e, na falha, usa esse valor: **consentimento anterior continua valendo; sem consentimento anterior, sem anúncios** |
 | Opções de privacidade | Menu → "Privacidade e anúncios" reabre o formulário UMP (`showPrivacyOptionsForm`); depois disso o consentimento é relido |
 | Testes do consentimento | Sucesso; UMP negado; erro com consentimento anterior; erro sem consentimento; pedido de anúncio antes do UMP terminar (nada carrega antes) |
-| Premiados (sempre opcionais, iniciados pelo jogador) | Ouro ×2 por 5 min (acumula até 30 min); coletar ganhos offline ×2; +15 s contra o chefe; baú do mensageiro ×5. Cada botão é identificado como anúncio ("Assista a um anúncio curto" + ícone) |
+| Premiados (sempre opcionais, iniciados pelo jogador) | Ouro ×2 por 5 min (acumula até 30 min); coletar ganhos offline ×2; +15 s contra o chefe; baú do mensageiro ×5; **Renascer com +50% de cristais** (a quantidade com e sem anúncio aparece na tela de confirmação, antes da escolha). Cada botão é identificado como anúncio ("Assista a um anúncio curto" + ícone) |
 | Recompensa | Concedida **só** no evento `Rewarded` do SDK; fechar antes não dá recompensa; falha mostra mensagem amigável, sem recompensa |
 | Intersticial | Só **depois de o jogador confirmar um Renascer** (pausa natural); nunca nos 10 primeiros minutos desde o 1º jogo; mínimo de 3 min entre intersticiais; nunca até 60 s após um premiado (`src/ads/AdPolicy.ts`, com testes) |
 | Colocação | Nenhum anúncio perto de botões de jogo nem que dispare por toque acidental; sem anúncio na abertura do app nem ao sair |
@@ -138,6 +138,8 @@ Nada no jogo é obtido com dinheiro real:
 | Ouro ×2 por anúncio (premiado) | **Fixo** | ×2 de ouro por 5 min (acumula até 30 min) |
 | Ganhos offline ×2 por anúncio (premiado) | **Fixo** | Dobra o valor já mostrado |
 | +15 s contra o chefe por anúncio (premiado) | **Fixo** | Tempo fixo |
+| Renascer +50% de cristais por anúncio (premiado) | **Fixo** | floor(cristais × 1,5); os dois valores são mostrados antes de escolher |
+| Árvore de Talentos e Conjuntos de relíquias | **Fixo** | Pontos e bônus conhecidos; nada sorteado, nada ligado a anúncio |
 | **Relíquias** | Aleatório | Caem de chefes: Rei Esqueleto (fase 50, 100, …) sempre; General 15% (só após o 1º Renascer). Qual relíquia é sorteado (as que faltam têm peso 2). Repetidas sobem de nível; todas no máximo viram 2 cristais. **Nunca ligadas a anúncio** |
 | Inimigos raros (Dourado/Blindado/Gigante) | Aleatório | Chance por inimigo (3,5% / 8% / 6%); Dourado dá ouro ×10 se derrotado em 7 s |
 | Tipo de inimigo | Aleatório | Sorteio ponderado entre os tipos liberados pela fase |

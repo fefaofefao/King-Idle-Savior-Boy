@@ -408,4 +408,6 @@ export const es: Locale = {
   "sets.tier2": "Las 3 en nivel {n}:",
   "sets.activated": "¡{name} activado!",
   "combo.dmg": "+{v}% daño",
+  "prestige.adButton": "Anuncio: +50% (+{n} cristales)",
+  "prestige.adNote": "Mira un anuncio corto (opcional) para renacer con +50% de cristales: {n} en total.",
 };

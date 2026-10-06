@@ -406,6 +406,8 @@ export const ptBR = {
   "sets.tier2": "As 3 no nível {n}:",
   "sets.activated": "{name} ativado!",
   "combo.dmg": "+{v}% dano",
+  "prestige.adButton": "Anúncio: +50% (+{n} cristais)",
+  "prestige.adNote": "Assista a um anúncio curto (opcional) para renascer com +50% de cristais: {n} no total.",
 };
 
 export type LocaleKey = keyof typeof ptBR;

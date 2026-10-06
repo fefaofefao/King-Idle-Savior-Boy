@@ -578,10 +578,15 @@ export class Game {
     return this.state.maxStage >= BALANCE.prestige.minStage;
   }
 
-  prestige(now: number): Decimal {
+  /** Cristais de um Renascer agora; `adBonus` = bônus do anúncio premiado (ex.: 0,5 = +50%). */
+  prestigeGain(adBonus = 0): Decimal {
+    return crystalsForPrestige(this.state.maxStage, this.state).times(1 + adBonus).floor();
+  }
+
+  prestige(now: number, adBonus = 0): Decimal {
     const s = this.state;
     if (!this.canPrestige()) return D(0);
-    const gain = crystalsForPrestige(s.maxStage, s);
+    const gain = this.prestigeGain(adBonus);
     s.crystals = s.crystals.plus(gain);
     s.gold = D(0);
     s.stage = 1;

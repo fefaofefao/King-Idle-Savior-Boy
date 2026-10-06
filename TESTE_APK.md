@@ -62,6 +62,7 @@
 - [ ] Aba Herói → Conjuntos de relíquias: ao completar 3 relíquias de um conjunto, aparece "Conjunto … ativado!"
 
 **Anúncios (de teste)**
+- [ ] Renascer: a confirmação oferece "Anúncio: +50%" com a quantidade de cristais; ao assistir, recebe o valor mostrado
 - [ ] Consentimento (UMP) na primeira abertura (aparece só em algumas regiões, como Europa)
 - [ ] Ouro ×2 (botão azul no topo), Coletar ×2 offline, +15 s no chefe, Baú ×5
 - [ ] Interstitial só depois de um Renascer (e nunca nos primeiros 10 min)

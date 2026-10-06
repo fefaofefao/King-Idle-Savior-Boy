@@ -221,3 +221,9 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 
   O começo (até o 1º Renascer) não muda.
 - **Parede da 1ª corrida** (10 simulações): 7 de 10 param no chefe da fase 40 por volta de 14 min; 3 de 10 vencem por sorte e param na 48–50 (~30 min). Mesma distribuição de antes da v1.1.
+
+## Premiado no Renascer (+50% de cristais)
+- A confirmação do Renascer tem 3 botões: Cancelar, **Renascer (+N)** e **Anúncio: +50% (+M)**. Os dois valores aparecem antes da escolha; se o anúncio falhar, o modal continua aberto e nada é perdido.
+- `BALANCE.ads.prestigeAdBonus = 0.5`; `Game.prestigeGain(adBonus)` / `prestige(now, adBonus)`.
+- Como o jogador acabou de ver um premiado, o intersticial pós-Renascer não aparece (regra dos 60 s).
+- **Impacto** (simulação de 45 h, `npm run sim -- --minutes=2700 --ad-prestige`): quem assiste em **todo** Renascer avança ~15–20% mais rápido no meio e no fim de jogo. Cap. 8 em 8h05 (sem anúncio: 10h20), cap. 9 em 17 h (sem: 20h45), cap. 10 em 41 h (sem: > 45 h). Vantagem perceptível sem quebrar o ritmo; nenhum ajuste extra.

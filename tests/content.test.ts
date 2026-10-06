@@ -268,3 +268,16 @@ describe('Conjuntos de relíquias', () => {
     expect(F.statBonus(s, 'goldenTime')).toBeCloseTo(0.5);
   });
 });
+
+describe('Renascer com anúncio (+50% de cristais)', () => {
+  it('dá floor(cristais × 1,5) e o valor é conhecido antes de escolher', () => {
+    const a = at(60);
+    const g = new Game(a);
+    const normal = g.prestigeGain().toNumber();
+    const withAd = g.prestigeGain(BALANCE.ads.prestigeAdBonus).toNumber();
+    expect(withAd).toBe(Math.floor(normal * 1.5));
+    const got = g.prestige(0, BALANCE.ads.prestigeAdBonus).toNumber();
+    expect(got).toBe(withAd);
+    expect(g.state.crystals.toNumber()).toBe(withAd);
+  });
+});

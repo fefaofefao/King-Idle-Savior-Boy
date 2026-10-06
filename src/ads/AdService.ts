@@ -2,7 +2,7 @@
  * Interface única de anúncios. No Android usa AdMob; no navegador, um mock.
  * Regras de frequência (interstitial) ficam em AdPolicy.
  */
-export type RewardedPlacement = 'offline2x' | 'goldBuff' | 'bossTime' | 'chest5x';
+export type RewardedPlacement = 'offline2x' | 'goldBuff' | 'bossTime' | 'chest5x' | 'prestigeBonus';
 
 export interface AdService {
   init(): Promise<void>;

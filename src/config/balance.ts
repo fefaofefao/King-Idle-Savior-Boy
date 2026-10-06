@@ -120,6 +120,8 @@ export const BALANCE = {
     interstitialMinIntervalSec: 180,
     interstitialFirstSessionGraceSec: 600,
     interstitialAfterRewardedGraceSec: 60,
+    /** Premiado opcional no Renascer: +50% de cristais (o valor é mostrado antes de escolher). */
+    prestigeAdBonus: 0.5,
   },
 
   chest: {

@@ -7,7 +7,7 @@ import { BALANCE, type SkinId } from './config/balance';
 import { relicStatText } from './ui/relicText';
 import { D, Decimal } from './core/bignum';
 import { formatNumber, formatTime } from './core/format';
-import { offlineCapSec, mageUnlocked, totalDps, crystalsForPrestige, prestigeDamageGain, relicSetTier, talentPointsEarned } from './core/formulas';
+import { offlineCapSec, mageUnlocked, totalDps, prestigeDamageGain, relicSetTier, talentPointsEarned } from './core/formulas';
 import { Game, type BuyAmount, type GameEvent } from './core/game';
 import { applyOffline } from './core/offline';
 import {
@@ -582,20 +582,47 @@ export class App {
   async prestige(): Promise<void> {
     const s = this.state;
     if (!this.game.canPrestige()) return;
-    const gain = crystalsForPrestige(s.maxStage, s);
+    const gain = this.game.prestigeGain();
+    const bonusGain = this.game.prestigeGain(BALANCE.ads.prestigeAdBonus);
     const mult = prestigeDamageGain(s);
-    const ok = await this.modals.confirm(
-      t('prestige.confirmTitle'),
-      `${t('prestige.confirmText', { n: formatNumber(gain), x: mult.toNumber().toFixed(2) })} ${t('prestige.confirmReset')}`,
-    );
-    if (!ok) return;
+    // Três escolhas: cancelar, renascer normal ou assistir a um anúncio por +50% de cristais.
+    const adBonus = await new Promise<number | null>((resolve) => {
+      let answered = false;
+      const answer = (v: number | null) => {
+        answered = true;
+        resolve(v);
+      };
+      this.modals.open({
+        title: t('prestige.confirmTitle'),
+        className: 'prestige-modal',
+        body: [
+          h('p', { text: `${t('prestige.confirmText', { n: formatNumber(gain), x: mult.toNumber().toFixed(2) })} ${t('prestige.confirmReset')}` }),
+          h('p', { class: 'ad-note', text: t('prestige.adNote', { n: formatNumber(bonusGain) }) }),
+        ],
+        onClose: () => !answered && resolve(null),
+        buttons: [
+          { label: t('common.cancel'), kind: 'secondary', onClick: () => answer(null) },
+          { label: t('prestige.button', { n: formatNumber(gain) }), kind: 'primary', onClick: () => answer(0) },
+          {
+            label: t('prestige.adButton', { n: formatNumber(bonusGain) }),
+            kind: 'ad',
+            icon: ICONS.ad,
+            onClick: async () => {
+              if (!(await this.watchAd('prestigeBonus'))) return false; // falhou: continua no modal
+              answer(BALANCE.ads.prestigeAdBonus);
+            },
+          },
+        ],
+      });
+    });
+    if (adBonus === null) return;
     const now = Date.now();
     const talentsBefore = talentPointsEarned(s);
-    this.game.prestige(now);
+    const got = this.game.prestige(now, adBonus);
     sfx.play('levelUp');
     this.scene.setZone(0);
     this.scene.setMageVisible(mageUnlocked(s));
-    this.floaters.banner(`+${formatNumber(gain)}`, 'crystal');
+    this.floaters.banner(`+${formatNumber(got)}`, 'crystal');
     const pts = talentPointsEarned(s) - talentsBefore;
     if (pts > 0) this.floaters.loot(ICONS.prestige, t('talents.gained', { n: pts }), t('talents.title'), 'new');
     await this.save();

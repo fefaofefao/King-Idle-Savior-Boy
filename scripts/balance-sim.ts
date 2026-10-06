@@ -369,7 +369,9 @@ function resetRun(tps: number, minutes: number) {
     }
     if (p.g.canPrestige() && p.now - lastProgressAt > 150_000) {
       const max = s.maxStage;
-      const c = p.g.prestige(p.now).toNumber();
+      // --ad-prestige: o jogador assiste ao premiado de +50% de cristais em todo Renascer.
+      const adBonus = process.argv.includes('--ad-prestige') ? BALANCE.ads.prestigeAdBonus : 0;
+      const c = p.g.prestige(p.now, adBonus).toNumber();
       spendTalents(p.g);
       runs.push({ start: runStart, end: p.now, max, crystals: c });
       // Loja: compra "Dano" só quando aumenta o dano total (cada cristal guardado vale +10%).

@@ -408,4 +408,6 @@ export const en: Locale = {
   "sets.tier2": "All 3 at level {n}:",
   "sets.activated": "{name} activated!",
   "combo.dmg": "+{v}% dmg",
+  "prestige.adButton": "Ad: +50% (+{n} crystals)",
+  "prestige.adNote": "Watch a short ad (optional) to rebirth with +50% crystals: {n} in total.",
 };
