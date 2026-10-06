@@ -55,6 +55,12 @@
 - [ ] Voltar no dia seguinte: convite da recompensa diária
 - [ ] Jornada: 10 capítulos (Ruínas, Pântano, Cidadela, Abismo, Trono Eterno)
 
+**Talentos e conjuntos (v1.1)**
+- [ ] Antes do 1º Renascer, a árvore (aba Renascer) aparece bloqueada; depois dele, "+N pontos de talento"
+- [ ] Tocar num talento sobe 1 nível; nós de baixo liberam com 3/6/9/12 pontos no ramo; "Redistribuir" devolve tudo
+- [ ] Combo Furioso: o contador de combo mostra "+X% dano"
+- [ ] Aba Herói → Conjuntos de relíquias: ao completar 3 relíquias de um conjunto, aparece "Conjunto … ativado!"
+
 **Anúncios (de teste)**
 - [ ] Consentimento (UMP) na primeira abertura (aparece só em algumas regiões, como Europa)
 - [ ] Ouro ×2 (botão azul no topo), Coletar ×2 offline, +15 s no chefe, Baú ×5

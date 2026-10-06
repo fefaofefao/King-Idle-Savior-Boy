@@ -191,3 +191,33 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
   - convite da recompensa diária ao voltar (nunca na 1ª abertura);
   - dica depois de perder para o chefe;
   - "Atual: +X%" na loja de cristais.
+
+## Árvore de Talentos e Conjuntos de relíquias (v1.1)
+- **Talentos:** 3 ramos (Lâmina, Guilda, Fortuna) com 5 nós cada; o 5º é um capstone de 5 pontos. Abre no **1º Renascer**: se abrisse antes, o ponto ganho na fase 25 já furava a parede da fase 40. Pontos = 1 por Renascer + 1 a cada 25 fases da maior fase (lidos do estado, sem acumulador). O nó k de um ramo exige 3×k pontos gastos nele. Redistribuir é grátis, para incentivar testar estilos.
+- **Mecânicas novas nos talentos:**
+  - Combo Furioso: +0,2% de dano de toque por toque do combo, até +10% a +50%;
+  - Golpe Final: crítico ×1,5;
+  - Contratos: guilda até −15%;
+  - Acampamento: ouro offline +10%/nível;
+  - Toque de Midas: +10 pp de chance de relíquia do General.
+- **Conjuntos (4 × 3 relíquias):** 1º bônus com as 3; 2º com as 3 no nível 10.
+  - Caçador: Ponto Fraco 25% mais frequente / +50% de dano nele;
+  - Senhor da Guerra: +25% DPS / −10% recarga;
+  - Tesoureiro: +25% ouro / +50% de tempo do Dourado;
+  - Real: +2 s contra chefes / +10% cristais.
+- **Bônus unificados:** `statBonus` = relíquias + talentos + conjuntos.
+- **Rebalanceamento** (simulação ativa, 45 h): sem ajuste, talentos e conjuntos aceleravam o fim de jogo em ~35% (cap. 10 em 29 h, antes 45 h). Com o crescimento tardio dos cristais começando na fase **65** (antes 60) e **×1,05** (antes ×1,06):
+
+  | Capítulo concluído | Tempo simulado |
+  |---|---|
+  | 3 | 27 min |
+  | 4 | 1h20 |
+  | 5 | 2h15 |
+  | 6 | 2h55 |
+  | 7 | 4h55 |
+  | 8 | 9h30 |
+  | 9 | ~20 h |
+  | 10 | > 45 h (fase 195 em 37 h) |
+
+  O começo (até o 1º Renascer) não muda.
+- **Parede da 1ª corrida** (10 simulações): 7 de 10 param no chefe da fase 40 por volta de 14 min; 3 de 10 vencem por sorte e param na 48–50 (~30 min). Mesma distribuição de antes da v1.1.

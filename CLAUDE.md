@@ -72,6 +72,7 @@ scripts/store/ (gera screenshots e gráfico)  app-ads.txt  PUBLICAR.md  SETUP_CO
 | 6. Revisão final | ✅ testes e build ok, revisão feita; pendências abaixo |
 | Extra: Jornada do Rei | ✅ 71 missões em 10 capítulos + infinitas, tutorial, rastreador no HUD, história por capítulo |
 | Extra: Versão final | ✅ criaturas procedurais, relíquias, visuais, combo, fim de jogo sem platô, passada de UX (DECISIONS.md) |
+| Extra: v1.1 | ✅ Árvore de Talentos (3 ramos, 15 talentos) + Conjuntos de relíquias; rebalanceado (DECISIONS.md) |
 | Extra: APK de teste | ✅ gerado no GitHub Actions a cada push, com painel de testes |
 
 ## Pendências (dependem do dono do projeto)
