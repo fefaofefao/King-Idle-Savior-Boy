@@ -1,4 +1,4 @@
-# Relatório de conformidade — King Idle Savior Boy (Google Play + AdMob)
+# Relatório de conformidade — Savior Boy: Idle Monsters (Google Play + AdMob)
 
 Inventário do que foi implementado no desenvolvimento, para validação por um revisor de conformidade.
 Estado em 2026-10-05, branch `claude/play-compliance`. O que depende do dono está em [PUBLICAR.md](PUBLICAR.md).
@@ -9,10 +9,10 @@ Estado em 2026-10-05, branch `claude/play-compliance`. O que depende do dono est
 
 | Item | Valor |
 |---|---|
-| Nome | King Idle Savior Boy (igual em pt-BR, en e es) |
+| Nome | Savior Boy: Idle Monsters (igual em pt-BR, en e es) |
 | Desenvolvedor | FSamp Labs |
 | E-mail de contato | fefaofefao@gmail.com |
-| Package / applicationId | `br.com.fernando.idleknight` (definitivo após a 1ª publicação) |
+| Package / applicationId | `br.com.fsamplabs.saviorboy` (definitivo após a 1ª publicação) |
 | Versão | versionName `1.0.0`, versionCode `106` (= número do run do workflow de release + 100) |
 | Tipo | Jogo, gratuito, com anúncios; sem compras no app (estrutura de IAP existe, desligada: `ENABLE_IAP = false`) |
 | Gênero | Idle/clicker RPG, fantasia cartoon 3D (esqueletos estilizados, sem sangue) |
@@ -28,7 +28,7 @@ Estado em 2026-10-05, branch `claude/play-compliance`. O que depende do dono est
 | minSdk / compileSdk / targetSdk | 24 / 36 / 36 |
 | Formato de envio | **AAB** assinado com chave de upload (`bundleRelease`), gerado no GitHub Actions (`.github/workflows/android-release.yml`) |
 | Assinatura | Keystore PKCS12, RSA 2048, alias `idleknight`, validade ~27 anos; guardada fora do repositório; credenciais só em GitHub Secrets. Previsto **Play App Signing** |
-| AAB gerado | `KingIdleSaviorBoy-AAB-1.0.0-106` (11,7 MB, assinado), run 37251159104, branch principal `claude/youthful-hamilton-rx1ww2` (com o merge de `claude/play-compliance`) |
+| AAB gerado | `SaviorBoyIdleMonsters-AAB-1.0.0-106` (11,7 MB, assinado), run 37251159104, branch principal `claude/youthful-hamilton-rx1ww2` (com o merge de `claude/play-compliance`) |
 | Tamanho | Verificação automática no workflow: falha se AAB > 40 MB |
 | Orientação | Retrato (`screenOrientation="portrait"`) |
 | Ícone / splash | Ícone adaptativo (foreground/background) + splash, gerados por `@capacitor/assets` |
@@ -76,7 +76,7 @@ Estado em 2026-10-05, branch `claude/play-compliance`. O que depende do dono est
   - (b) na 1ª vez que o baú offline enche, depois de uma tela explicando o motivo (botões "Agora não" / "Quero ser avisado").
 
   Se negada, o jogo segue normal e o Menu mostra o aviso desligado; se o Android tirar a permissão depois, o Menu desliga ao abrir. Save v6 (`settings.notifAsked`), com migração e testes.
-- **Política de Privacidade** (pt/en/es): `docs/privacy-policy/index.html` → `https://fefaofefao.github.io/King-Idle-Savior-Boy/privacy-policy/`. Atualizada em **2026-10-05**. Cobre:
+- **Política de Privacidade** (pt/en/es): `docs/privacy-policy/index.html` → `https://fefaofefao.github.io/Savior-Boy-Idle-Monsters/privacy-policy/`. Atualizada em **2026-10-05**. Cobre:
   - responsável pelo tratamento: **Fernando Martins Sampaio (FSamp Labs)**;
   - contato e público 13+;
   - dados locais e backup do Android;
@@ -152,7 +152,7 @@ Nada no jogo é obtido com dinheiro real:
 Conclusão: nenhum anúncio libera conteúdo aleatório. Os anúncios só multiplicam ou estendem valores fixos já exibidos. Os itens aleatórios (relíquias, raros) vêm só de jogar.
 
 ## 6. Ficha da loja (pronta em `store-listing/`)
-- **Textos** em pt-BR, en e es: título "King Idle Savior Boy: RPG" (25 caracteres), descrição curta ≤ 80 e longa ≤ 4000. Informam "gratuito e contém anúncios; premiados opcionais"; sem promessas de prêmio real e sem termos enganosos.
+- **Textos** em pt-BR, en e es: título "Savior Boy: Idle Monsters" (25 caracteres), descrição curta ≤ 80 e longa ≤ 4000. Informam "gratuito e contém anúncios; premiados opcionais"; sem promessas de prêmio real e sem termos enganosos.
 - **Notas da versão 1.0.0** em 3 idiomas (≤ 500 caracteres cada).
 - **Gráficos:** ícone 512×512 (PNG 32 bits), gráfico de destaque 1024×500, **8 capturas 1080×1920 por idioma**. São capturas do jogo real, sem elementos de terceiros e sem badges da Play.
 - **Categoria sugerida:** Jogos → RPG (ou Casual).
@@ -187,7 +187,7 @@ Resolvidos nesta revisão (branch `claude/play-compliance`):
 - ~~Notificação pedida na 1ª abertura~~ → opt-in (seção 4).
 - Classificação dos anúncios: Teen → **PG**.
 - Anúncios **não personalizados** para todos (ECA Digital).
-- **Páginas de 16 KB:** checagem automática no workflow de release (`scripts/check-16kb.py`: lê o ELF de cada `.so` do AAB e exige `PT_LOAD p_align ≥ 16 KB`; falha o build se não). Resultado no build `KingIdleSaviorBoy-AAB-1.0.0-106` (run 37251159104): **0 bibliotecas nativas (.so) no AAB → compatível com páginas de 16 KB** (o app é WebView + Java/Kotlin; o SDK de anúncios não traz `.so`). A checagem continua ativa para futuras dependências nativas.
+- **Páginas de 16 KB:** checagem automática no workflow de release (`scripts/check-16kb.py`: lê o ELF de cada `.so` do AAB e exige `PT_LOAD p_align ≥ 16 KB`; falha o build se não). Resultado no build `SaviorBoyIdleMonsters-AAB-1.0.0-106` (run 37251159104): **0 bibliotecas nativas (.so) no AAB → compatível com páginas de 16 KB** (o app é WebView + Java/Kotlin; o SDK de anúncios não traz `.so`). A checagem continua ativa para futuras dependências nativas.
 - **Botão voltar / predictive back (targetSdk 36):**
   - o `@capacitor/app` 8 registra um `OnBackPressedCallback` do AndroidX (`getOnBackPressedDispatcher().addCallback`), compatível com `OnBackInvokedCallback` no Android 13+;
   - o jogo trata o evento `backButton` (fecha o modal; sem modal, confirma a saída e chama `App.exitApp()`);
@@ -198,7 +198,7 @@ Resolvidos nesta revisão (branch `claude/play-compliance`):
 Ainda em aberto:
 1. ~~CPF na política e nos termos~~ → **removido**. Política e termos identificam o responsável só pelo nome (Fernando Martins Sampaio, FSamp Labs) e o e-mail de contato, como pede a LGPD.
 2. ~~Relíquia "Cálice do Mensageiro" sem efeito~~ → **corrigido**: o ouro do baú agora é multiplicado por (1 + 15% × nível), exatamente como a descrição promete (`Game.chestGold`, com teste). As 12 relíquias foram conferidas: todas aplicam o bônus descrito.
-3. **Package ID** contém "idleknight" (nome antigo do projeto); não muda após publicar.
+3. ~~Package ID com o nome antigo~~ → trocado para **`br.com.fsamplabs.saviorboy`** junto com o novo nome do jogo (*Savior Boy: Idle Monsters*), antes de qualquer envio à Play. O alias da keystore (`idleknight`) é interno e continua o mesmo.
 4. **Configurações no painel do AdMob a espelhar:** classificação máxima **PG**; mensagens GDPR e "estados dos EUA" publicadas.
 5. **Publicações pendentes:** GitHub Pages da política/termos; `user-site/` no repositório `fefaofefao.github.io`.
 6. **Conta pessoal nova:** teste fechado com 12+ testadores por 14 dias antes da produção.

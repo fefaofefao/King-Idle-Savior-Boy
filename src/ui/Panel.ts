@@ -44,7 +44,7 @@ import { openExternal } from '../platform/platform';
 import { FLAGS, ICONS, MEMBER_ICONS, MONSTER_ICONS, RELIC_ICONS, TALENT_ICONS, skinIcon } from './icons';
 
 /** URL pública da política de privacidade (GitHub Pages). Ajuste após publicar — veja SETUP_CONTAS.md. */
-export const SITE_URL = 'https://fefaofefao.github.io/King-Idle-Savior-Boy/';
+export const SITE_URL = 'https://fefaofefao.github.io/Savior-Boy-Idle-Monsters/';
 export const PRIVACY_URL = `${SITE_URL}privacy-policy/`;
 export const TERMS_URL = `${SITE_URL}terms/`;
 /** Âncora da página no idioma do jogo (#pt, #en, #es). */

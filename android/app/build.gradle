@@ -9,10 +9,10 @@ def admobAppId = envOr('ADMOB_APP_ID', 'ca-app-pub-3940256099942544~3347511713')
 def keystorePath = envOr('ANDROID_KEYSTORE_PATH', '')
 
 android {
-    namespace = "br.com.fernando.idleknight"
+    namespace = "br.com.fsamplabs.saviorboy"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "br.com.fernando.idleknight"
+        applicationId "br.com.fsamplabs.saviorboy"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode Integer.parseInt(envOr('VERSION_CODE', '1'))

@@ -44,14 +44,14 @@ for (const [lang, locale] of [['pt-BR', 'pt-BR'], ['en', 'en-US'], ['es', 'es-ES
   await page.waitForTimeout(120);
   await page.screenshot({ path: `${OUT}/${lang}/02-combat.png` });
   // 3: Rei Esqueleto furioso
-  await page.evaluate(() => { const a = window.__app; const g = a.game; g['_dmg'] = g['damage']; g['damage'] = () => {}; g.state.stage = 50; a.scene.setZone(0); g.spawnEnemy(); });
+  await page.evaluate(() => { const a = window.__app; const g = a.game; g['_dmg'] = g['damage']; g['damage'] = () => {}; g['_weak'] = g.weakSpotHit; g.weakSpotHit = () => null; g.state.stage = 50; a.scene.setZone(0); g.spawnEnemy(); });
   await page.waitForTimeout(2600);
   await page.evaluate(() => { const g = window.__app.game; g['enemyHp'] = g.enemyMaxHp.times(0.35); });
   await page.waitForTimeout(1300);
   await page.evaluate(() => document.querySelectorAll('.boss-intro,.banner,.toast').forEach((e) => e.remove()));
   for (let i = 0; i < 4; i++) { await page.touchscreen.tap(250, 270); await page.waitForTimeout(60); }
   await page.screenshot({ path: `${OUT}/${lang}/03-boss.png` });
-  await page.evaluate(() => { const g = window.__app.game; g['damage'] = g['_dmg']; });
+  await page.evaluate(() => { const g = window.__app.game; g['damage'] = g['_dmg']; g.weakSpotHit = g['_weak']; });
   // 4: Golem no gelo + Pontos Fracos
   await page.evaluate(() => { const g = window.__app.game; g.state.bladeLevel = 142; g.state.guild = [86, 74, 61, 52, 40, 25, 10, 0]; });
   await page.evaluate(() => { const a = window.__app; const g = a.game; g.state.stage = 163; a.scene.setZone(3); g.spawnEnemy(); g.monster = { type: 'golem', affix: 'giant' }; a.scene.spawnEnemy(false, g.monster); });

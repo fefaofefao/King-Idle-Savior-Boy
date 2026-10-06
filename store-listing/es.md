@@ -1,12 +1,12 @@
 # Ficha de la tienda — Español (es)
 
-**Título (máx. 30):** King Idle Savior Boy: RPG
+**Título (máx. 30):** Savior Boy: Idle Monsters
 
 **Descripción corta (máx. 80):** Toca, derrota monstruos y forma tu gremio. ¡Tu héroe crece sin conexión!
 
 **Descripción completa (máx. 4000):**
 
-¡Toma la espada y salva el reino! En **King Idle Savior Boy**, cada toque hace que tu caballero ataque hordas de esqueletos y criaturas en un mundo de fantasía cartoon en 3D.
+¡Toma la espada y salva el reino! En **Savior Boy: Idle Monsters**, cada toque hace que tu caballero ataque hordas de esqueletos y criaturas en un mundo de fantasía cartoon en 3D.
 
 ⚔️ **TOCA, HAZ COMBOS Y ACIERTA PUNTOS DÉBILES**
 Los toques seguidos forman combos que dan oro extra. Atento a los Puntos Débiles que aparecen en los enemigos para causar un daño enorme. Mantén el dedo en la pantalla para atacar sin parar.

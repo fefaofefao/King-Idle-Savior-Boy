@@ -1,5 +1,5 @@
 // Identidade do app (arquivo separado porque o capacitor.config.ts também a importa, fora do Vite).
-export { APP_ID, APP_NAME_EN, GAME_TITLE } from './identity';
+export { APP_ID, APP_NAME_EN, GAME_TITLE, GAME_TITLE_MAIN, GAME_TITLE_SUB } from './identity';
 
 /** Flags de recursos. */
 export const FEATURES = {

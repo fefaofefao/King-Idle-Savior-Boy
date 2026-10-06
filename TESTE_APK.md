@@ -1,9 +1,9 @@
-# Testando o APK — King Idle Savior Boy
+# Testando o APK — Savior Boy: Idle Monsters
 
 ## 1. Baixar o APK
 1. No GitHub, abra o repositório → aba **Actions** → workflow **"Android APK (teste)"**.
 2. Clique na execução mais recente com ✅ verde.
-3. Em **Artifacts**, baixe `KingIdleSaviorBoy-APK-N`. Vem um `.zip`; extraia e pegue o `.apk`.
+3. Em **Artifacts**, baixe `SaviorBoyIdleMonsters-APK-N`. Vem um `.zip`; extraia e pegue o `.apk`.
    (Cada push no repositório gera um APK novo. O arquivo fica disponível por 30 dias.)
 
 ## 2. Instalar no Android

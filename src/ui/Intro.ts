@@ -1,4 +1,4 @@
-import { GAME_TITLE } from '../config/app';
+import { GAME_TITLE, GAME_TITLE_MAIN, GAME_TITLE_SUB } from '../config/app';
 import type { Lang } from '../core/state';
 import { LANGUAGES, getLang, setLang, t } from '../i18n';
 import { h } from './dom';
@@ -73,18 +73,18 @@ export interface TitleScreen {
 }
 
 /**
- * Tela inicial: cenário ao entardecer, logo "King Idle Savior Boy", escolha dos 3 idiomas
+ * Tela inicial: cenário ao entardecer, logo "Savior Boy: Idle Monsters", escolha dos 3 idiomas
  * e botão Jogar com a barra de carregamento dos modelos.
  * Na primeira abertura o seletor de idioma recebe destaque.
  */
 export function showTitleScreen(root: HTMLElement, firstLaunch: boolean, onPlay?: () => void): TitleScreen {
-  const words = GAME_TITLE.split(' ');
+  const [w1, w2] = GAME_TITLE_MAIN.split(' ');
   const logo = h('div', { class: 'ts-logo' }, [
     h('div', { class: 'ts-crown', html: CROWN }),
     h('div', { class: 'ts-title', 'aria-label': GAME_TITLE }, [
-      h('span', { class: 'ts-w1', text: words[0] }),
-      h('span', { class: 'ts-w2', text: words.slice(1, -1).join(' ') }),
-      h('span', { class: 'ts-w3', text: words[words.length - 1] }),
+      h('span', { class: 'ts-w1', text: w1 }),
+      h('span', { class: 'ts-w3', text: w2 }),
+      h('span', { class: 'ts-w2 ts-sub', text: GAME_TITLE_SUB }),
     ]),
     h('div', { class: 'ts-badge', html: '<img src="icon.png" alt="">' }),
   ]);

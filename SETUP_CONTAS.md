@@ -5,7 +5,7 @@ O resto o projeto já faz sozinho. Faça na ordem.
 
 > Regras de ouro
 > - **Nunca** coloque IDs reais, senhas ou a keystore no código ou em commits. Tudo vai em **GitHub Secrets**.
-> - O **Package ID `br.com.fernando.idleknight` não pode mudar** depois da 1ª publicação.
+> - O **Package ID `br.com.fsamplabs.saviorboy` não pode mudar** depois da 1ª publicação.
 > - Políticas e prazos da Play mudam. Onde houver número (testadores, dias, API), **confirme na tela do Play Console**.
 
 ---
@@ -29,7 +29,7 @@ O resto o projeto já faz sozinho. Faça na ordem.
 ## 2. AdMob
 
 1. Entre em <https://admob.google.com> com a mesma conta Google que vai usar na Play.
-2. **Apps → Adicionar app** → Android → "O app ainda não está publicado" (você vincula à Play depois) → nome "King Idle Savior Boy".
+2. **Apps → Adicionar app** → Android → "O app ainda não está publicado" (você vincula à Play depois) → nome "Savior Boy: Idle Monsters".
 3. Copie o **App ID** (formato `ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY`).
 4. **Blocos de anúncios → Adicionar bloco:**
    - **Premiado (Rewarded)**: nome "rewarded_main". Recompensa: 1 item "bonus". Copie o ID (`ca-app-pub-…/…`).
@@ -61,7 +61,7 @@ No GitHub: **Settings → Secrets and variables → Actions → New repository s
 ## 4. Play Console
 
 1. Crie a conta de desenvolvedor em <https://play.google.com/console> (taxa única). Contas pessoais exigem verificação de identidade. **Nome do desenvolvedor** (aparece na loja): **FSamp Labs**.
-2. **Criar app:** nome "King Idle Savior Boy", idioma padrão pt-BR, **Jogo**, **Gratuito**.
+2. **Criar app:** nome "Savior Boy: Idle Monsters", idioma padrão pt-BR, **Jogo**, **Gratuito**.
 3. **Configurar o app** (painel "Configure seu app"): preencha cada item conforme as seções 5 e 6.
 4. **Play App Signing:** na 1ª versão enviada, aceite "Deixar o Google gerenciar e proteger a chave de assinatura do app". O AAB enviado é assinado com a sua **chave de upload** (a keystore do passo 1).
 5. **Ficha da loja:** textos em `store-listing/pt-BR.md`, `en.md` e `es.md` (adicione os idiomas en-US, es-ES e es-419 em "Traduções"). Ícone: `store-listing/graphics/icon-512.png`. Gráfico de destaque: `store-listing/graphics/feature-graphic-1024x500.png`. Capturas: `store-listing/screenshots/<idioma>/` (8 por idioma). Notas da versão: `store-listing/release-notes.md`.
@@ -98,9 +98,9 @@ O site já está pronto na pasta `docs/` (página inicial, **Política de Privac
 1. Faça o merge deste trabalho na branch padrão (`main`).
 2. No GitHub: **Settings → Pages → Build and deployment → Deploy from a branch** → branch `main`, pasta **`/docs`** → Save.
 3. Em 1–2 minutos o site fica em:
-   - `https://fefaofefao.github.io/King-Idle-Savior-Boy/` (início)
-   - `https://fefaofefao.github.io/King-Idle-Savior-Boy/privacy-policy/` ← **URL da política para a Play**
-   - `https://fefaofefao.github.io/King-Idle-Savior-Boy/terms/`
+   - `https://fefaofefao.github.io/Savior-Boy-Idle-Monsters/` (início)
+   - `https://fefaofefao.github.io/Savior-Boy-Idle-Monsters/privacy-policy/` ← **URL da política para a Play**
+   - `https://fefaofefao.github.io/Savior-Boy-Idle-Monsters/terms/`
    O jogo já abre esses links no Menu (no idioma do jogador). Se o endereço for outro, ajuste `SITE_URL` em `src/ui/Panel.ts`.
 4. E-mail de contato já preenchido: `fefaofefao@gmail.com` (use o mesmo na ficha da Play).
 5. **app-ads.txt:** precisa ficar na **raiz** do domínio informado como "Site" na ficha da Play.

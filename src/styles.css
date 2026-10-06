@@ -2397,3 +2397,8 @@ button.card:active:not(:disabled) {
 .combo-dmg:empty {
   display: none;
 }
+/* Subtítulo do logo ("Idle Monsters"), abaixo do nome principal. */
+.ts-sub {
+  margin-top: 8px !important;
+  letter-spacing: 2px !important;
+}

@@ -1,5 +1,5 @@
 export const ptBR = {
-  'app.name': 'King Idle Savior Boy',
+  'app.name': 'Savior Boy: Idle Monsters',
   'lang.title': 'Escolha o idioma',
   'lang.subtitle': 'Você pode mudar depois no Menu.',
   'lang.continue': 'Jogar',

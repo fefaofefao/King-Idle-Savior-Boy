@@ -1,7 +1,7 @@
 import type { Locale } from './pt-BR';
 
 export const es: Locale = {
-  'app.name': 'King Idle Savior Boy',
+  'app.name': 'Savior Boy: Idle Monsters',
   'lang.title': 'Elige tu idioma',
   'lang.subtitle': 'Puedes cambiarlo después en el Menú.',
   'lang.continue': 'Jugar',

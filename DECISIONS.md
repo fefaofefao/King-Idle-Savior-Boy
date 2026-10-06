@@ -1,4 +1,4 @@
-# DECISIONS — King Idle Savior Boy
+# DECISIONS — Savior Boy: Idle Monsters
 
 Registro das decisões técnicas e de design, com uma linha de justificativa cada.
 
@@ -50,7 +50,7 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 - **Ícone renderizado do `knight.glb`** com espada e escudo, do peito para cima, sobre fundo em gradiente azul. `scripts/render-icon.mjs` abre `tools/render-icon.html` no Chromium headless (Vite + Three.js) e grava `assets/knight-render.png`; `npm run icons` gera o ícone adaptativo, o splash e `public/icon.png`, que também aparece na tela inicial.
 
 ## Nome e tela inicial
-- **Nome do jogo: "King Idle Savior Boy"** (pedido do dono), igual nos 3 idiomas e definido numa única constante (`GAME_TITLE`). O Package ID `br.com.fernando.idleknight` foi mantido, conforme a especificação.
+- **Nome do jogo: "Savior Boy: Idle Monsters"** (pedido do dono), igual nos 3 idiomas e definido numa única constante (`GAME_TITLE`). O Package ID `br.com.fsamplabs.saviorboy` foi mantido, conforme a especificação.
 - **Tela inicial** (`src/ui/Intro.ts`): aparece a cada abertura. Tem um cenário em SVG ao entardecer (castelo, montanhas, raios girando, faíscas), o logo com coroa e o botão Jogar. O carregamento dos modelos aparece no próprio botão ("Carregando… 45%"), e a escolha dos 3 idiomas fica na mesma tela, em destaque na primeira abertura.
 
 ## Idiomas
@@ -58,7 +58,7 @@ Registro das decisões técnicas e de design, com uma linha de justificativa cad
 - **Tela de escolha de idioma na primeira abertura**, com o idioma do aparelho pré-selecionado; depois é alterável no Menu. A escolha fica em `settings.lang` / `settings.langChosen`.
 - **Migração v1 → v2** do save marca `langChosen = true` para quem já jogava (não mostra a tela de novo).
 - **Bandeiras em SVG** em vez de emoji — emoji de bandeira não aparece em todos os aparelhos.
-- O nome do app no Android é "King Idle Savior Boy" em todos os idiomas.
+- O nome do app no Android é "Savior Boy: Idle Monsters" em todos os idiomas.
 
 ## Balanceamento (rodar `npm run sim`)
 **Versão atual (feedback do APK 8 do dono):** "cristais quebrando o jogo", "primeiro monstro com 10 de vida e 1 de ouro", "guilda forte demais", "10 min de jogo → 1º reset" e "pulando 10 min a guilda ainda matava, então não compensa resetar".

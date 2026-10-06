@@ -1,6 +1,6 @@
 # Créditos
 
-**King Idle Savior Boy** é um jogo de **FSamp Labs**.
+**Savior Boy: Idle Monsters** é um jogo de **FSamp Labs**.
 
 - **3D characters, weapons and animations: Kay Lousberg — KayKit ([www.kaylousberg.com](https://www.kaylousberg.com)), CC0.**
   (KayKit Adventurers 2.0 + KayKit Skeletons 1.1)

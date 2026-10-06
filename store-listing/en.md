@@ -1,12 +1,12 @@
 # Store listing — English (en)
 
-**Title (max 30):** King Idle Savior Boy: RPG
+**Title (max 30):** Savior Boy: Idle Monsters
 
 **Short description (max 80):** Tap, defeat monsters and build your guild. Your hero grows even offline!
 
 **Full description (max 4000):**
 
-Grab your sword and save the kingdom! In **King Idle Savior Boy**, every tap makes your knight strike hordes of skeletons and creatures in a cartoon 3D fantasy world.
+Grab your sword and save the kingdom! In **Savior Boy: Idle Monsters**, every tap makes your knight strike hordes of skeletons and creatures in a cartoon 3D fantasy world.
 
 ⚔️ **TAP, COMBO AND HIT WEAK SPOTS**
 Consecutive taps build combos that pay extra gold. Watch for Weak Spots on enemies to deal huge damage. Hold your finger on the screen to attack non-stop.

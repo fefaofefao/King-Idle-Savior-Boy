@@ -1,7 +1,7 @@
-# CLAUDE.md — King Idle Savior Boy
+# CLAUDE.md — Savior Boy: Idle Monsters
 
 Clicker + RPG idle em retrato (portrait) para Android (Capacitor) que também roda no navegador.
-Especificação: `GAME_SPEC.md` + `ASSETS.md`. Nome do jogo: **King Idle Savior Boy** (`GAME_TITLE` em `src/config/app.ts`). Decisões: `DECISIONS.md`.
+Especificação: `GAME_SPEC.md` + `ASSETS.md`. Nome do jogo: **Savior Boy: Idle Monsters** (`GAME_TITLE` em `src/config/app.ts`). Decisões: `DECISIONS.md`.
 
 ## Como rodar
 

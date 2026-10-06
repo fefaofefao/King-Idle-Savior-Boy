@@ -107,7 +107,7 @@ jobs:
       - name: Publicar AAB como artifact
         uses: actions/upload-artifact@v4
         with:
-          name: KingIdleSaviorBoy-AAB-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}
+          name: SaviorBoyIdleMonsters-AAB-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}
           path: android/app/build/outputs/bundle/release/app-release.aab
 
       # Opcional: envia para a faixa de TESTE INTERNO da Play (só se o secret existir).
@@ -116,7 +116,7 @@ jobs:
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
-          packageName: br.com.fernando.idleknight
+          packageName: br.com.fsamplabs.saviorboy
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
           track: internal
           status: completed

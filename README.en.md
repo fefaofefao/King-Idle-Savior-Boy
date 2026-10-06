@@ -1,6 +1,6 @@
-<p align="center"><img src="store-listing/graphics/feature-graphic-1024x500.png" alt="King Idle Savior Boy" width="640"></p>
+<p align="center"><img src="store-listing/graphics/feature-graphic-1024x500.png" alt="Savior Boy: Idle Monsters" width="640"></p>
 
-# King Idle Savior Boy
+# Savior Boy: Idle Monsters
 
 A game by **FSamp Labs**.
 

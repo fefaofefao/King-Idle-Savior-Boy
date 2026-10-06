@@ -1,4 +1,4 @@
-package br.com.fernando.idleknight;
+package br.com.fsamplabs.saviorboy;
 
 import com.getcapacitor.BridgeActivity;
 

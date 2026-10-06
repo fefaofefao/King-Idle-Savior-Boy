@@ -59,11 +59,11 @@ jobs:
       - name: Renomear APK
         run: |
           mkdir -p out
-          cp android/app/build/outputs/apk/debug/app-debug.apk "out/KingIdleSaviorBoy-0.1.${{ github.run_number }}-test.apk"
+          cp android/app/build/outputs/apk/debug/app-debug.apk "out/SaviorBoyIdleMonsters-0.1.${{ github.run_number }}-test.apk"
           ls -la out
 
       - uses: actions/upload-artifact@v4
         with:
-          name: KingIdleSaviorBoy-APK-${{ github.run_number }}
+          name: SaviorBoyIdleMonsters-APK-${{ github.run_number }}
           path: out/*.apk
           retention-days: 30

@@ -5,7 +5,7 @@ Cole no Play Console (Produção ou teste → Criar versão → Notas da versão
 ## v1.0.0
 
 <pt-BR>
-Primeira versão de King Idle Savior Boy!
+Primeira versão de Savior Boy: Idle Monsters!
 • Toque, faça combos e acerte Pontos Fracos
 • 12 tipos de inimigos e o Rei Esqueleto a cada 50 fases
 • Guilda com 8 heróis e a Maga companheira
@@ -17,7 +17,7 @@ Primeira versão de King Idle Savior Boy!
 </pt-BR>
 
 <en-US>
-The first version of King Idle Savior Boy!
+The first version of Savior Boy: Idle Monsters!
 • Tap, build combos and hit Weak Spots
 • 12 enemy types and the Skeleton King every 50 stages
 • A guild of 8 heroes plus your Mage companion
@@ -29,7 +29,7 @@ The first version of King Idle Savior Boy!
 </en-US>
 
 <es-ES>
-¡Primera versión de King Idle Savior Boy!
+¡Primera versión de Savior Boy: Idle Monsters!
 • Toca, haz combos y acierta Puntos Débiles
 • 12 tipos de enemigos y el Rey Esqueleto cada 50 fases
 • Gremio de 8 héroes y tu compañera Maga

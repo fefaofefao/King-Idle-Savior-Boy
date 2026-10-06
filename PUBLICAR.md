@@ -1,6 +1,6 @@
 # PUBLICAR — o que está pronto e o que falta do seu lado
 
-Resumo para levar o **King Idle Savior Boy** à Google Play. O passo a passo detalhado de cada item está em [SETUP_CONTAS.md](SETUP_CONTAS.md).
+Resumo para levar o **Savior Boy: Idle Monsters** à Google Play. O passo a passo detalhado de cada item está em [SETUP_CONTAS.md](SETUP_CONTAS.md).
 
 ## ✅ Pronto no projeto
 
@@ -37,7 +37,7 @@ Resumo para levar o **King Idle Savior Boy** à Google Play. O passo a passo det
 
 ### 3. Sites (obrigatório antes de preencher a Play)
 - [ ] **Settings → Pages → Deploy from a branch** → a branch com o merge, pasta **`/docs`** → Save
-- [ ] Conferir `https://fefaofefao.github.io/King-Idle-Savior-Boy/privacy-policy/` e `/terms/`
+- [ ] Conferir `https://fefaofefao.github.io/Savior-Boy-Idle-Monsters/privacy-policy/` e `/terms/`
 - [ ] Criar o repositório público **`fefaofefao.github.io`**, copiar o conteúdo de **`user-site/`** (app-ads.txt + index.html) para a raiz e ativar o Pages (`main` / root). Conferir `https://fefaofefao.github.io/app-ads.txt` (passo a passo em `user-site/README.md`)
 
 ### 4. AdMob
@@ -51,11 +51,11 @@ Resumo para levar o **King Idle Savior Boy** à Google Play. O passo a passo det
 
 ### 5. AAB
 - [x] Keystore de upload gerada e secrets cadastrados
-- [ ] Baixar o **AAB novo** `KingIdleSaviorBoy-AAB-1.0.0-106` (versionCode 106) em https://github.com/fefaofefao/King-Idle-Savior-Boy/actions/runs/37251159104 → Artifacts, e guardar junto com a keystore. **Não** use os AABs antigos (versionCode 1–5 e 105)
+- [ ] Baixar o **AAB novo** `SaviorBoyIdleMonsters-AAB-1.0.0-106` (versionCode 106) em https://github.com/fefaofefao/Savior-Boy-Idle-Monsters/actions/runs/37251159104 → Artifacts, e guardar junto com a keystore. **Não** use os AABs antigos (versionCode 1–5 e 105)
 - [ ] Guardar a keystore + senha em **2 lugares seguros**
 
 ### 6. Play Console: criar o app e "Conteúdo do app"
-- [ ] Criar app: *King Idle Savior Boy*, idioma padrão pt-BR, **Jogo**, **Gratuito**
+- [ ] Criar app: *Savior Boy: Idle Monsters*, idioma padrão pt-BR, **Jogo**, **Gratuito**
 - [ ] Política de privacidade: URL do item 3
 - [ ] Acesso ao app: tudo sem login · Anúncios: **Sim** · ID de publicidade: **Sim (publicidade, não personalizada)**
 - [ ] Classificação de conteúdo (IARC) com as respostas da CONFORMIDADE §5
